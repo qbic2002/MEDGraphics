@@ -104,8 +104,8 @@ RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHead
     RGBAData rgbaData(pnmHeader.width, pnmHeader.height);
 
     int k = 0;
-    for (int i = 0; i < pnmHeader.width; ++i){
-        for (int j = 0; j < pnmHeader.height; ++j) {
+    for (int j = 0; j < pnmHeader.height; ++j) {
+        for (int i = 0; i < pnmHeader.width; ++i){
             if (pnmHeader.pnmMode == PNMMode::P5){
                 unsigned char color = fileData[offset + k++];
                 if (color > pnmHeader.maxGrey){

@@ -2,10 +2,11 @@
 // Created by golov on 15.09.2022.
 //
 
+#include <iostream>
 #include "fileUtil.h"
 
-bool getFileContent(char* buffer, std::ifstream& fileStream, int size) {
-    if (!fileStream.is_open()){
+bool getFileContent(char *buffer, std::ifstream &fileStream, int size) {
+    if (!fileStream.is_open()) {
         return false;
     }
 
@@ -15,7 +16,7 @@ bool getFileContent(char* buffer, std::ifstream& fileStream, int size) {
 }
 
 int getFileSize(std::ifstream &fileStream) {
-    if (!fileStream.is_open()){
+    if (!fileStream.is_open()) {
         return -1;
     }
 
@@ -25,15 +26,4 @@ int getFileSize(std::ifstream &fileStream) {
     fileStream.seekg(pos);
 
     return size;
-}
-
-std::string readAllText(const std::string& fileName) {
-    std::ifstream fileStream(fileName, std::ios::binary);
-    int size = getFileSize(fileStream);
-    char* data = new char[size];
-    if (!getFileContent(data, fileStream, size)) {
-        throw -1;
-    }
-
-    return std::string(data, size);
 }

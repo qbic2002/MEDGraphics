@@ -2,7 +2,6 @@
 #include "GLFW/glfw3.h"
 #include <iostream>
 #include <vector>
-#include <fstream>
 #include "math/vec3.h"
 #include "utils/measureFps.h"
 #include "utils/random.h"
@@ -13,6 +12,7 @@
 
 #include "stb_image.h"
 #include "pnm/utils/pnmUtil.h"
+#include "utils/file.h"
 
 using namespace std;
 using namespace utils;
@@ -23,17 +23,13 @@ GLuint squareVao;
 vector<Rect> rects;
 GLuint textureId;
 GLuint shaderId;
+float curRatio;
 
 float squareData[] = {
         -1, -1, 1, 1, 1, 0, 0, 1,
         1, -1, 1, 1, 1, 0, 1, 1,
         1, 1, 1, 1, 1, 0, 1, 0,
         -1, 1, 1, 1, 1, 0, 0, 0
-};
-float tex[]{0, 0,
-            0, 2,
-            2, 2,
-            2, 0,
 };
 
 
@@ -106,8 +102,6 @@ void update() {
     }
 }
 
-void checkGlError();
-
 void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //    glEnable(GL_TEXTURE_2D);
@@ -169,44 +163,20 @@ void render() {
 ////    glBindVertexArray(0);
 //    glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(shaderId);
-//    glColor3f(1, 1, 1);
     glEnable(GL_TEXTURE_2D);
-//    checkGlError()l
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
-//    checkGlError();
     glPushMatrix();
     {
         glLoadIdentity();
-//        glEnableClientState(GL_VERTEX_ARRAY);
-        checkGlError();
-//        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
         glBindVertexArray(squareVao);
-        checkGlError();
-//        glVertexPointer(2, GL_FLOAT, 4 * sizeof(float), squareData);
-//        glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(float), squareData + 2);
         glDrawArrays(GL_QUADS, 0, 4);
-//        checkGlError();
         glBindVertexArray(0);
-//        checkGlError();
-//glVertexPointer
-
-//        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//        glDisableClientState(GL_VERTEX_ARRAY);
-        checkGlError();
     }
     glPopMatrix();
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
-}
-
-void checkGlError() {
-    auto error = glGetError();
-    if (error == GL_NO_ERROR)
-        return;
-    cout << glewGetErrorString(error) << endl;
 }
 
 void createSquareVao() {
@@ -264,6 +234,7 @@ GLuint loadTexture(unsigned char const *data, int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_2D, 0);
+    curRatio = (float) width / height;
     return texture;
 }
 
@@ -277,47 +248,17 @@ GLuint loadTexture(char const *filename) {
 
 GLuint loadTexturePNM(char const *filename) {
     PNMImage pnmImage = pnm::readPNMImage(filename);
-    std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height
-              << " " << pnmImage.pnmHeader.maxGrey << "\n";
-
-
-//    for (int i = 0; i < pnmImage.pnmHeader.width; ++i) {
-//        for (int j = 0; j < pnmImage.pnmHeader.height; ++j) {
-//            std::cout << std::setw(3) << (int) pnmImage.rgbaData.get(i, j).R << " ";
-//        }
-//        std::cout << "\n";
-//    }
-
-
-//    int width, height, count;
-//    unsigned char *data = stbi_load(filename, &width, &height, &count, 0);
     GLuint texture = loadTexture((unsigned char *) pnmImage.rgbaData.getPRgbaRaster(), pnmImage.pnmHeader.width,
                                  pnmImage.pnmHeader.height);
-//    stbi_image_free(data);
     return texture;
 }
 
-char *readFile(char const *fileName) {
-    std::ifstream inputStream(fileName, std::ios::binary);
-    if (!inputStream.is_open()) {
-        cerr << "Could not open file '" << fileName << "'" << endl;
-        throw exception();
-    }
-    inputStream.seekg(0, std::ios::end);
-    int size = inputStream.tellg();
-    inputStream.seekg(0);
-    char *data = new char[size + 1];
-    data[size] = 0;
-    inputStream.read(data, size);
-    return data;
-}
-
 GLuint readShader(GLenum type, char const *fileName) {
-    char *shaderSource = readFile(fileName);
+    auto shaderSource = readAllText(fileName);
+    char *shaderSourceChars = shaderSource.data();
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &shaderSource, nullptr);
+    glShaderSource(shader, 1, &shaderSourceChars, nullptr);
     glCompileShader(shader);
-    delete shaderSource;
 
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -354,15 +295,14 @@ GLuint readShader() {
     return program;
 }
 
-void init(GLFWwindow *window) {
+void init(GLFWwindow *window, const string &fileName) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
     shaderId = readShader();
 
     createSquareVao();
-//    textureId = loadTexture("assets/test.png");
-    textureId = loadTexturePNM("assets/1.pgm");
+    textureId = loadTexturePNM(fileName.c_str());
 
     utils::initTimer();
 
@@ -377,7 +317,7 @@ int main() {
     GLFWwindow *window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
-    init(window);
+    init(window, "assets/qbic.ppm");
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

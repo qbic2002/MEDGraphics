@@ -19,8 +19,8 @@ int main(){
     std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height << " " << pnmImage.pnmHeader.maxGrey << "\n";
 
 
-    for (int i = 0; i < pnmImage.pnmHeader.width; ++i){
-        for (int j = 0; j < pnmImage.pnmHeader.height; ++j) {
+    for (int j = 0; j < pnmImage.pnmHeader.height; ++j) {
+        for (int i = 0; i < pnmImage.pnmHeader.width; ++i){
             std::cout << std::setw(3) << (int)pnmImage.rgbaData.get(i, j).R << " ";
         }
         std::cout << "\n";

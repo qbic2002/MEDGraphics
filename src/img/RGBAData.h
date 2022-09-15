@@ -14,9 +14,6 @@ public:
 
     RGBAData(int width, int height) : width_(width), height_(height) {
         pRgbaRaster_ = new RGBAPixel[width_ * height_];
-//        for (int i = 0; i < width_; ++i) {
-//            pRgbaRaster_[i] = new RGBAPixel[height_];
-//        }
     }
 
     RGBAData(const RGBAData &other) : RGBAData(other.width_, other.height_) {
@@ -38,8 +35,7 @@ public:
         height_ = other.height_;
 
         pRgbaRaster_ = new RGBAPixel[width_ * height_];
-
-        memcpy(pRgbaRaster_, other.pRgbaRaster_, width_ * height_);
+        memcpy(pRgbaRaster_, other.pRgbaRaster_, width_ * height_ * sizeof(RGBAPixel));
 
         return *this;
     }
