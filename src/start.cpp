@@ -2,10 +2,10 @@
 #include "GLFW/glfw3.h"
 #include <iostream>
 #include <vector>
-#include <random>
-#include "utils/measureFps.h"
-#include "utils/windowSize.h"
 #include "math/vec3.h"
+#include "utils/measureFps.h"
+#include "utils/random.h"
+#include "utils/windowSize.h"
 
 using namespace std;
 using namespace utils;
@@ -22,23 +22,6 @@ public:
     vec3 rotation;
     vec3 rotationVel;
 };
-
-unsigned int random() {
-    static random_device rd;
-    static mt19937 gen(rd());
-    return gen();
-}
-
-unsigned int random(unsigned int max) {
-    return random() % max;
-}
-
-int random(int min, int max) {
-    int range = max - min;
-    if (range <= 0)
-        return min;
-    return min + (int) (random() % range);
-}
 
 GLFWwindow *createWindow(int width, int height, const char *title, bool vsync) {
     GLFWwindow *window;
