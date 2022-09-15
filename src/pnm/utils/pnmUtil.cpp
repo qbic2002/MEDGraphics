@@ -7,12 +7,12 @@
 #include "fileUtil.h"
 
 int parsePnmMode(const char* fileData, PNMMode& pnmMode){
-    if (fileData[0] == 'P' || fileData[1] == '5'){
+    if (fileData[0] == 'P' && fileData[1] == '5'){
         pnmMode = PNMMode::P5;
         return 2;
     }
 
-    if (fileData[0] == 'P' || fileData[1] == '6'){
+    if (fileData[0] == 'P' && fileData[1] == '6'){
         pnmMode = PNMMode::P6;
         return 2;
     }
@@ -106,11 +106,23 @@ RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHead
     int k = 0;
     for (int i = 0; i < pnmHeader.width; ++i){
         for (int j = 0; j < pnmHeader.height; ++j) {
-            unsigned char color = fileData[offset + k++];
-            if (color > pnmHeader.maxGrey){
-                throw -1;
+            if (pnmHeader.pnmMode == PNMMode::P5){
+                unsigned char color = fileData[offset + k++];
+                if (color > pnmHeader.maxGrey){
+                    throw -1;
+                }
+                rgbaData.set(i, j, RGBARaster(color, color, color, 255));
             }
-            rgbaData.set(i, j, RGBARaster(color, color, color, 255));
+
+            if (pnmHeader.pnmMode == PNMMode::P6){
+                unsigned char r = fileData[offset + k++];
+                unsigned char g = fileData[offset + k++];
+                unsigned char b = fileData[offset + k++];
+                if (r > pnmHeader.maxGrey || g > pnmHeader.maxGrey || b > pnmHeader.maxGrey){
+                    throw -1;
+                }
+                rgbaData.set(i, j, RGBARaster(r, g, b, 255));
+            }
         }
     }
 
