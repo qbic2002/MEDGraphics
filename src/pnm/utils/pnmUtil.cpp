@@ -103,9 +103,10 @@ int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
 RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHeader& pnmHeader) {
     RGBAData rgbaData(pnmHeader.width, pnmHeader.height);
 
+    int k = 0;
     for (int i = 0; i < pnmHeader.width; ++i){
         for (int j = 0; j < pnmHeader.height; ++j) {
-            unsigned char color = fileData[offset + i];
+            unsigned char color = fileData[offset + k++];
             if (color > pnmHeader.maxGrey){
                 throw -1;
             }

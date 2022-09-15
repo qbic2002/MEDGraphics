@@ -29,4 +29,11 @@ int main(){
 
     delete[] buffer;
     inputPnm.close();
+
+    for (int i = 0; i < pnmImage.pnmHeader.width; ++i){
+        for (int j = 0; j < pnmImage.pnmHeader.height; ++j) {
+            std::cout << (int)pnmImage.rgbaData.get(i, j).R << " ";
+        }
+        std::cout << "\n";
+    }
 }
