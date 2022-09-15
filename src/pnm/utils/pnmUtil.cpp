@@ -111,7 +111,7 @@ RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHead
                 if (color > pnmHeader.maxGrey){
                     throw -1;
                 }
-                rgbaData.set(i, j, RGBARaster(color, color, color, 255));
+                rgbaData.set(i, j, RGBAPixel(color, color, color, 255));
             }
 
             if (pnmHeader.pnmMode == PNMMode::P6){
@@ -121,7 +121,7 @@ RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHead
                 if (r > pnmHeader.maxGrey || g > pnmHeader.maxGrey || b > pnmHeader.maxGrey){
                     throw -1;
                 }
-                rgbaData.set(i, j, RGBARaster(r, g, b, 255));
+                rgbaData.set(i, j, RGBAPixel(r, g, b, 255));
             }
         }
     }

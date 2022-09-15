@@ -14,6 +14,10 @@ file(
         COPY ${CMAKE_CURRENT_LIST_DIR}/bin/Release/x64/glew32.dll
         DESTINATION ${CMAKE_BINARY_DIR}/build)
 
+add_custom_target(copy_assets
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_BINARY_DIR}/build/assets
+        )
+
 include_directories(include)
 
 add_subdirectory(src)

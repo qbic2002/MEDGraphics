@@ -6,19 +6,20 @@
 #define MEDGRAPHICS_RGBADATA_H
 
 
-#include "RGBARaster.h"
+#include "RGBAPixel.h"
 
 class RGBAData {
 public:
     RGBAData() = default;
+
     RGBAData(int width, int height) : width_(width), height_(height) {
-        pRgbaRaster_ = new RGBARaster*[width_];
-        for (int i = 0; i < width_; ++i) {
-            pRgbaRaster_[i] = new RGBARaster[height_];
-        }
+        pRgbaRaster_ = new RGBAPixel[width_ * height_];
+//        for (int i = 0; i < width_; ++i) {
+//            pRgbaRaster_[i] = new RGBAPixel[height_];
+//        }
     }
 
-    RGBAData(const RGBAData& other) : RGBAData(other.width_, other.height_) {
+    RGBAData(const RGBAData &other) : RGBAData(other.width_, other.height_) {
         for (int w = 0; w < width_; ++w) {
             for (int h = 0; h < height_; ++h) {
                 set(w, h, other.get(w, h));
@@ -26,69 +27,57 @@ public:
         }
     }
 
-    RGBAData& operator=(const RGBAData& other) {
-        if (&other == this){
+    RGBAData &operator=(const RGBAData &other) {
+        if (&other == this) {
             return *this;
         }
 
-        for (int i = 0; i < width_; ++i) {
-            delete[] pRgbaRaster_[i];
-        }
         delete[] pRgbaRaster_;
 
         width_ = other.width_;
         height_ = other.height_;
 
-        pRgbaRaster_ = new RGBARaster*[width_];
-        for (int i = 0; i < width_; ++i) {
-            pRgbaRaster_[i] = new RGBARaster[height_];
-        }
+        pRgbaRaster_ = new RGBAPixel[width_ * height_];
 
-        for (int w = 0; w < width_; ++w) {
-            for (int h = 0; h < height_; ++h) {
-                set(w, h, other.get(w, h));
-            }
-        }
+        memcpy(pRgbaRaster_, other.pRgbaRaster_, width_ * height_);
 
         return *this;
     }
 
-    ~RGBAData(){
-        for (int i = 0; i < width_; ++i) {
-            delete[] pRgbaRaster_[i];
-        }
+    ~RGBAData() {
         delete[] pRgbaRaster_;
     }
 
-    RGBARaster **getPRgbaRaster() const {
+    const RGBAPixel *getPRgbaRaster() const {
         return pRgbaRaster_;
     }
 
-    RGBARaster get(int w, int h) const {
-        if (w < 0 || w >= width_){
+    RGBAPixel get(int x, int y) const {
+        if (x < 0 || x >= width_) {
             return {};
         }
-        if (h < 0 || h >= height_){
+        if (y < 0 || y >= height_) {
             return {};
         }
 
-        return pRgbaRaster_[w][h];
+        return pRgbaRaster_[y * width_ + x];
     }
 
-    void set(int w, int h, RGBARaster raster) {
-        if (w < 0 || w >= width_){
+    void set(int x, int y, const RGBAPixel &raster) {
+        if (x < 0 || x >= width_) {
             return;
         }
-        if (h < 0 || h >= height_){
+        if (y < 0 || y >= height_) {
             return;
         }
 
-        pRgbaRaster_[w][h] = raster;
+        pRgbaRaster_[y * width_ + x] = raster;
     }
+
 private:
     int width_;
     int height_;
-    RGBARaster** pRgbaRaster_;
+    RGBAPixel *pRgbaRaster_;
 };
 
 

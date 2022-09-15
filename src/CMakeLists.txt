@@ -2,7 +2,13 @@ add_executable(MEDGraphics
         start.cpp
         utils/measureFps.cpp utils/measureFps.h
         utils/windowSize.cpp utils/windowSize.h
-        math/vec3.cpp math/vec3.h utils/random.cpp utils/random.h)
+        math/vec3.cpp math/vec3.h utils/random.cpp utils/random.h
+        stb_image.h
+        pnm/utils/fileUtil.cpp
+        pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h
+        pnm/PNMImage.h)
+target_link_libraries(MEDGraphics ${LIBS})
+add_dependencies(MEDGraphics copy_assets)
 
 add_executable(MEDGraphicsPNM
         pnm/main.cpp
@@ -10,4 +16,10 @@ add_executable(MEDGraphicsPNM
         pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h
         pnm/PNMImage.h)
 
-target_link_libraries(MEDGraphics ${LIBS})
+add_executable(TextureTest
+        textureTest.cpp
+        utils/measureFps.cpp utils/measureFps.h
+        utils/windowSize.cpp utils/windowSize.h
+        math/vec3.cpp math/vec3.h utils/random.cpp utils/random.h
+        stb_image.h)
+target_link_libraries(TextureTest ${LIBS})

@@ -14,7 +14,7 @@ int main(){
 
 
 
-    PNMImage pnmImage = pnm::readPNMImage(R"(D:\CPP\cg22-project-MEDGraphics\src\pnm\2.ppm)");
+    PNMImage pnmImage = pnm::readPNMImage("assets/1.pgm");
 
     std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height << " " << pnmImage.pnmHeader.maxGrey << "\n";
 
