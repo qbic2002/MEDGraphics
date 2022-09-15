@@ -8,7 +8,10 @@
 #include "../PNMImage.h"
 
 namespace pnm {
-    int parsePnmHeader(const char* fileData, PNMImage& pnmImage);
+    int parsePnmHeader(const char* fileData, PNMHeader& pnmHeader);
+    RGBAData parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader);
+
+    PNMImage readPNMImage(const char* fileName);
 }
 
 

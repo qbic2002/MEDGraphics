@@ -6,6 +6,8 @@ add_executable(MEDGraphics
 
 add_executable(MEDGraphicsPNM
         pnm/main.cpp
-        pnm/utils/fileUtil.cpp pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h)
+        pnm/utils/fileUtil.cpp
+        pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h
+        pnm/PNMImage.h)
 
 target_link_libraries(MEDGraphics ${LIBS})

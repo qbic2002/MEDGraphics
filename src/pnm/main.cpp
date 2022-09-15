@@ -23,11 +23,9 @@ int main(){
 //    }
 
 
-    PNMImage pnmImage;
+    PNMImage pnmImage = pnm::readPNMImage(R"(D:\CPP\cg22-project-MEDGraphics\src\pnm\rays2.pnm)");
 
-    pnm::parsePnmHeader(buffer, pnmImage);
-
-    std::cout << pnmImage.pnmMode << " " << pnmImage.width << " " << pnmImage.height << " " << pnmImage.maxGrey << "\n";
+    std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height << " " << pnmImage.pnmHeader.maxGrey << "\n";
 
     delete[] buffer;
     inputPnm.close();

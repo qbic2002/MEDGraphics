@@ -2,23 +2,30 @@
 // Created by golov on 15.09.2022.
 //
 
-#ifndef MEDGRAPHICS_PNMIMAGE_H
-#define MEDGRAPHICS_PNMIMAGE_H
+#ifndef CG22_PROJECT_MEDGRAPHICS_PNMIMAGE_H
+#define CG22_PROJECT_MEDGRAPHICS_PNMIMAGE_H
 
-enum PNMMode{
-    P5,
-    P6
-};
+
+#include "PNMHeader.h"
+#include "../img/RGBAData.h"
 
 class PNMImage {
 public:
-    PNMMode pnmMode;
-    int width;
-    int height;
-    int maxGrey;
+    PNMImage() = default;
+    PNMImage(const PNMImage& other) : pnmHeader(other.pnmHeader), rgbaData(other.rgbaData){}
 
-    unsigned char* data;
+    PNMImage operator=(const PNMImage& other){
+        if (&other == this){
+            return *this;
+        }
+
+        pnmHeader = other.pnmHeader;
+        rgbaData = other.rgbaData;
+    }
+
+    PNMHeader pnmHeader;
+    RGBAData rgbaData;
 };
 
 
-#endif //MEDGRAPHICS_PNMIMAGE_H
+#endif //CG22_PROJECT_MEDGRAPHICS_PNMIMAGE_H

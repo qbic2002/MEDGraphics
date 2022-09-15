@@ -4,6 +4,7 @@
 
 #include <string>
 #include "pnmUtil.h"
+#include "fileUtil.h"
 
 int parsePnmMode(const char* fileData, PNMMode& pnmMode){
     if (fileData[0] == 'P' || fileData[1] == '5'){
@@ -73,13 +74,13 @@ int parsePnmMaxGrey(const char *fileData, int offset, int& maxGrey){
     return i;
 }
 
-int pnm::parsePnmHeader(const char *fileData, PNMImage &pnmImage) {
+int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
     PNMMode pnmMode;
 
     int offset;
     offset = parsePnmMode(fileData, pnmMode);
     if (offset ==-1){
-        return false;
+        return -1;
     }
 
     int width;
@@ -91,10 +92,48 @@ int pnm::parsePnmHeader(const char *fileData, PNMImage &pnmImage) {
     int maxGrey;
     offset = parsePnmMaxGrey(fileData, offset, maxGrey);
 
-    pnmImage.pnmMode = pnmMode;
-    pnmImage.width = width;
-    pnmImage.height = height;
-    pnmImage.maxGrey = maxGrey;
+    pnmHeader.pnmMode = pnmMode;
+    pnmHeader.width = width;
+    pnmHeader.height = height;
+    pnmHeader.maxGrey = maxGrey;
 
     return offset;
+}
+
+RGBAData pnm::parseData(const unsigned char *fileData, int offset, const PNMHeader& pnmHeader) {
+    RGBAData rgbaData(pnmHeader.width, pnmHeader.height);
+
+    for (int i = 0; i < pnmHeader.width; ++i){
+        for (int j = 0; j < pnmHeader.height; ++j) {
+            unsigned char color = fileData[offset + i];
+            if (color > pnmHeader.maxGrey){
+                throw -1;
+            }
+            rgbaData.set(i, j, RGBARaster(color, color, color, 255));
+        }
+    }
+
+    return rgbaData;
+}
+
+PNMImage pnm::readPNMImage(const char *fileName) {
+    PNMImage pnmImage{};
+
+    std::ifstream fileStream(fileName, std::ios::binary);
+    int size = getFileSize(fileStream);
+
+    char* fileData = new char[size];
+    getFileContent(fileData, fileStream, size);
+
+    int offset = pnm::parsePnmHeader(fileData, pnmImage.pnmHeader);
+    if (offset == -1){
+        throw -1;
+    }
+
+    pnmImage.rgbaData = pnm::parseData((unsigned char*)fileData, offset, pnmImage.pnmHeader);
+
+    delete[] fileData;
+    fileStream.close();
+
+    return pnmImage;
 }
