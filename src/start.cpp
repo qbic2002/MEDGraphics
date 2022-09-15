@@ -36,7 +36,9 @@ GLFWwindow *createWindow(int width, int height, const char *title, bool vsync) {
         return nullptr;
     }
     glfwMakeContextCurrent(window);
-    if (!vsync)
+    if (vsync)
+        glfwSwapInterval(1);
+    else
         glfwSwapInterval(0);
     return window;
 }
