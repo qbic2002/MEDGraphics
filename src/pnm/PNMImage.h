@@ -21,6 +21,8 @@ public:
 
         pnmHeader = other.pnmHeader;
         rgbaData = other.rgbaData;
+
+        return *this;
     }
 
     PNMHeader pnmHeader;
