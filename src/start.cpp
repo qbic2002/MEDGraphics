@@ -5,6 +5,7 @@
 #include <random>
 #include "utils/measureFps.h"
 #include "utils/windowSize.h"
+#include "math/vec3.h"
 
 using namespace std;
 using namespace utils;
@@ -13,35 +14,6 @@ class Rect;
 
 GLuint squareVao;
 vector<Rect> rects;
-
-class vec3 {
-public:
-    float x, y, z;
-
-    vec3() = default;
-
-    explicit vec3(float xyz) : vec3(xyz, xyz, xyz) {};
-
-    vec3(float x, float y, float z) {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-
-    vec3 operator*(float scalar) const {
-        return {x * scalar, y * scalar, z * scalar};
-    }
-
-    vec3 operator+(vec3 const &other) const {
-        return {x + other.x, y + other.y, z + other.z};
-    }
-
-    vec3 operator+=(vec3 const &other) {
-        return this->operator=(*this + other);
-    }
-
-    vec3 &operator=(vec3 const &other) = default;
-};
 
 class Rect {
 public:
