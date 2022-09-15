@@ -6,8 +6,6 @@
 #define MEDGRAPHICS_PNMHEADER_H
 
 
-#include "PNMImage.h"
-
 enum PNMMode{
     P5,
     P6
