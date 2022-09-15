@@ -26,3 +26,14 @@ int getFileSize(std::ifstream &fileStream) {
 
     return size;
 }
+
+std::string readAllText(const std::string& fileName) {
+    std::ifstream fileStream(fileName, std::ios::binary);
+    int size = getFileSize(fileStream);
+    char* data = new char[size];
+    if (!getFileContent(data, fileStream, size)) {
+        throw -1;
+    }
+
+    return std::string(data, size);
+}

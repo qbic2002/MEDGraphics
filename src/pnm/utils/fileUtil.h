@@ -9,5 +9,6 @@
 
 int getFileSize(std::ifstream& fileStream);
 bool getFileContent(char* buffer, std::ifstream& fileStream, int size);
+std::string readAllText(const std::string& fileName);
 
 #endif //MEDGRAPHICS_FILEUTIL_H
