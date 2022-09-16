@@ -8,6 +8,7 @@
 
 #include "PNMHeader.h"
 #include "../img/RGBAData.h"
+#include "PNMMeta.h"
 
 class PNMImage {
 public:
@@ -26,6 +27,7 @@ public:
     }
 
     PNMHeader pnmHeader;
+    PNMMeta pnmMeta;
     RGBAData rgbaData;
 };
 

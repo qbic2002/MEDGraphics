@@ -26,6 +26,11 @@ int parsePnmWidth(const char *fileData, int offset, int &width) {
     std::string widthString;
     while (true) {
         char ch = fileData[i++];
+        if (ch == '#') {
+            while (fileData[i++] != '\n') {
+
+            }
+        }
         if (ch >= '0' && ch <= '9') {
             widthString.push_back(ch);
         } else if (widthString.length() != 0) {
@@ -44,6 +49,11 @@ int parsePnmHeight(const char *fileData, int offset, int &height) {
     std::string heightString;
     while (true) {
         char ch = fileData[i++];
+        if (ch == '#') {
+            while (fileData[i++] != '\n') {
+
+            }
+        }
         if (ch >= '0' && ch <= '9') {
             heightString.push_back(ch);
         } else if (heightString.length() != 0) {
@@ -62,6 +72,11 @@ int parsePnmMaxGrey(const char *fileData, int offset, int &maxGrey) {
     std::string maxGreyString;
     while (true) {
         char ch = fileData[i++];
+        if (ch == '#') {
+            while (fileData[i++] != '\n') {
+
+            }
+        }
         if (ch >= '0' && ch <= '9') {
             maxGreyString.push_back(ch);
         } else if (maxGreyString.length() != 0) {
@@ -138,7 +153,7 @@ PNMImage pnm::readPNMImage(const char *fileName) {
     std::ifstream fileStream(fileName, std::ios::binary);
     int size = getFileSize(fileStream);
 
-    char *fileData = new char[size];
+    char* fileData = new char[size];
     getFileContent(fileData, fileStream, size);
 
     int offset = pnm::parsePnmHeader(fileData, pnmImage.pnmHeader);
@@ -146,10 +161,36 @@ PNMImage pnm::readPNMImage(const char *fileName) {
         throw -1;
     }
 
-    pnmImage.rgbaData = pnm::parseData((unsigned char *) fileData, offset, pnmImage.pnmHeader);
+    pnmImage.pnmMeta = pnm::parseMeta(fileData, offset);
+
+    pnmImage.rgbaData = pnm::parseData((unsigned char*) fileData, offset, pnmImage.pnmHeader);
 
     delete[] fileData;
     fileStream.close();
 
+    for (const auto& item: pnmImage.pnmMeta.getMeta()) {
+        std::cout << item.first;
+    }
     return pnmImage;
+}
+
+PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
+    PNMMeta pnmMeta;
+    for (int i = 0; i < headerSize; ++i) {
+        char ch = fileData[i];
+        if (ch == '#') {
+            std::string metaInf;
+            int offset = i;
+            metaInf.push_back(ch);
+            ch = fileData[++i];
+            while (ch != '\n') {
+                metaInf.push_back(ch);
+                ch = fileData[++i];
+            }
+            metaInf.push_back(ch);
+            pnmMeta.addMeta(metaInf, offset);
+        }
+    }
+
+    return pnmMeta;
 }

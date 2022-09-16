@@ -6,10 +6,14 @@
 #define MEDGRAPHICS_PNMUTIL_H
 
 #include "../PNMImage.h"
+#include "../PNMMeta.h"
 
 namespace pnm {
     int parsePnmHeader(const char* fileData, PNMHeader& pnmHeader);
+
     RGBAData parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader);
+
+    PNMMeta parseMeta(const char* fileData, int headerSize);
 
     PNMImage readPNMImage(const char* fileName);
 }
