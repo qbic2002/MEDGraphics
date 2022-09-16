@@ -7,6 +7,7 @@
 
 
 #include "RGBAPixel.h"
+#include <iostream>
 
 class RGBAData {
 public:

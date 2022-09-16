@@ -6,7 +6,7 @@
 #define MEDGRAPHICS_FILE_H
 
 namespace utils {
-    std::string readAllText(const std::string &fileName);
+    std::string readAllText(const std::string& fileName);
 }
 
 #endif //MEDGRAPHICS_FILE_H

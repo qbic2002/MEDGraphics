@@ -4,10 +4,14 @@
 #include "GLFW/glfw3.h"
 
 namespace utils {
-    void checkWindowSize(GLFWwindow *window);
+    void checkWindowSize(GLFWwindow* window);
+
     int getWindowWidth();
+
     int getWindowHeight();
-    void setOnWindowResize(void (*_onResize)(unsigned w, unsigned h));
+
+    void setOnWindowResize(void (* _onResize)(unsigned w, unsigned h));
+
     float getWindowRatio();
 }
 #endif //CPP_EXPERIMENTS_WINDOWSIZE_H

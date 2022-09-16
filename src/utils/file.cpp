@@ -8,7 +8,7 @@
 #include "file.h"
 
 namespace utils {
-    std::string readAllText(const std::string &fileName) {
+    std::string readAllText(const std::string& fileName) {
         std::ifstream ifs(fileName);
         if (!ifs.is_open()) {
             std::cerr << "Could not open file '" << fileName << "'" << std::endl;

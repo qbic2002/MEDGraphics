@@ -1,6 +1,5 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include <iostream>
 #include <vector>
 #include "math/vec3.h"
 #include "utils/measureFps.h"
@@ -12,7 +11,7 @@
 
 #include "stb_image.h"
 #include "pnm/utils/pnmUtil.h"
-#include "utils/file.h"
+#include "view/ShaderProgram.h"
 
 using namespace std;
 using namespace utils;
@@ -22,7 +21,7 @@ class Rect;
 GLuint squareVao;
 vector<Rect> rects;
 GLuint textureId;
-GLuint shaderId;
+ShaderProgram* shader;
 float curRatio;
 
 float squareData[] = {
@@ -121,7 +120,7 @@ void render() {
     }
     glBindVertexArray(0);
 
-    glUseProgram(shaderId);
+    glUseProgram(shader->getProgramId());
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glPushMatrix();
@@ -219,53 +218,11 @@ GLuint loadTexturePNM(char const *filename) {
     return texture;
 }
 
-GLuint readShader(GLenum type, char const *fileName) {
-    auto shaderSource = readAllText(fileName);
-    char *shaderSourceChars = shaderSource.data();
-    GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &shaderSourceChars, nullptr);
-    glCompileShader(shader);
-
-    GLint compiled;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled != GL_TRUE) {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetShaderInfoLog(shader, 1024, &log_length, message);
-        cerr << "Couldn't compile shader '" << fileName << "': " << message << endl;
-        throw std::exception();
-    }
-
-    return shader;
-}
-
-GLuint readShader() {
-    GLuint vertexShader = readShader(GL_VERTEX_SHADER, "assets/shaders/default.vert");
-    GLuint fragmentShader = readShader(GL_FRAGMENT_SHADER, "assets/shaders/default.frag");
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    GLint program_linked;
-    glGetProgramiv(program, GL_LINK_STATUS, &program_linked);
-    if (program_linked != GL_TRUE) {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetProgramInfoLog(program, 1024, &log_length, message);
-        cerr << "Couldn't link program: " << message << endl;
-        throw std::exception();
-    }
-
-    return program;
-}
-
 void init(GLFWwindow *window, const string &fileName) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
-    shaderId = readShader();
+    shader = new ShaderProgram("assets/shaders/default.vert", "assets/shaders/default.frag");
 
     createSquareVao();
     textureId = loadTexturePNM(fileName.c_str());

@@ -4,9 +4,10 @@
 namespace utils {
     int curWidth = -1;
     int curHeight = -1;
-    void (*onResize)(unsigned w, unsigned h);
 
-    void checkWindowSize(GLFWwindow *window) {
+    void (* onResize)(unsigned w, unsigned h);
+
+    void checkWindowSize(GLFWwindow* window) {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
         if (width != curWidth || height != curHeight) {
@@ -27,7 +28,7 @@ namespace utils {
         return curHeight;
     }
 
-    void setOnWindowResize(void (*_onResize)(unsigned w, unsigned h)) {
+    void setOnWindowResize(void (* _onResize)(unsigned w, unsigned h)) {
         onResize = _onResize;
     }
 
