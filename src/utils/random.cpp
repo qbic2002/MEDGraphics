@@ -2,9 +2,11 @@
 #include "random.h"
 
 namespace utils {
+    std::uniform_real_distribution<> uniform(0, 1);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     unsigned int random() {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
         return gen();
     }
 
@@ -17,5 +19,13 @@ namespace utils {
         if (range <= 0)
             return min;
         return min + (int) (random() % range);
+    }
+
+    float randomFloat() {
+        return uniform(gen);
+    }
+
+    float randomFloat(float min, float max) {
+        return randomFloat() * (max - min) + min;
     }
 }

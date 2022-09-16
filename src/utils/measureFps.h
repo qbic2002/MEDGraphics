@@ -6,5 +6,7 @@ namespace utils {
     void updateTimer();
 
     float getDeltaT();
+
+    float getCurrentTime();
 }
 #endif //CPP_EXPERIMENTS_MEASUREFPS_H

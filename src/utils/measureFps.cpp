@@ -2,17 +2,21 @@
 #include <iostream>
 
 namespace utils {
-    clock_t prevT;
+    clock_t initClock;
+    clock_t prevClock;
+    clock_t curClock;
+
     float dt;
     int frames = 0;
 
     void initTimer() {
-        prevT = clock();
+        initClock = clock();
+        prevClock = curClock = 0;
     }
 
     void updateTimer() {
-        auto curT = clock();
-        auto elapsedTime = curT - prevT;
+        curClock = clock() - initClock;
+        auto elapsedTime = curClock - prevClock;
         dt = (float) elapsedTime / CLOCKS_PER_SEC;
 
         frames++;
@@ -24,10 +28,14 @@ namespace utils {
             frames = 0;
         }
 
-        prevT = curT;
+        prevClock = curClock;
     }
 
     float getDeltaT() {
         return dt;
+    }
+
+    float getCurrentTime() {
+        return (float) curClock / CLOCKS_PER_SEC;
     }
 }
