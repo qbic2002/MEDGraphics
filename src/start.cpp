@@ -104,71 +104,37 @@ void update() {
 
 void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glEnable(GL_TEXTURE_2D);
-//    glBindTexture(GL_TEXTURE_2D, textureId);
-////    glBindVertexArray(squareVao);
-//    glColor3f(1, 1, 1);
-//
-//    glPushMatrix();
-//    {
-//        glLoadIdentity();
-////        glScalef(100, 100, 1);
-////        glTranslatef(1, 1, 0);
-//
-//        /*//    glBegin(GL_QUADS);
-//        //    {
-//        //        for (int i = 0; i < 4; i++) {
-//        //            glTexCoord2f(textCoords[i*2], textCoords[i*2 + 1]);
-//        //            glVertex2f(vert[i*2], vert[i*2 + 1]);
-//        //        }
-//        //    }
-//        //    glEnd();*/
-//        glEnableClientState(GL_VERTEX_ARRAY);
-//        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-//
-//        glVertexPointer(2, GL_FLOAT, 16, squareData);
-//        glTexCoordPointer(2, GL_FLOAT, 16, squareData + 2);
-//        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-//
-////        glVertexPointer(2, GL_FLOAT, 0, vert);
-////        glTexCoordPointer(2, GL_FLOAT, 0, textCoords);
-////        glDrawArrays(GL_QUADS, 0, 4);
-//
-//        glDisableClientState(GL_VERTEX_ARRAY);
-//        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//    }
-//    glPopMatrix();
-//    glDisable(GL_TEXTURE_2D);
-//
-////    glVertexPointer(2, GL_FLOAT, 4, square);
-////    glTexCoordPointer(2, GL_FLOAT, 2, tex);
-////    glDrawArrays(GL_QUADS, 0, 4);
-//
-////    for (auto &rect: rects) {
-////        glPushMatrix();
-////        glTranslatef(rect.pos.x, rect.pos.y, rect.pos.z);
-//////        glRotatef(rect.rotation.x, 1, 0, 0);
-//////        glRotatef(rect.rotation.y, 0, 1, 0);
-//////        glRotatef(rect.rotation.z, 0, 0, 1);
-////        float k = (rect.pos.z) / 10;
-////        float color = 0.8 * k + 0.2 * (1 - k);
-////        glColor3f(color, color, color);
-////        float size = 5 * k + 3 * (1 - k);
-////        size *= 10;
-////        glScalef(size, size, 1);
-////        glDrawArrays(GL_QUADS, 0, 4);
-////        glPopMatrix();
-////        break;
-////    }
-////    glBindVertexArray(0);
-//    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(squareVao);
+    for (auto &rect: rects) {
+        glPushMatrix();
+        glTranslatef(rect.pos.x, rect.pos.y, rect.pos.z);
+        glRotatef(rect.rotation.x, 1, 0, 0);
+        glRotatef(rect.rotation.y, 0, 1, 0);
+        glRotatef(rect.rotation.z, 0, 0, 1);
+        float k = (rect.pos.z) / 10;
+        float color = 0.8 * k + 0.2 * (1 - k);
+        glColor3f(color, color, color);
+        float size = 5 * k + 3 * (1 - k);
+        glScalef(size, size, 1);
+        glDrawArrays(GL_QUADS, 0, 4);
+        glPopMatrix();
+    }
+    glBindVertexArray(0);
+
     glUseProgram(shaderId);
     glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glPushMatrix();
     {
         glLoadIdentity();
+        float windowRatio = getWindowRatio();
+        float ratio = curRatio / windowRatio;
+        if (ratio < 1) {
+            glScalef(ratio, 1, 1);
+        } else {
+            glScalef(1, 1 / ratio, 1);
+        }
+        glScalef(0.9, 0.9, 1);
         glBindVertexArray(squareVao);
         glDrawArrays(GL_QUADS, 0, 4);
         glBindVertexArray(0);
@@ -325,8 +291,8 @@ int main() {
         render();
         glfwSwapBuffers(window);
         utils::updateTimer();
-//        glfwPollEvents();
-        glfwWaitEvents();
+        glfwPollEvents();
+//        glfwWaitEvents();
     }
 
     glfwTerminate();

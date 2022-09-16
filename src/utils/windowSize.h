@@ -8,5 +8,6 @@ namespace utils {
     int getWindowWidth();
     int getWindowHeight();
     void setOnWindowResize(void (*_onResize)(unsigned w, unsigned h));
+    float getWindowRatio();
 }
 #endif //CPP_EXPERIMENTS_WINDOWSIZE_H

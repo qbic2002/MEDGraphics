@@ -30,4 +30,8 @@ namespace utils {
     void setOnWindowResize(void (*_onResize)(unsigned w, unsigned h)) {
         onResize = _onResize;
     }
+
+    float getWindowRatio() {
+        return (float) curWidth / curHeight;
+    }
 }
