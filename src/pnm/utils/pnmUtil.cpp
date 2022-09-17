@@ -115,8 +115,8 @@ int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
     return offset;
 }
 
-RGBAData pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader) {
-    RGBAData rgbaData(pnmHeader.width, pnmHeader.height);
+Raster<RGBAPixel> pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader) {
+    Raster<RGBAPixel> rgbaData(pnmHeader.width, pnmHeader.height);
 
     int k = 0;
     if (pnmHeader.pnmMode == PNMMode::P5) {
