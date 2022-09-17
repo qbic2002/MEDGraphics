@@ -139,7 +139,7 @@ GLuint loadTexture(char const* filename) {
 
 GLuint loadTexturePNM(char const* filename) {
     PNMImage pnmImage = pnm::readPNMImage(filename);
-    GLuint texture = loadTexture((unsigned char*) pnmImage.rgbaData.getPRgbaRaster(), pnmImage.pnmHeader.width,
+    GLuint texture = loadTexture((unsigned char*) pnmImage.rgbaData.getRgbaRaster(), pnmImage.pnmHeader.width,
                                  pnmImage.pnmHeader.height);
     return texture;
 }

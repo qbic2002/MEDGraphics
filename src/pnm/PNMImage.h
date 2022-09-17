@@ -7,28 +7,21 @@
 
 
 #include "PNMHeader.h"
-#include "../img/RGBAData.h"
+#include "../img/Raster.h"
 #include "PNMMeta.h"
+#include "../img/RGBAPixel.h"
 
 class PNMImage {
 public:
     PNMImage() = default;
-    PNMImage(const PNMImage& other) : pnmHeader(other.pnmHeader), rgbaData(other.rgbaData){}
 
-    PNMImage operator=(const PNMImage& other){
-        if (&other == this){
-            return *this;
-        }
+    PNMImage(const PNMImage& other) = default;
 
-        pnmHeader = other.pnmHeader;
-        rgbaData = other.rgbaData;
-
-        return *this;
-    }
+    PNMImage& operator=(const PNMImage& other) = default;
 
     PNMHeader pnmHeader;
     PNMMeta pnmMeta;
-    RGBAData rgbaData;
+    Raster<RGBAPixel> rgbaData;
 };
 
 
