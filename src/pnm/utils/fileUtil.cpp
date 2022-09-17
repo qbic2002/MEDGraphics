@@ -27,3 +27,12 @@ int getFileSize(std::ifstream &fileStream) {
 
     return size;
 }
+
+bool writeToFile(const char* data, std::ofstream& fileStream, int size) {
+    if (!fileStream.is_open()) {
+        return false;
+    }
+
+    fileStream.write(data, size);
+    return true;
+}

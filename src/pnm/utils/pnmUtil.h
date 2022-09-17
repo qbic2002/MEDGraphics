@@ -16,6 +16,10 @@ namespace pnm {
     PNMMeta parseMeta(const char* fileData, int headerSize);
 
     PNMImage readPNMImage(const char* fileName);
+
+    bool writePNMImage(const PNMImage& pnmImage, const char* filename);
+
+    PNMImage convertP6ToP5(const PNMImage& other);
 }
 
 

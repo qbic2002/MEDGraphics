@@ -60,7 +60,7 @@ public:
         return pRgbaRaster_[y * width_ + x];
     }
 
-    void set(int x, int y, const RGBAPixel &raster) {
+    void set(int x, int y, const RGBAPixel& raster) {
         if (x < 0 || x >= width_) {
             return;
         }
@@ -71,10 +71,26 @@ public:
         pRgbaRaster_[y * width_ + x] = raster;
     }
 
+    RGBAPixel* begin() {
+        return (pRgbaRaster_);
+    }
+
+    RGBAPixel* end() {
+        return pRgbaRaster_ + width_ * height_;
+    }
+
+    const RGBAPixel* cbegin() const {
+        return (pRgbaRaster_);
+    }
+
+    const RGBAPixel* cend() const {
+        return pRgbaRaster_ + width_ * height_;
+    }
+
 private:
     int width_;
     int height_;
-    RGBAPixel *pRgbaRaster_;
+    RGBAPixel* pRgbaRaster_ = nullptr;
 };
 
 

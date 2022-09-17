@@ -8,6 +8,9 @@
 #include <fstream>
 
 int getFileSize(std::ifstream& fileStream);
+
 bool getFileContent(char* buffer, std::ifstream& fileStream, int size);
+
+bool writeToFile(const char* data, std::ofstream& fileStream, int size);
 
 #endif //MEDGRAPHICS_FILEUTIL_H
