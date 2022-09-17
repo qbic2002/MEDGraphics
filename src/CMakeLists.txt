@@ -6,7 +6,9 @@ add_executable(MEDGraphics
         stb_image.h
         pnm/utils/fileUtil.cpp
         pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h
-        pnm/PNMImage.h utils/file.cpp utils/file.h view/ShaderProgram.cpp view/ShaderProgram.h)
+        pnm/PNMImage.h utils/file.cpp utils/file.h view/ShaderProgram.cpp view/ShaderProgram.h
+        view/Context.cpp view/Context.h
+        view/BgRenderer.cpp view/BgRenderer.h)
 target_link_libraries(MEDGraphics ${LIBS})
 add_dependencies(MEDGraphics copy_assets)
 

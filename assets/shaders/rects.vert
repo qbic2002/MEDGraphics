@@ -8,6 +8,7 @@ layout (location = 4) in float rotationVelocity;
 layout (location = 5) in int index;
 
 out vec3 ourColor;
+out vec2 texCoord;
 
 uniform float theta;
 uniform int width;
@@ -15,18 +16,13 @@ uniform int height;
 
 float cycle(float value, float min, float max) {
     float range = max - min;
-    //    if (value < min)  {
-    //        value -= floor((value - min) / range) * range;
-    //    }
-    //    if (max < value) {
-    //        value -= floor((value - min) / range) * range;
-    //    }
     return value - floor((value - min) / range) * range;
 }
 
 void main()
 {
     vec3 cornerVector = vec3[4](vec3(-1, -1, 0), vec3(1, -1, 0), vec3(1, 1, 0), vec3(-1, 1, 0))[index];
+    texCoord = (cornerVector.xy + vec2(1, 1)) / 2;
 
     vec3 pos = position + velocity * theta;
     pos.x = cycle(pos.x, -10, width + 10);
@@ -38,7 +34,7 @@ void main()
     vec3 temp = cross(q.xyz, cornerVector) + q.w * cornerVector;
     cornerVector += 2.0 * cross(q.xyz, temp);
 
-    pos += cornerVector * 5;
+    pos += cornerVector * 10;
 
     ourColor = vec3(pos.z) / 100;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0f);

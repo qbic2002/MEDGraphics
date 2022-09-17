@@ -54,12 +54,16 @@ ShaderProgram::ShaderProgram(const std::string& fileNameVert, const std::string&
     assertProgramLinked(programId);
 }
 
-GLuint ShaderProgram::getProgramId() const {
-    return this->programId;
+GLuint ShaderProgram::getUniformLocation(const GLchar* name) const {
+    return glGetUniformLocation(programId, name);
+};
+
+void ShaderProgram::useProgram() const {
+    glUseProgram(programId);
 }
 
 ShaderProgram::~ShaderProgram() {
     glDeleteProgram(programId);
     glDeleteShader(shaderVertId);
     glDeleteShader(shaderFragId);
-};
+}

@@ -6,14 +6,16 @@
 #define MEDGRAPHICS_SHADERPROGRAM_H
 
 #include <string>
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 class ShaderProgram {
 
 public:
     ShaderProgram(const std::string& fileNameVert, const std::string& fileNameFrag);
 
-    [[nodiscard]] GLuint getProgramId() const;
+    GLuint getUniformLocation(const GLchar* name) const;
+
+    void useProgram() const;
 
     ~ShaderProgram();
 
