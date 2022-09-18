@@ -9,12 +9,11 @@
 #include "utils/fileUtil.h"
 #include "PNMImage.h"
 #include "utils/pnmUtil.h"
+#include "../img/GrayPixel.h"
 
-int main(){
 
+int main() {
     std::cout << sizeof(RGBAPixel) << " " << sizeof(Pixel) << "\n";
-
-    Raster<RGBAPixel> raster;
 
 //    PNMImage pnmImage = pnm::readPNMImage("assets/qbic.ppm");
 //
