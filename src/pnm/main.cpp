@@ -15,11 +15,12 @@
 int main() {
     std::cout << sizeof(RGBAPixel) << " " << sizeof(Pixel) << "\n";
 
-//    PNMImage pnmImage = pnm::readPNMImage("assets/qbic.ppm");
-//
-//    std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height
-//              << " " << pnmImage.pnmHeader.maxGrey << "\n";
-//
-//    PNMImage p5Img = pnm::convertP6ToP5(pnmImage);
-//    pnm::writePNMImage(p5Img, "assets/cr.pnm");
+    Raster<RGBAPixel> raster(10, 10);
+    PNMImage pnmImage = pnm::readPNMImage("assets/qbic.ppm");
+
+    std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height
+              << " " << pnmImage.pnmHeader.maxGrey << "\n";
+
+    PNMImage p5Img = pnm::convertP6ToP5(pnmImage);
+    pnm::writePNMImage(p5Img, "assets/cr.pnm");
 }

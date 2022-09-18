@@ -156,7 +156,7 @@ int main() {
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
-    init(window, "assets/test.png");
+    init(window, "assets/qbic.ppm");
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

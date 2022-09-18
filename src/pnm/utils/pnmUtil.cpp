@@ -116,23 +116,27 @@ int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
     return offset;
 }
 
-Raster<RGBAPixel> pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader) {
-    Raster<RGBAPixel> rgbaData(pnmHeader.width, pnmHeader.height);
+AbstractRaster* pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader) {
 
     int k = 0;
     if (pnmHeader.pnmMode == PNMMode::P5) {
+        auto* grayData = new Raster<GrayPixel>(pnmHeader.width, pnmHeader.height);
         for (int j = 0; j < pnmHeader.height; ++j) {
             for (int i = 0; i < pnmHeader.width; ++i) {
                 unsigned char color = fileData[offset + k++];
                 if (color > pnmHeader.maxGrey) {
                     throw -1;
                 }
-                rgbaData.set(i, j, RGBAPixel(color, color, color, 255));
+                grayData->set(i, j, GrayPixel(color));
             }
         }
+
+        return grayData;
     }
 
     if (pnmHeader.pnmMode == PNMMode::P6) {
+        auto* rgbaData = new Raster<RGBAPixel>(pnmHeader.width, pnmHeader.height);
+
         for (int j = 0; j < pnmHeader.height; ++j) {
             for (int i = 0; i < pnmHeader.width; ++i) {
                 unsigned char r = fileData[offset + k++];
@@ -141,11 +145,14 @@ Raster<RGBAPixel> pnm::parseData(const unsigned char* fileData, int offset, cons
                 if (r > pnmHeader.maxGrey || g > pnmHeader.maxGrey || b > pnmHeader.maxGrey) {
                     throw -1;
                 }
-                rgbaData.set(i, j, RGBAPixel(r, g, b, 255));
+                rgbaData->set(i, j, RGBAPixel(r, g, b, 255));
             }
         }
+
+        return rgbaData;
     }
-    return rgbaData;
+
+    throw -1;
 }
 
 PNMImage pnm::readPNMImageFromMemory(char* data) {
@@ -158,12 +165,12 @@ PNMImage pnm::readPNMImageFromMemory(char* data) {
 
     pnmImage.pnmMeta = pnm::parseMeta(data, offset);
 
-    pnmImage.rgbaData = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader);
+    pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
         std::cout << item.first;
     }
-    return pnmImage;
+    return std::move(pnmImage);
 }
 
 PNMImage pnm::readPNMImage(const char* fileName) {
@@ -210,16 +217,16 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(pnmImage.rgbaData.get(j, i).r);
+                data.push_back(((Raster<GrayPixel>*) pnmImage.data)->get(j, i).grayScale);
             }
         }
     }
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(pnmImage.rgbaData.get(j, i).r);
-                data.push_back(pnmImage.rgbaData.get(j, i).g);
-                data.push_back(pnmImage.rgbaData.get(j, i).b);
+                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).r);
+                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).g);
+                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).b);
             }
         }
     }
@@ -251,12 +258,11 @@ PNMImage pnm::convertP6ToP5(const PNMImage& other) {
 
     pnmImage.pnmMeta = other.pnmMeta;
 
-    pnmImage.rgbaData = other.rgbaData;
-
-    for (RGBAPixel& rgbaPixel: pnmImage.rgbaData) {
-        rgbaPixel = rgbaPixel.toGray();
+    auto* grayRaster = new Raster<GrayPixel>(other.data->getWidth(), other.data->getHeight());
+    for (unsigned int i = 0; i < other.data->getWidth() * other.data->getHeight(); ++i) {
+        grayRaster->set(i, ((Raster<RGBAPixel>*) other.data)->get(i).toGray());
     }
 
+    pnmImage.data = grayRaster;
     return pnmImage;
-
 }

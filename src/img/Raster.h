@@ -14,7 +14,6 @@
 template<class T>
 concept CheckType = std::is_base_of<Pixel, T>::value;
 
-
 template<class T> requires CheckType<T>
 class Raster : public AbstractRaster {
 public:
@@ -81,6 +80,14 @@ public:
         }
 
         return raster[y * width_ + x];
+    }
+
+    T get(unsigned int i) const {
+        if (i >= width_ * height_) {
+            return {};
+        }
+
+        return raster[i];
     }
 
     void set(int x, int y, const T& pixel) {
@@ -198,6 +205,10 @@ public:
         }
 
         return rgbaCompressed;
+    }
+
+    PixelType getPixelType() const override {
+        return utils::getPixelType<T>();
     }
 
     T* begin() {

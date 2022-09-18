@@ -31,7 +31,14 @@ namespace img {
     AbstractRaster* loadImageData(const std::vector<char>& bytes) {
         if (isPNMSignature(bytes)) {
             auto pnmImage = pnm::readPNMImageFromMemory(const_cast<char*>(bytes.data()));
-            return new Raster<RGBAPixel>(pnmImage.rgbaData);
+            switch (pnmImage.data->getPixelType()) {
+                case RGBA: {
+                    return new Raster(*((Raster<RGBAPixel>*) pnmImage.data));
+                }
+                case GRAY: {
+                    return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
+                }
+            }
         } else {
             int width, height, channels;
             unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width, &height,

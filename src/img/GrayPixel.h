@@ -7,7 +7,6 @@
 
 
 #include "Pixel.h"
-#include "RGBAPixel.h"
 
 class GrayPixel : public Pixel {
 public:

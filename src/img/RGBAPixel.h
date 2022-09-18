@@ -6,6 +6,7 @@
 #define MEDGRAPHICS_RGBAPIXEL_H
 
 #include "Pixel.h"
+#include "GrayPixel.h"
 
 class RGBAPixel : public Pixel {
 public:
@@ -18,9 +19,9 @@ public:
     RGBAPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {
     }
 
-    RGBAPixel toGray() const {
+    GrayPixel toGray() const {
         unsigned char color = (r + g + b) / 3;
-        return {color, color, color, this->a};
+        return {color};
     }
 
     rgba toRGBA() const override {

@@ -11,7 +11,7 @@
 namespace pnm {
     int parsePnmHeader(const char* fileData, PNMHeader& pnmHeader);
 
-    Raster<RGBAPixel> parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader);
+    AbstractRaster* parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader);
 
     PNMMeta parseMeta(const char* fileData, int headerSize);
 

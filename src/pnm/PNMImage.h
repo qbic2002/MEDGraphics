@@ -15,13 +15,23 @@ class PNMImage {
 public:
     PNMImage() = default;
 
-    PNMImage(const PNMImage& other) = default;
+    PNMImage(const PNMImage& other) = delete;
 
-    PNMImage& operator=(const PNMImage& other) = default;
+    PNMImage(PNMImage&& other) noexcept: pnmHeader(other.pnmHeader), pnmMeta(other.pnmMeta) {
+        data = other.data;
+        other.data = nullptr;
+    }
+
+    PNMImage& operator=(const PNMImage& other) = delete;
+
+
+    ~PNMImage() {
+        delete data;
+    }
 
     PNMHeader pnmHeader;
     PNMMeta pnmMeta;
-    Raster<RGBAPixel> rgbaData;
+    AbstractRaster* data = nullptr;
 };
 
 
