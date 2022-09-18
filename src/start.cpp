@@ -9,9 +9,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "stb_image.h"
-#include "pnm/utils/pnmUtil.h"
 #include "view/ShaderProgram.h"
 #include "view/Context.h"
+#include "img/imageLoader.h"
 
 using namespace std;
 using namespace utils;
@@ -129,21 +129,6 @@ GLuint loadTexture(unsigned char const* data, int width, int height) {
     return texture;
 }
 
-GLuint loadTexture(char const* filename) {
-    int width, height, count;
-    unsigned char* data = stbi_load(filename, &width, &height, &count, 0);
-    GLuint texture = loadTexture(data, width, height);
-    stbi_image_free(data);
-    return texture;
-}
-
-GLuint loadTexturePNM(char const* filename) {
-    PNMImage pnmImage = pnm::readPNMImage(filename);
-    GLuint texture = loadTexture((unsigned char*) pnmImage.rgbaData.getRgbaRaster(), pnmImage.pnmHeader.width,
-                                 pnmImage.pnmHeader.height);
-    return texture;
-}
-
 void init(GLFWwindow* window, const string& fileName) {
     glewInit();
 
@@ -153,7 +138,10 @@ void init(GLFWwindow* window, const string& fileName) {
     context = new Context();
 
     createSquareVao();
-    textureId = loadTexturePNM(fileName.c_str());
+
+    AbstractRaster* raster = img::loadImageData(fileName);
+    textureId = loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight());
+    delete raster;
 
     utils::initTimer();
 
@@ -168,7 +156,7 @@ int main() {
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
-    init(window, "assets/qbic.ppm");
+    init(window, "assets/test.png");
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

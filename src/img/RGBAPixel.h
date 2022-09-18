@@ -9,31 +9,34 @@
 
 class RGBAPixel : public Pixel {
 public:
-    RGBAPixel() = default;
-
-    RGBAPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : R(r), G(g), B(b), A(a) {}
-
-    RGBAPixel getGrey() const {
-        unsigned char color = (this->R + this->G + this->B) / 3;
-        return RGBAPixel(color, color, color, this->A);
+    RGBAPixel() : RGBAPixel(0, 0, 0, 0) {
     }
 
-    void toGrey() {
-        unsigned char color = (this->R + this->G + this->B) / 3;
-        this->R = color;
-        this->G = color;
-        this->B = color;
+    RGBAPixel(rgba rgba) : rgba(rgba) {
     }
 
-    RGBAPixel getRGBA() const override {
-        return {(*this)};
+    RGBAPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {
+    }
+
+    RGBAPixel toGray() const {
+        unsigned char color = (r + g + b) / 3;
+        return {color, color, color, this->a};
+    }
+
+    rgba toRGBA() const override {
+        return rgba;
     }
 
 public:
-    unsigned char R;
-    unsigned char G;
-    unsigned char B;
-    unsigned char A;
+    union {
+        rgba rgba;
+        struct {
+            unsigned char r;
+            unsigned char g;
+            unsigned char b;
+            unsigned char a;
+        };
+    };
 };
 
 

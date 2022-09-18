@@ -20,6 +20,8 @@ namespace pnm {
     bool writePNMImage(const PNMImage& pnmImage, const char* filename);
 
     PNMImage convertP6ToP5(const PNMImage& other);
+
+    PNMImage readPNMImageFromMemory(char* data);
 }
 
 

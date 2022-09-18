@@ -5,11 +5,13 @@
 #ifndef MEDGRAPHICS_PIXEL_H
 #define MEDGRAPHICS_PIXEL_H
 
+#include "rgba.h"
+
 class RGBAPixel;
 
 class Pixel {
 public:
-    virtual RGBAPixel getRGBA() const = 0;
+    virtual rgba toRGBA() const = 0;
 
     virtual ~Pixel() = default;
 };

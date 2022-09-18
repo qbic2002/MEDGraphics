@@ -5,6 +5,7 @@
 #include <string>
 #include "pnmUtil.h"
 #include "fileUtil.h"
+#include "../../utils/file.h"
 
 int parsePnmMode(const char* fileData, PNMMode& pnmMode) {
     if (fileData[0] == 'P' && fileData[1] == '5') {
@@ -147,31 +148,27 @@ Raster<RGBAPixel> pnm::parseData(const unsigned char* fileData, int offset, cons
     return rgbaData;
 }
 
-PNMImage pnm::readPNMImage(const char* fileName) {
+PNMImage pnm::readPNMImageFromMemory(char* data) {
     PNMImage pnmImage{};
 
-    std::ifstream fileStream(fileName, std::ios::binary);
-    int size = getFileSize(fileStream);
-
-    char* fileData = new char[size];
-    getFileContent(fileData, fileStream, size);
-
-    int offset = pnm::parsePnmHeader(fileData, pnmImage.pnmHeader);
+    int offset = pnm::parsePnmHeader(data, pnmImage.pnmHeader);
     if (offset == -1) {
         throw -1;
     }
 
-    pnmImage.pnmMeta = pnm::parseMeta(fileData, offset);
+    pnmImage.pnmMeta = pnm::parseMeta(data, offset);
 
-    pnmImage.rgbaData = pnm::parseData((unsigned char*) fileData, offset, pnmImage.pnmHeader);
-
-    delete[] fileData;
-    fileStream.close();
+    pnmImage.rgbaData = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
         std::cout << item.first;
     }
     return pnmImage;
+}
+
+PNMImage pnm::readPNMImage(const char* fileName) {
+    std::vector<char> data = utils::readAllBytes(fileName);
+    return readPNMImageFromMemory(data.data());
 }
 
 PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
@@ -213,16 +210,16 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(pnmImage.rgbaData.get(j, i).R);
+                data.push_back(pnmImage.rgbaData.get(j, i).r);
             }
         }
     }
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(pnmImage.rgbaData.get(j, i).R);
-                data.push_back(pnmImage.rgbaData.get(j, i).G);
-                data.push_back(pnmImage.rgbaData.get(j, i).B);
+                data.push_back(pnmImage.rgbaData.get(j, i).r);
+                data.push_back(pnmImage.rgbaData.get(j, i).g);
+                data.push_back(pnmImage.rgbaData.get(j, i).b);
             }
         }
     }
@@ -257,7 +254,7 @@ PNMImage pnm::convertP6ToP5(const PNMImage& other) {
     pnmImage.rgbaData = other.rgbaData;
 
     for (RGBAPixel& rgbaPixel: pnmImage.rgbaData) {
-        rgbaPixel.toGrey();
+        rgbaPixel = rgbaPixel.toGray();
     }
 
     return pnmImage;

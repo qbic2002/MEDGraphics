@@ -15,7 +15,7 @@ public:
 
     GrayPixel(int gray) : grayScale(gray) {}
 
-    RGBAPixel getRGBA() const override {
+    rgba toRGBA() const override {
         return {grayScale, grayScale, grayScale, 255};
     }
 

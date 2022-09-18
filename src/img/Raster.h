@@ -8,19 +8,21 @@
 #include <iostream>
 #include "Pixel.h"
 #include "RGBAPixel.h"
+#include "rgba.h"
+#include "AbstractRaster.h"
 
 template<class T>
 concept CheckType = std::is_base_of<Pixel, T>::value;
 
 
 template<class T> requires CheckType<T>
-class Raster {
+class Raster : public AbstractRaster {
 public:
     Raster() = default;
 
     Raster(int width, int height) : width_(width), height_(height) {
         raster = new T[width_ * height_];
-        rgbaRaster = new unsigned char[width_ * height_ * 4];
+        rgbaRaster = new rgba[width_ * height_];
     }
 
     Raster(const Raster& other) : Raster(other.width_, other.height_) {
@@ -29,6 +31,14 @@ public:
                 this->set(j, i, other.get(j, i));
             }
         }
+    }
+
+    int getWidth() const override {
+        return width_;
+    }
+
+    int getHeight() const override {
+        return height_;
     }
 
     Raster& operator=(const Raster& other) {
@@ -43,25 +53,23 @@ public:
         height_ = other.height_;
 
         raster = new T[width_ * height_];
-        rgbaRaster = new unsigned char[width_ * height_ * 4];
+        rgbaRaster = new rgba[width_ * height_];
         for (int i = 0; i < height_; ++i) {
             for (int j = 0; j < width_; ++j) {
                 this->set(j, i, other.get(j, i));
             }
         }
 
-
         return *this;
     }
 
-    ~Raster() {
+    ~Raster() override {
         delete[] raster;
         delete[] rgbaRaster;
     }
 
-
-    const unsigned char* getRgbaRaster() const {
-        return rgbaRaster;
+    const unsigned char* getRgbaData() const override {
+        return (const unsigned char*) rgbaRaster;
     }
 
     T get(int x, int y) const {
@@ -84,12 +92,16 @@ public:
         }
 
         raster[y * width_ + x] = pixel;
+        rgbaRaster[y * width_ + x] = pixel.toRGBA();
+    }
 
-        RGBAPixel rgbaPixel = pixel.getRGBA();
-        rgbaRaster[(y * width_ + x) * 4] = rgbaPixel.R;
-        rgbaRaster[(y * width_ + x) * 4 + 1] = rgbaPixel.G;
-        rgbaRaster[(y * width_ + x) * 4 + 2] = rgbaPixel.B;
-        rgbaRaster[(y * width_ + x) * 4 + 3] = rgbaPixel.A;
+    void set(unsigned int index, const T& pixel) {
+        if (index < 0 || index >= width_ * height_) {
+            return;
+        }
+
+        raster[index] = pixel;
+        rgbaRaster[index] = pixel.toRGBA();
     }
 
     Raster<RGBAPixel> compress(int newWidth, int newHeight) const {
@@ -99,7 +111,7 @@ public:
         Raster<RGBAPixel> rgbaR(width_, height_);
         for (int i = 0; i < height_; ++i) {
             for (int j = 0; j < width_; ++j) {
-                rgbaR.set(j, i, this->get(j, i).getRGBA());
+                rgbaR.set(j, i, RGBAPixel(this->get(j, i).toRGBA()));
             }
         }
 
@@ -116,40 +128,40 @@ public:
 
                 for (int k = 0; k < pixelsInOneInHeight; ++k) {
                     for (int l = 0; l < pixelsInOneInWidth; ++l) {
-                        newR += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).R;
-                        newG += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).G;
-                        newB += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).B;
-                        newA += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).A;
+                        newR += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).r;
+                        newG += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).g;
+                        newB += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).b;
+                        newA += rgbaR.get(j * pixelsInOneInWidth + l, i * pixelsInOneInHeight + k).a;
                     }
                 }
 
                 if (i == newHeight - 1 && j == newWidth - 1) {
                     for (int k = 0; k < height_ % newHeight; ++k) {
                         for (int l = 0; l < width_ % newWidth; ++l) {
-                            newR += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).R;
-                            newG += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).G;
-                            newB += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).B;
-                            newA += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).A;
+                            newR += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).r;
+                            newG += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).g;
+                            newB += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).b;
+                            newA += rgbaR.get((width_ - 1 - l), (height_ - 1 - k)).a;
                         }
                     }
                 }
                 if (i == newHeight - 1) {
                     for (int k = 0; k < height_ % newHeight; ++k) {
                         for (int l = 0; l < pixelsInOneInWidth; ++l) {
-                            newR += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).R;
-                            newG += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).G;
-                            newB += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).B;
-                            newA += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).A;
+                            newR += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).r;
+                            newG += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).g;
+                            newB += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).b;
+                            newA += rgbaR.get(j * pixelsInOneInWidth + l, (height_ - 1 - k)).a;
                         }
                     }
                 }
                 if (j == newWidth - 1) {
                     for (int k = 0; k < width_ % newWidth; ++k) {
                         for (int l = 0; l < pixelsInOneInHeight; ++l) {
-                            newR += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).R;
-                            newG += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).G;
-                            newB += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).B;
-                            newA += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).A;
+                            newR += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).r;
+                            newG += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).g;
+                            newB += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).b;
+                            newA += rgbaR.get((width_ - 1 - k), (i * pixelsInOneInHeight + l)).a;
                         }
                     }
                 }
@@ -204,26 +216,21 @@ public:
         return raster + width_ * height_;
     }
 
-
     const T* getRaster() const {
         return raster;
     }
 
 private:
     inline void fillRgbaArray() {
-        int k = 0;
         for (int i = 0; i < width_ * height_; ++i) {
-            rgbaRaster[k++] = raster[i].getRGBA().R;
-            rgbaRaster[k++] = raster[i].getRGBA().G;
-            rgbaRaster[k++] = raster[i].getRGBA().B;
-            rgbaRaster[k++] = raster[i].getRGBA().A;
+            rgbaRaster[i] = raster[i].toRGBA();
         }
     }
 
     int width_;
     int height_;
     T* raster = nullptr;
-    unsigned char* rgbaRaster = nullptr;
+    rgba* rgbaRaster = nullptr;
 };
 
 #endif //MEDGRAPHICS_RASTER_H
