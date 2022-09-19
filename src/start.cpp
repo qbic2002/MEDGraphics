@@ -11,15 +11,12 @@
 #include "stb_image.h"
 #include "view/ShaderProgram.h"
 #include "view/Context.h"
-#include "img/imageLoader.h"
 
 using namespace std;
 using namespace utils;
 using namespace view;
 
 GLuint squareVao;
-GLuint textureId;
-ShaderProgram* shader;
 float curRatio;
 
 Context* context;
@@ -51,37 +48,37 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
     return window;
 }
 
-void update() {
-}
+//void update() {
+//}
 
-void render() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    context->bgRenderer.render();
-
-    shader->useProgram();
-    glPushMatrix();
-    {
-        glLoadIdentity();
-        float windowRatio = getWindowRatio();
-        float ratio = curRatio / windowRatio;
-        if (ratio < 1) {
-            glScalef(ratio, 1, 1);
-        } else {
-            glScalef(1, 1 / ratio, 1);
-        }
-        glScalef(0.9, 0.9, 1);
-        glBindVertexArray(squareVao);
-        glDrawArrays(GL_QUADS, 0, 4);
-        glBindVertexArray(0);
-    }
-    glPopMatrix();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-    glUseProgram(0);
-}
+//void render() {
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, textureId);
+//
+//    context->bgRenderer.render();
+//
+//    shader->useProgram();
+//    glPushMatrix();
+//    {
+//        glLoadIdentity();
+//        float windowRatio = getWindowRatio();
+//        float ratio = curRatio / windowRatio;
+//        if (ratio < 1) {
+//            glScalef(ratio, 1, 1);
+//        } else {
+//            glScalef(1, 1 / ratio, 1);
+//        }
+//        glScalef(0.9, 0.9, 1);
+//        glBindVertexArray(squareVao);
+//        glDrawArrays(GL_QUADS, 0, 4);
+//        glBindVertexArray(0);
+//    }
+//    glPopMatrix();
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    glDisable(GL_TEXTURE_2D);
+//    glUseProgram(0);
+//}
 
 void createSquareVao() {
     int vertexSize = 8 * sizeof(float);
@@ -109,43 +106,24 @@ void createSquareVao() {
 }
 
 void onWindowResize(unsigned width, unsigned height) {
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -100, 100);
 //    glFrustum(0, width, 0, height, 1, 100);
-    context->bgRenderer.update(width, height);
-}
-
-GLuint loadTexture(unsigned char const* data, int width, int height) {
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    curRatio = (float) width / height;
-    return texture;
+//    context->bgRenderer.update(width, height);
+    context->onWindowResize(width, height);
 }
 
 void init(GLFWwindow* window, const string& fileName) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
-    shader = new ShaderProgram("assets/shaders/default.vert", "assets/shaders/default.frag");
 
-    context = new Context();
+    context = new Context(fileName);
 
     createSquareVao();
 
-    AbstractRaster* raster = img::loadImageData(fileName);
-    textureId = loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight());
-    delete raster;
-
     utils::initTimer();
 
-    utils::setOnWindowResize(onWindowResize);
+    utils::setOnWindowResize((OnWindowResizeListener*) (context));
+//    utils::setOnWindowResize(&Context::onWindowResize(std::ref(context)));
     utils::checkWindowSize(window);
 }
 
@@ -160,8 +138,8 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);
-        update();
-        render();
+        context->update();
+        context->render();
         glfwSwapBuffers(window);
         utils::updateTimer();
         glfwPollEvents();

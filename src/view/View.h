@@ -5,11 +5,15 @@
 #ifndef MEDGRAPHICS_VIEW_H
 #define MEDGRAPHICS_VIEW_H
 
-namespace view {
 
+#include "Context.h"
+
+namespace view {
     class View {
     public:
-        View(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        View(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+
+        View(Context* context) : View(context, 0, 0, 0, 0) {}
 
         unsigned int getX() const;
 
@@ -19,11 +23,11 @@ namespace view {
 
         unsigned int getHeight() const;
 
-        virtual void render() {
-        }
+        virtual void render() = 0;
 
-    private:
+    protected:
         unsigned int x, y, width, height;
+        Context* context;
     };
 
 } // view

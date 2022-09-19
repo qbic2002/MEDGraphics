@@ -21,6 +21,6 @@ namespace view {
         return height;
     }
 
-    View::View(unsigned int x, unsigned int y, unsigned int width, unsigned int height) : x(x), y(y), width(width),
-                                                                                          height(height) {}
+    View::View(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+            : context(context), x(x), y(y), width(width), height(height) {}
 } // view

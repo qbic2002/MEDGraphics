@@ -7,6 +7,8 @@ namespace utils {
 
     void (* onResize)(unsigned w, unsigned h);
 
+    OnWindowResizeListener* onWindowResizeListener = nullptr;
+
     void checkWindowSize(GLFWwindow* window) {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
@@ -15,8 +17,8 @@ namespace utils {
             curWidth = width;
             curHeight = height;
             std::cout << "Resized to: " << width << "x" << height << std::endl;
-            if (onResize)
-                onResize(width, height);
+            if (onWindowResizeListener)
+                onWindowResizeListener->onWindowResize(width, height);
         }
     }
 
@@ -34,5 +36,9 @@ namespace utils {
 
     float getWindowRatio() {
         return (float) curWidth / curHeight;
+    }
+
+    void setOnWindowResize(OnWindowResizeListener* _onWindowResizeListener) {
+        onWindowResizeListener = _onWindowResizeListener;
     }
 }
