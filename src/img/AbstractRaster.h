@@ -18,6 +18,8 @@ public:
 
     virtual PixelType getPixelType() const = 0;
 
+//    virtual Raster<RGBAPixel> compress(int width, int height) = 0;
+
     virtual ~AbstractRaster() = default;
 };
 

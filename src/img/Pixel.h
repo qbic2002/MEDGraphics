@@ -7,8 +7,6 @@
 
 #include "rgba.h"
 
-class RGBAPixel;
-
 class Pixel {
 public:
     virtual rgba toRGBA() const = 0;

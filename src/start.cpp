@@ -1,7 +1,6 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include <vector>
-#include "math/vec3.h"
 #include "utils/measureFps.h"
 #include "utils/windowSize.h"
 #include "pnm/PNMImage.h"
@@ -20,13 +19,6 @@ GLuint squareVao;
 float curRatio;
 
 Context* context;
-
-float squareData[] = {
-        -1, -1, 1, 1, 1, 0, 0, 1,
-        1, -1, 1, 1, 1, 0, 1, 1,
-        1, 1, 1, 1, 1, 0, 1, 0,
-        -1, 1, 1, 1, 1, 0, 0, 0
-};
 
 GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
     GLFWwindow* window;
@@ -80,31 +72,6 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
 //    glUseProgram(0);
 //}
 
-void createSquareVao() {
-    int vertexSize = 8 * sizeof(float);
-
-    GLuint vboHandles[1];
-    glGenBuffers(1, vboHandles);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vboHandles[0]);
-    glBufferData(GL_ARRAY_BUFFER, 4 * vertexSize, squareData, GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &squareVao);
-    glBindVertexArray(squareVao);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize, (void*) nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize, (void*) 12);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, vertexSize, (void*) 24);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
-}
-
 void onWindowResize(unsigned width, unsigned height) {
 //    glFrustum(0, width, 0, height, 1, 100);
 //    context->bgRenderer.update(width, height);
@@ -118,7 +85,7 @@ void init(GLFWwindow* window, const string& fileName) {
 
     context = new Context(fileName);
 
-    createSquareVao();
+//    createSquareVao();
 
     utils::initTimer();
 

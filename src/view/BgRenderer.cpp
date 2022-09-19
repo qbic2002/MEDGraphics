@@ -62,6 +62,9 @@ namespace view {
         return rectVertices;
     }
 
+    BgRenderer::BgRenderer(Context* context) : View(context) {
+    }
+
     void BgRenderer::update(unsigned int _width, unsigned int _height) {
         clear();
         width = _width;

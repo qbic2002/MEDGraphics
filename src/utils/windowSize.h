@@ -1,7 +1,8 @@
 #ifndef CPP_EXPERIMENTS_WINDOWSIZE_H
 #define CPP_EXPERIMENTS_WINDOWSIZE_H
 
-#include "GLFW/glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 namespace utils {
     class OnWindowResizeListener {

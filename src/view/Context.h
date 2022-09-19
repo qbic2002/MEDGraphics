@@ -5,16 +5,21 @@
 #ifndef MEDGRAPHICS_CONTEXT_H
 #define MEDGRAPHICS_CONTEXT_H
 
-#include "BgRenderer.h"
-#include "ImageView.h"
 #include "../utils/windowSize.h"
 #include "../img/AbstractRaster.h"
+#include <string>
+#include <vector>
 
 namespace view {
+    class View;
 
     class Context : public utils::OnWindowResizeListener {
     public:
-        explicit Context(const std::string& fileName);
+        Context(const std::string& fileName);
+
+        Context(const Context& other) = delete;
+
+        Context& operator=(const Context& other) = delete;
 
         void update();
 
@@ -28,8 +33,7 @@ namespace view {
         GLuint textureId;
 
     private:
-        BgRenderer bgRenderer;
-        ImageView imageView;
+        std::vector<View*> views;
     };
 
 } // view

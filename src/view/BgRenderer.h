@@ -5,9 +5,9 @@
 #ifndef MEDGRAPHICS_BGRENDERER_H
 #define MEDGRAPHICS_BGRENDERER_H
 
-#include <GL/glew.h>
 #include "../math/vec3.h"
 #include "ShaderProgram.h"
+#include "View.h"
 
 namespace view {
     struct rotation {
@@ -24,8 +24,10 @@ namespace view {
         unsigned char index;
     };
 
-    class BgRenderer {
+    class BgRenderer : public View {
     public:
+        BgRenderer(Context* context);
+
         void update(unsigned int width, unsigned int height);
 
         void render();

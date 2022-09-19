@@ -12,6 +12,8 @@ namespace view {
 
     class ImageView : public View {
     public:
+        ImageView(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+
         void render() override;
 
         ~ImageView();
