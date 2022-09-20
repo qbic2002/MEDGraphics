@@ -38,6 +38,9 @@ namespace img {
                 case GRAY: {
                     return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
                 }
+                default : {
+                    throw std::exception();
+                }
             }
         } else {
             int width, height, channels;
@@ -50,5 +53,4 @@ namespace img {
             return raster;
         }
     }
-
 }

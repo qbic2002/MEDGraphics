@@ -1,22 +1,18 @@
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "stb_image.h"
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include <vector>
 #include "utils/measureFps.h"
 #include "utils/windowSize.h"
 #include "pnm/PNMImage.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-
-#include "stb_image.h"
-#include "view/ShaderProgram.h"
+#include "gl/ShaderProgram.h"
 #include "view/Context.h"
 
 using namespace std;
 using namespace utils;
 using namespace view;
-
-GLuint squareVao;
-float curRatio;
 
 Context* context;
 
@@ -27,81 +23,50 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
         return nullptr;
 
     glfwWindowHint(GLFW_SAMPLES, 16);
+    glfwWindowHint(GLFW_DECORATED, 0);
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return nullptr;
     }
     glfwMakeContextCurrent(window);
-    if (vsync)
-        glfwSwapInterval(1);
-    else
-        glfwSwapInterval(0);
+    glfwSwapInterval(vsync ? 1 : 0);
     return window;
 }
 
-//void update() {
-//}
+void cursorPosCallback(GLFWwindow* window, double x, double y) {
+    context->onMouseMove(x, getWindowHeight() - y);
+}
 
-//void render() {
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glEnable(GL_TEXTURE_2D);
-//    glBindTexture(GL_TEXTURE_2D, textureId);
-//
-//    context->bgRenderer.render();
-//
-//    shader->useProgram();
-//    glPushMatrix();
-//    {
-//        glLoadIdentity();
-//        float windowRatio = getWindowRatio();
-//        float ratio = curRatio / windowRatio;
-//        if (ratio < 1) {
-//            glScalef(ratio, 1, 1);
-//        } else {
-//            glScalef(1, 1 / ratio, 1);
-//        }
-//        glScalef(0.9, 0.9, 1);
-//        glBindVertexArray(squareVao);
-//        glDrawArrays(GL_QUADS, 0, 4);
-//        glBindVertexArray(0);
-//    }
-//    glPopMatrix();
-//    glBindTexture(GL_TEXTURE_2D, 0);
-//    glDisable(GL_TEXTURE_2D);
-//    glUseProgram(0);
-//}
-
-void onWindowResize(unsigned width, unsigned height) {
-//    glFrustum(0, width, 0, height, 1, 100);
-//    context->bgRenderer.update(width, height);
-    context->onWindowResize(width, height);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    context->onMouseButton(button, action, mods);
 }
 
 void init(GLFWwindow* window, const string& fileName) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    context = new Context(fileName);
-
-//    createSquareVao();
+    context = new Context(window, fileName);
 
     utils::initTimer();
-
     utils::setOnWindowResize((OnWindowResizeListener*) (context));
-//    utils::setOnWindowResize(&Context::onWindowResize(std::ref(context)));
     utils::checkWindowSize(window);
+
+    glfwSetCursorPosCallback(window, cursorPosCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
 }
 
-int main() {
+int main([[maybe_unused]] int argc, char** args) {
     int width = 640;
     int height = 480;
 
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
-    init(window, "assets/qbic.ppm");
+    init(window, args[1]);
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

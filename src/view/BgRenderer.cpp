@@ -76,6 +76,7 @@ namespace view {
 
     void BgRenderer::render() {
         glEnable(GL_DEPTH_TEST);
+        glBindTexture(GL_TEXTURE_2D, context->textureId);
         rectsShader.useProgram();
         glUniform1f(uniformThetaLoc, getCurrentTime());
         glUniform1i(uniformWidthLoc, width);

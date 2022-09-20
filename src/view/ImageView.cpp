@@ -4,7 +4,6 @@
 
 #include "ImageView.h"
 #include "GL/glew.h"
-#include "../utils/windowSize.h"
 
 namespace view {
 
@@ -12,14 +11,14 @@ namespace view {
     GLuint squareVao;
 
     float squareData[] = {
-            -1, -1, 1, 1, 1, 0, 0, 1,
-            1, -1, 1, 1, 1, 0, 1, 1,
-            1, 1, 1, 1, 1, 0, 1, 0,
-            -1, 1, 1, 1, 1, 0, 0, 0
+            -1, -1, 1, 1, 1, 1, 1, 0, 1,
+            1, -1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 0,
+            -1, 1, 1, 1, 1, 1, 1, 0, 0
     };
 
     void createSquareVao() {
-        int vertexSize = 8 * sizeof(float);
+        int vertexSize = 9 * sizeof(float);
 
         glGenBuffers(1, &squareBuffer);
 
@@ -34,8 +33,8 @@ namespace view {
         glEnableVertexAttribArray(2);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize, (void*) nullptr);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize, (void*) 12);
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, vertexSize, (void*) 24);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (void*) 12);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexSize, (void*) 28);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -49,6 +48,7 @@ namespace view {
 
     void ImageView::render() {
         shader->useProgram();
+        glBindTexture(GL_TEXTURE_2D, context->textureId);
         glPushMatrix();
         {
             glLoadIdentity();
@@ -72,5 +72,9 @@ namespace view {
         glDeleteBuffers(1, &squareBuffer);
         glDeleteVertexArrays(1, &squareVao);
         delete shader;
+    }
+
+    ImageView::ImageView(Context* _context) : View(_context) {
+        createSquareVao();
     }
 } // view

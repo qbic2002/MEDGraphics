@@ -6,7 +6,7 @@
 #define MEDGRAPHICS_BGRENDERER_H
 
 #include "../math/vec3.h"
-#include "ShaderProgram.h"
+#include "../gl/ShaderProgram.h"
 #include "View.h"
 
 namespace view {
@@ -26,13 +26,13 @@ namespace view {
 
     class BgRenderer : public View {
     public:
-        BgRenderer(Context* context);
+        explicit BgRenderer(Context* context);
 
         void update(unsigned int width, unsigned int height);
 
-        void render();
+        void render() override;
 
-        ~BgRenderer();
+        ~BgRenderer() override;
 
     private:
         GLuint rectsVaoId = 0;
@@ -41,7 +41,7 @@ namespace view {
         rectVertex* rectVertices = nullptr;
         unsigned int width = 0, height = 0;
 
-        ShaderProgram rectsShader = ShaderProgram("assets/shaders/rects.vert", "assets/shaders/rects.frag");
+        ShaderProgram rectsShader = ShaderProgram("rects");
         GLuint uniformThetaLoc = rectsShader.getUniformLocation("theta");
         GLuint uniformWidthLoc = rectsShader.getUniformLocation("width");
         GLuint uniformHeightLoc = rectsShader.getUniformLocation("height");

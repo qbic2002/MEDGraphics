@@ -42,9 +42,9 @@ GLuint readShaderFile(GLenum type, const std::string& fileName) {
     return shaderId;
 }
 
-ShaderProgram::ShaderProgram(const std::string& fileNameVert, const std::string& fileNameFrag) {
-    shaderVertId = readShaderFile(GL_VERTEX_SHADER, fileNameVert);
-    shaderFragId = readShaderFile(GL_FRAGMENT_SHADER, fileNameFrag);
+ShaderProgram::ShaderProgram(const std::string& name) {
+    shaderVertId = readShaderFile(GL_VERTEX_SHADER, "assets/shaders/" + name + ".vert");
+    shaderFragId = readShaderFile(GL_FRAGMENT_SHADER, "assets/shaders/" + name + ".frag");
 
     programId = glCreateProgram();
     glAttachShader(programId, shaderVertId);

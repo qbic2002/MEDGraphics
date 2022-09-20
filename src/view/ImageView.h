@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_IMAGEVIEW_H
 #define MEDGRAPHICS_IMAGEVIEW_H
 
-#include "ShaderProgram.h"
+#include "../gl/ShaderProgram.h"
 #include "View.h"
 
 namespace view {
@@ -14,12 +14,14 @@ namespace view {
     public:
         ImageView(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
+        explicit ImageView(Context* _context);
+
         void render() override;
 
-        ~ImageView();
+        ~ImageView() override;
 
     private:
-        ShaderProgram* shader = new ShaderProgram("assets/shaders/default.vert", "assets/shaders/default.frag");
+        ShaderProgram* shader = new ShaderProgram("default");
     };
 
 } // view
