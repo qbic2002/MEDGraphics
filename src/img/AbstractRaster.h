@@ -8,6 +8,12 @@
 
 #include "PixelType.h"
 
+template<class T>
+concept CheckType = std::is_base_of<Pixel, T>::value;
+
+template<class T> requires CheckType<T>
+class Raster;
+
 class AbstractRaster {
 public:
     virtual int getWidth() const = 0;
@@ -18,7 +24,7 @@ public:
 
     virtual PixelType getPixelType() const = 0;
 
-//    virtual Raster<RGBAPixel> compress(int width, int height) = 0;
+    virtual Raster<RGBAPixel> compress(int width, int height) const = 0;
 
     virtual ~AbstractRaster() = default;
 };

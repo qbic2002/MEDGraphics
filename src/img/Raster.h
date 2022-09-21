@@ -11,9 +11,6 @@
 #include "rgba.h"
 #include "AbstractRaster.h"
 
-template<class T>
-concept CheckType = std::is_base_of<Pixel, T>::value;
-
 template<class T> requires CheckType<T>
 class Raster : public AbstractRaster {
 public:
@@ -111,7 +108,7 @@ public:
         rgbaRaster[index] = pixel.toRGBA();
     }
 
-    Raster<RGBAPixel> compress(int newWidth, int newHeight) const {
+    Raster<RGBAPixel> compress(int newWidth, int newHeight) const override {
         if (newWidth > width_ || newHeight > height_) {
             throw -1;
         }
