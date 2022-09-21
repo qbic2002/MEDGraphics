@@ -18,7 +18,7 @@ public:
 
     Raster(int width, int height) : width_(width), height_(height) {
         raster = new T[width_ * height_];
-        rgbaRaster = new rgba[width_ * height_];
+        rgbaRaster = (rgba*) malloc(width_ * height_ * sizeof(rgba));
     }
 
     Raster(const Raster& other) : Raster(other.width_, other.height_) {
@@ -43,13 +43,14 @@ public:
         }
 
         delete[] raster;
-        delete[] rgbaRaster;
+        free(rgbaRaster);
 
         width_ = other.width_;
         height_ = other.height_;
 
         raster = new T[width_ * height_];
-        rgbaRaster = new rgba[width_ * height_];
+        rgbaRaster = (rgba*) malloc(width_ * height_ * sizeof(rgba));
+
         for (int i = 0; i < height_; ++i) {
             for (int j = 0; j < width_; ++j) {
                 this->set(j, i, other.get(j, i));
@@ -61,7 +62,7 @@ public:
 
     ~Raster() override {
         delete[] raster;
-        delete[] rgbaRaster;
+        free(rgbaRaster);
     }
 
     const unsigned char* getRgbaData() const override {
