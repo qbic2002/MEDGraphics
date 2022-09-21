@@ -66,6 +66,10 @@ int main([[maybe_unused]] int argc, char** args) {
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
+    if (argc == 0) {
+        throw std::exception();
+    }
+
     init(window, args[1]);
 
     while (!glfwWindowShouldClose(window)) {

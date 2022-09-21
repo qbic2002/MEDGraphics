@@ -28,6 +28,10 @@ namespace view {
     public:
         explicit BgRenderer(Context* context);
 
+        BgRenderer(const BgRenderer& other) = delete;
+
+        BgRenderer& operator=(const BgRenderer& other) = delete;
+
         void update(unsigned int width, unsigned int height);
 
         void render() override;

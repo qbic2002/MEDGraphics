@@ -14,6 +14,10 @@ namespace view {
     public:
         ImageView(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
+        ImageView(const ImageView& other) = delete;
+
+        ImageView& operator=(const ImageView& other) = delete;
+
         explicit ImageView(Context* _context);
 
         void render() override;

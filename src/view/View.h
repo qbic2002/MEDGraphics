@@ -31,6 +31,12 @@ namespace view {
 
     class Background {
     public:
+        Background() = default;
+
+        Background(const Background& other) = delete;
+
+        Background& operator=(const Background& other) = delete;
+
         rgba color{};
         rgba colorOnHover{};
         rgba colorOnPress{};
@@ -79,6 +85,11 @@ namespace view {
         View(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
         View(Context* context) : View(context, 0, 0, 0, 0) {}
+
+        View(const View& other) = delete;
+
+        View& operator=(const View& other) = delete;
+
 
         unsigned int getX() const;
 
