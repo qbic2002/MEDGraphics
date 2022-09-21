@@ -91,7 +91,7 @@ namespace view {
 
     void Context::onWindowResize(unsigned int width, unsigned int height) {
         glLoadIdentity();
-        glOrtho(0, width, 0, height, -100, 100);
+        glOrtho(0, width, height, 0, -100, 100);
         bgRenderer->update(width, height);
 
         unsigned int iconSize = 16;
@@ -100,11 +100,11 @@ namespace view {
 
         int leftEdge = width;
         leftEdge -= btnWidth;
-        closeView->setPosition(leftEdge, height - btnHeight, btnWidth, btnHeight);
+        closeView->setPosition(leftEdge, 0, btnWidth, btnHeight);
         leftEdge -= btnWidth;
-        maximizeView->setPosition(leftEdge, height - btnHeight, btnWidth, btnHeight);
+        maximizeView->setPosition(leftEdge, 0, btnWidth, btnHeight);
         leftEdge -= btnWidth;
-        iconifyView->setPosition(leftEdge, height - btnHeight, btnWidth, btnHeight);
+        iconifyView->setPosition(leftEdge, 0, btnWidth, btnHeight);
 
         closeView->setPadding(padding(((float) (btnWidth - iconSize) / 2), (float) (btnHeight - iconSize) / 2));
         maximizeView->setPadding(padding(((float) (btnWidth - iconSize) / 2), (float) (btnHeight - iconSize) / 2));
@@ -149,7 +149,7 @@ namespace view {
         }
         if (grabbing) {
             glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
-            glfwSetWindowPos(window, grabWindowX + x - grabX, grabWindowY - y + grabY);
+            glfwSetWindowPos(window, grabWindowX + x - grabX, grabWindowY + y - grabY);
         }
     }
 
@@ -180,9 +180,26 @@ namespace view {
         if (action != 1 || pressedSomething)
             return;
 
-        grabbing = true;
-        grabX = prevX;
-        grabY = prevY;
-        glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
+        if (!isMaximized) {
+            grabbing = true;
+            grabX = prevX;
+            grabY = prevY;
+            glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
+        }
+    }
+
+    void Context::onMouseLeave() {
+        for (View* view: views) {
+            switch (view->state) {
+                case DEFAULT:
+                    break;
+                case HOVERED:
+                case PRESSED: {
+                    view->state = DEFAULT;
+                }
+                    break;
+            }
+        }
+        grabbing = false;
     }
 } // view

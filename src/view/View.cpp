@@ -56,13 +56,13 @@ namespace view {
         if (background.getImage() != nullptr) {
             background.getImage()->bind();
             glBegin(GL_QUADS);
-            glTexCoord2f(0, 1);
-            glVertex2f(x + padding.left, y + padding.bottom);
-            glTexCoord2f(1, 1);
-            glVertex2f(x + width - padding.right, y + padding.bottom);
-            glTexCoord2f(1, 0);
-            glVertex2f(x + width - padding.right, y + height - padding.top);
             glTexCoord2f(0, 0);
+            glVertex2f(x + padding.left, y + padding.bottom);
+            glTexCoord2f(1, 0);
+            glVertex2f(x + width - padding.right, y + padding.bottom);
+            glTexCoord2f(1, 1);
+            glVertex2f(x + width - padding.right, y + height - padding.top);
+            glTexCoord2f(0, 1);
             glVertex2f(x + padding.left, y + height - padding.top);
             glEnd();
             background.getImage()->unbind();

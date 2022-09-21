@@ -35,11 +35,16 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
 }
 
 void cursorPosCallback(GLFWwindow* window, double x, double y) {
-    context->onMouseMove(x, getWindowHeight() - y);
+    context->onMouseMove(x, y);
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     context->onMouseButton(button, action, mods);
+}
+
+void cursorEnterCallback(GLFWwindow* window, int entered) {
+    if (entered == 0)
+        context->onMouseLeave();
 }
 
 void init(GLFWwindow* window, const string& fileName) {
@@ -57,18 +62,19 @@ void init(GLFWwindow* window, const string& fileName) {
 
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetCursorEnterCallback(window, cursorEnterCallback);
 }
 
 int main([[maybe_unused]] int argc, char** args) {
+    if (argc == 0) {
+        throw std::exception();
+    }
+
     int width = 640;
     int height = 480;
 
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
-
-    if (argc == 0) {
-        throw std::exception();
-    }
 
     init(window, args[1]);
 

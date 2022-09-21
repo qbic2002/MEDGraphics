@@ -39,6 +39,8 @@ namespace view {
 
         void onMouseButton(int button, int action, int mods);
 
+        void onMouseLeave();
+
     private:
         std::vector<View*> views;
         BgRenderer* bgRenderer;
