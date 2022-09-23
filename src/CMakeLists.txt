@@ -2,13 +2,14 @@ add_executable(MEDGraphics
         start.cpp
         utils/measureFps.cpp utils/measureFps.h
         utils/windowSize.cpp utils/windowSize.h
+        utils/file.cpp utils/file.h
         math/vec3.cpp math/vec3.h utils/random.cpp utils/random.h
         stb_image.h
-        pnm/utils/fileUtil.cpp
-        pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h
-        pnm/PNMImage.h utils/file.cpp utils/file.h gl/ShaderProgram.cpp gl/ShaderProgram.h
-        view/Context.cpp view/Context.h
-        view/BgRenderer.cpp view/BgRenderer.h view/ImageView.cpp view/ImageView.h view/View.cpp view/View.h img/imageLoader.cpp img/imageLoader.h img/rgba.h img/AbstractRaster.h gl/Texture.cpp gl/Texture.h gl/utils.cpp gl/utils.h)
+        pnm/utils/fileUtil.cpp pnm/utils/pnmUtil.cpp pnm/utils/pnmUtil.h pnm/PNMImage.h
+        gl/ShaderProgram.cpp gl/ShaderProgram.h gl/Texture.cpp gl/Texture.h gl/utils.cpp gl/utils.h
+        view/Context.cpp view/Context.h view/View.cpp view/View.h view/Assets.cpp view/Assets.h view/Style.h view/ViewGroup.cpp view/ViewGroup.h
+        widget/BgRenderer.cpp widget/BgRenderer.h widget/ImageView.cpp widget/ImageView.h widget/WindowBar.cpp widget/WindowBar.h widget/RootView.cpp widget/RootView.h
+        img/imageLoader.cpp img/imageLoader.h img/rgba.h img/AbstractRaster.h)
 target_link_libraries(MEDGraphics ${LIBS})
 add_dependencies(MEDGraphics copy_assets)
 

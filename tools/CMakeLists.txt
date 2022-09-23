@@ -1,1 +1,2 @@
 add_executable(test_window test_window.cpp)
+add_executable(test_smart_pointers test_smart_pointers.cpp)

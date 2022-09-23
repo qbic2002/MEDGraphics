@@ -6,19 +6,21 @@
 #define MEDGRAPHICS_IMAGEVIEW_H
 
 #include "../gl/ShaderProgram.h"
-#include "View.h"
+#include "../view/View.h"
 
 namespace view {
 
     class ImageView : public View {
     public:
-        ImageView(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        explicit ImageView(Context* context);
 
         ImageView(const ImageView& other) = delete;
 
+        ImageView(const ImageView&& other) = delete;
+
         ImageView& operator=(const ImageView& other) = delete;
 
-        explicit ImageView(Context* _context);
+        ImageView& operator=(const ImageView&& other) = delete;
 
         void render() override;
 

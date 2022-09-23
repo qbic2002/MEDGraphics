@@ -7,7 +7,7 @@
 
 #include "../math/vec3.h"
 #include "../gl/ShaderProgram.h"
-#include "View.h"
+#include "../view/View.h"
 
 namespace view {
     struct rotation {
@@ -30,13 +30,17 @@ namespace view {
 
         BgRenderer(const BgRenderer& other) = delete;
 
+        BgRenderer(const BgRenderer&& other) = delete;
+
         BgRenderer& operator=(const BgRenderer& other) = delete;
 
-        void update(unsigned int width, unsigned int height);
+        BgRenderer& operator=(const BgRenderer&& other) = delete;
+
+        ~BgRenderer() override;
 
         void render() override;
 
-        ~BgRenderer() override;
+        void onWindowResize(unsigned int width, unsigned int height) override;
 
     private:
         GLuint rectsVaoId = 0;

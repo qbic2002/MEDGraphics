@@ -14,9 +14,13 @@ namespace gl {
     public:
         explicit Texture(const std::string& fileName);
 
-        void bind();
+        Texture(const Texture& other) = delete;
 
-        void unbind();
+        Texture(Texture&& other) noexcept;
+
+        void bind() const;
+
+        void unbind() const;
 
         ~Texture();
 

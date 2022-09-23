@@ -41,8 +41,7 @@ namespace view {
         glBindVertexArray(0);
     }
 
-    ImageView::ImageView(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-            : View(context, x, y, width, height) {
+    ImageView::ImageView(Context* context) : View(context) {
         createSquareVao();
     }
 
@@ -72,9 +71,5 @@ namespace view {
         glDeleteBuffers(1, &squareBuffer);
         glDeleteVertexArrays(1, &squareVao);
         delete shader;
-    }
-
-    ImageView::ImageView(Context* _context) : View(_context) {
-        createSquareVao();
     }
 } // view

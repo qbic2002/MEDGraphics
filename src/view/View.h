@@ -9,70 +9,10 @@
 #include "Context.h"
 #include "../gl/Texture.h"
 #include "../img/rgba.h"
+#include "Style.h"
+#include "ClickEvent.h"
 
 namespace view {
-
-    struct padding {
-        float left;
-        float top;
-        float right;
-        float bottom;
-
-        explicit padding(float value) : padding(value, value) {
-        }
-
-        padding(float horizontal, float vertical) : left(horizontal), top(vertical), right(horizontal),
-                                                    bottom(vertical) {
-        }
-
-        padding(float left, float top, float right, float bottom) : left(left), top(top), right(right),
-                                                                    bottom(bottom) {}
-    };
-
-    class Background {
-    public:
-        Background() = default;
-
-        Background(const Background& other) = delete;
-
-        Background& operator=(const Background& other) = delete;
-
-        rgba color{};
-        rgba colorOnHover{};
-        rgba colorOnPress{};
-
-        Background& setImage(const std::string& fileName) {
-            delete image;
-            image = new gl::Texture(fileName);
-            return *this;
-        }
-
-        Background& setColor(const rgba& _color) {
-            Background::color = _color;
-            return *this;
-        }
-
-        Background& setColorOnHover(const rgba& _colorOnHover) {
-            Background::colorOnHover = _colorOnHover;
-            return *this;
-        }
-
-        Background& setColorOnPress(const rgba& _colorOnPress) {
-            Background::colorOnPress = _colorOnPress;
-            return *this;
-        }
-
-        gl::Texture* getImage() const {
-            return image;
-        }
-
-        ~Background() {
-            delete image;
-        }
-
-    private:
-        gl::Texture* image = nullptr;
-    };
 
     enum State {
         DEFAULT,
@@ -82,60 +22,56 @@ namespace view {
 
     class View {
     public:
-        View(Context* context, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        explicit View(Context* context) : context(context), style() {}
 
-        View(Context* context) : View(context, 0, 0, 0, 0) {}
+        View(Context* context, const Style& style) : context(context), style(style) {}
+
+        View(Context* context, const Style&& style) : context(context), style(style) {}
 
         View(const View& other) = delete;
 
+        View(const View&& other) = delete;
+
         View& operator=(const View& other) = delete;
 
+        View& operator=(const View&& other) = delete;
 
-        unsigned int getX() const;
+        virtual ~View() = default;
 
-        unsigned int getY() const;
+        Style& getStyle();
 
-        unsigned int getWidth() const;
+        /// @return whether event was consumed
+        virtual bool onClick(const ClickEvent& event);
 
-        unsigned int getHeight() const;
+        View& setOnClickListener(std::function<void()>&& _onClickListener);
 
-        void setPosition(unsigned int _x, unsigned int _y, unsigned int _width, unsigned int _height) {
-            this->x = _x;
-            this->y = _y;
-            this->width = _width;
-            this->height = _height;
-        }
+        virtual void onWindowResize(unsigned int width, unsigned int height);
 
-        void setPadding(const padding& _padding) {
-            this->padding = _padding;
-        }
+        View& setOnWindowResizeListener(std::function<void(View& v, unsigned int w, unsigned int h)>&& _onWindowResize);
 
-        Background& getBackground() {
-            return this->background;
-        }
+        virtual void onMouseEnter();
 
-        void onClick() {
-            if (onClickListener != nullptr) {
-                onClickListener();
-            }
-        };
+        virtual void onMouseLeave();
 
-        void setOnClickListener(std::function<void()>&& _onClickListener) {
-            onClickListener = _onClickListener;
-        }
+        virtual void onMouseMove(double x, double y);
+
+        virtual void renderBackground();
 
         virtual void render();
 
-        virtual ~View() = default;
+        virtual bool isInside(double x, double y);
+
+        const Context* getContext() const {
+            return context;
+        }
 
         State state = DEFAULT;
 
     protected:
         Context* context;
-        unsigned int x, y, width, height;
-        padding padding{0, 0, 0, 0};
-        Background background;
+        Style style;
         std::function<void()> onClickListener = nullptr;
+        std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
     };
 
 } // view

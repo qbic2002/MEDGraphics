@@ -34,17 +34,28 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
     return window;
 }
 
+struct {
+    double x, y;
+} cursorPos;
+
 void cursorPosCallback(GLFWwindow* window, double x, double y) {
+    cursorPos.x = x;
+    cursorPos.y = y;
     context->onMouseMove(x, y);
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    context->onMouseButton(button, action, mods);
+    ClickEvent event{cursorPos.x, cursorPos.y, button, action, mods};
+    context->onMouseButton(event);
 }
 
 void cursorEnterCallback(GLFWwindow* window, int entered) {
     if (entered == 0)
         context->onMouseLeave();
+}
+
+void maximizeCallback(GLFWwindow* window, int maximized) {
+    context->onWindowMaximize(maximized);
 }
 
 void init(GLFWwindow* window, const string& fileName) {
@@ -63,6 +74,7 @@ void init(GLFWwindow* window, const string& fileName) {
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorEnterCallback(window, cursorEnterCallback);
+    glfwSetWindowMaximizeCallback(window, maximizeCallback);
 }
 
 int main([[maybe_unused]] int argc, char** args) {
