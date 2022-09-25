@@ -15,11 +15,11 @@ namespace view {
         float parentK;
         float pixelK;
 
-        Dimension() : parentK(0), pixelK(0) {}
+        Dimension() noexcept: parentK(0), pixelK(0) {}
 
-        Dimension(float pixelK) : parentK(0), pixelK(pixelK) {}
+        Dimension(float pixelK) noexcept: parentK(0), pixelK(pixelK) {}
 
-        Dimension(float parentK, float pixelK) : parentK(parentK), pixelK(pixelK) {}
+        Dimension(float parentK, float pixelK) noexcept: parentK(parentK), pixelK(pixelK) {}
 
         float evaluate(float parentValue) const {
             return parentK * parentValue + pixelK;
@@ -91,6 +91,7 @@ namespace view {
         position position{};
         padding padding{};
         Background background{};
+        bool isDraggable;
     };
 
     struct CalculatedPos {

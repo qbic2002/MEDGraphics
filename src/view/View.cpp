@@ -115,4 +115,8 @@ namespace view {
     void View::onMeasure(const CalculatedPos& parentPos) {
         calculatedPos = CalculatedPos(parentPos, style.position);
     }
+
+    bool View::onDrag(double x, double y, double dx, double dy) {
+        return false;
+    }
 } // view

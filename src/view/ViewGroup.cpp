@@ -16,7 +16,7 @@ namespace view {
     bool ViewGroup::onClick(const ClickEvent& event) {
         for (View* child: children) {
             if (child->isInside(event.x, event.y)) {
-                child->state == event.action == GLFW_PRESS ? PRESSED : HOVERED;
+                child->state = event.action == GLFW_PRESS ? PRESSED : HOVERED;
                 if (child->onClick(event)) {
                     return true;
                 }
@@ -71,7 +71,7 @@ namespace view {
     bool ViewGroup::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
         for (auto* child: children) {
             if (child->isInside(cursorX, cursorY)) {
-                if (View::onScroll(xOffset, yOffset, cursorX, cursorY)) {
+                if (child->onScroll(xOffset, yOffset, cursorX, cursorY)) {
                     return true;
                 }
             }
@@ -85,5 +85,15 @@ namespace view {
         for (auto* child: children) {
             child->onMeasure(calculatedPos);
         }
+    }
+
+    bool ViewGroup::onDrag(double x, double y, double dx, double dy) {
+        for (auto* child: children) {
+            if (child->isInside(x, y) && child->state == PRESSED) {
+                if (child->onDrag(x, y, dx, dy))
+                    return true;
+            }
+        }
+        return View::onDrag(x, y, dx, dy);
     }
 } // view

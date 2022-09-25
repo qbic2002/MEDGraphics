@@ -43,6 +43,8 @@ namespace view {
         /// @return whether event was consumed
         virtual bool onClick(const ClickEvent& event);
 
+        virtual bool onDrag(double x, double y, double dx, double dy);
+
         View& setOnClickListener(std::function<void()>&& _onClickListener);
 
         virtual void onMeasure(const CalculatedPos& parentPos);

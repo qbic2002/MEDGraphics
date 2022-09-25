@@ -4,76 +4,103 @@
 
 #include "ImageView.h"
 #include "GL/glew.h"
+#include <cmath>
 
 namespace view {
 
-    GLuint squareBuffer;
-    GLuint squareVao;
-
-    float squareData[] = {
-            -1, -1, 1, 1, 1, 1, 1, 0, 1,
-            1, -1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 0,
-            -1, 1, 1, 1, 1, 1, 1, 0, 0
-    };
-
-    void createSquareVao() {
-        int vertexSize = 9 * sizeof(float);
-
-        glGenBuffers(1, &squareBuffer);
-
-        glBindBuffer(GL_ARRAY_BUFFER, squareBuffer);
-        glBufferData(GL_ARRAY_BUFFER, 4 * vertexSize, squareData, GL_STATIC_DRAW);
-
-        glGenVertexArrays(1, &squareVao);
-        glBindVertexArray(squareVao);
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize, (void*) nullptr);
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (void*) 12);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexSize, (void*) 28);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindVertexArray(0);
+    void glVertexUV(float x, float y, float u, float v) {
+        glTexCoord2f(u, v);
+        glVertex2f(x, y);
     }
 
-    ImageView::ImageView(Context* context, const Style& style) : View(context, style) {
-        createSquareVao();
-    }
+    ImageView::ImageView(Context* context, const Style& style) : View(context, style) {}
 
     void ImageView::render() {
-        shader->useProgram();
         glBindTexture(GL_TEXTURE_2D, context->textureId);
         glPushMatrix();
         {
-            glLoadIdentity();
-            float windowRatio = utils::getWindowRatio();
-            float ratio = (float) context->raster->getWidth() / context->raster->getHeight() / windowRatio;
-            if (ratio < 1) {
-                glScalef(ratio, 1, 1);
-            } else {
-                glScalef(1, 1 / ratio, 1);
-            }
-            glScalef(0.9, 0.9, 1);
-            glBindVertexArray(squareVao);
-            glDrawArrays(GL_QUADS, 0, 4);
-            glBindVertexArray(0);
+            glTranslatef(calculatedPos.x, calculatedPos.y, 0);
+
+            glTranslatef(translateX, translateY, 0);
+            glScalef(zoom, zoom, 1);
+
+            glBegin(GL_QUADS);
+
+            glVertexUV(0, 0, 0, 0);
+            glVertexUV(0, context->raster->getHeight(), 0, 1);
+            glVertexUV(context->raster->getWidth(), context->raster->getHeight(), 1, 1);
+            glVertexUV(context->raster->getWidth(), 0, 1, 0);
+
+            glEnd();
         }
         glPopMatrix();
-        glUseProgram(0);
-    }
-
-    ImageView::~ImageView() {
-        glDeleteBuffers(1, &squareBuffer);
-        glDeleteVertexArrays(1, &squareVao);
-        delete shader;
     }
 
     bool ImageView::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
+        translateX -= cursorX;
+        translateY -= cursorY;
+
+        translateX /= zoom;
+        translateY /= zoom;
+
+        zoomOffset += yOffset;
+        zoom = powf(1.5, zoomOffset);
+
+        translateX *= zoom;
+        translateY *= zoom;
+
+        translateX += cursorX;
+        translateY += cursorY;
+        validateZoom();
         return true;
     }
+
+    bool ImageView::onDrag(double x, double y, double dx, double dy) {
+        translateX += dx;
+        translateY += dy;
+        validateZoom();
+        return true;
+    }
+
+    void ImageView::onMeasure(const CalculatedPos& parentPos) {
+        View::onMeasure(parentPos);
+        initZoomWithImage();
+    }
+
+    void ImageView::initZoomWithImage() {
+        float vertRatio = calculatedPos.height / context->raster->getHeight();
+        float horRatio = calculatedPos.width / context->raster->getWidth();
+        float ratio = (vertRatio < horRatio) ? vertRatio : horRatio;
+        zoom = ratio;
+        zoomOffset = logf(zoom) / logf(1.5);
+        float scaledRasterWidth = context->raster->getWidth() * ratio;
+        float scaledRasterHeight = context->raster->getHeight() * ratio;
+        translateX = (calculatedPos.width - scaledRasterWidth) / 2;
+        translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+    }
+
+    void ImageView::validateZoom() {
+        float scaledRasterWidth = context->raster->getWidth() * zoom;
+        float scaledRasterHeight = context->raster->getHeight() * zoom;
+        if (scaledRasterWidth < calculatedPos.width) {
+            translateX = (calculatedPos.width - scaledRasterWidth) / 2;
+        }
+        if (scaledRasterHeight < calculatedPos.height) {
+            translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+        }
+        if (translateX > calculatedPos.width / 2) {
+            translateX = calculatedPos.width / 2;
+        }
+        if (translateY > calculatedPos.height / 2) {
+            translateY = calculatedPos.height / 2;
+        }
+        if (translateX + scaledRasterWidth < calculatedPos.width / 2) {
+            translateX = calculatedPos.width / 2 - scaledRasterWidth;
+        }
+        if (translateY + scaledRasterHeight < calculatedPos.height / 2) {
+            translateY = calculatedPos.height / 2 - scaledRasterHeight;
+        }
+    }
+
+
 } // view

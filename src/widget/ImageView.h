@@ -26,10 +26,18 @@ namespace view {
 
         bool onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
 
-        ~ImageView() override;
+        bool onDrag(double x, double y, double dx, double dy) override;
+
+        void onMeasure(const CalculatedPos& parentPos) override;
 
     private:
-        ShaderProgram* shader = new ShaderProgram("default");
+        void initZoomWithImage();
+
+        void validateZoom();
+
+        float zoom = 1;
+        float zoomOffset = 0;
+        float translateX = 0, translateY = 0;
     };
 
 } // view

@@ -53,12 +53,21 @@ namespace view {
     int grabWindowX, grabWindowY;
 
     void Context::onMouseMove(double x, double y) {
+        double dx = x - prevX;
+        double dy = y - prevY;
         prevX = x;
         prevY = y;
         rootView->onMouseMove(x, y);
         if (grabbing) {
-            glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
-            glfwSetWindowPos(window, grabWindowX + x - grabX, grabWindowY + y - grabY);
+            if (rootView->onDrag(x, y, dx, dy)) {
+                grabX = prevX;
+                grabY = prevY;
+                return;
+            }
+            if (!maximized) {
+                glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
+                glfwSetWindowPos(window, grabWindowX + x - grabX, grabWindowY + y - grabY);
+            }
         }
     }
 
@@ -73,12 +82,10 @@ namespace view {
         if (event.action != GLFW_PRESS)
             return;
 
-        if (!maximized) {
-            grabbing = true;
-            grabX = prevX;
-            grabY = prevY;
-            glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
-        }
+        grabbing = true;
+        grabX = prevX;
+        grabY = prevY;
+        glfwGetWindowPos(window, &grabWindowX, &grabWindowY);
     }
 
     void Context::onMouseLeave() {

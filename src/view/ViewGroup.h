@@ -20,6 +20,8 @@ namespace view {
 
         bool onClick(const ClickEvent& event) override;
 
+        bool onDrag(double x, double y, double dx, double dy) override;
+
         void addChild(View* view);
 
         void render() override;
