@@ -58,6 +58,10 @@ void maximizeCallback(GLFWwindow* window, int maximized) {
     context->onWindowMaximize(maximized);
 }
 
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+    context->onScroll(xOffset, yOffset, cursorPos.x, cursorPos.y);
+}
+
 void init(GLFWwindow* window, const string& fileName) {
     glewInit();
 
@@ -75,6 +79,7 @@ void init(GLFWwindow* window, const string& fileName) {
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorEnterCallback(window, cursorEnterCallback);
     glfwSetWindowMaximizeCallback(window, maximizeCallback);
+    glfwSetScrollCallback(window, scrollCallback);
 }
 
 int main([[maybe_unused]] int argc, char** args) {

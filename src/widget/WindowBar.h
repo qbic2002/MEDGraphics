@@ -5,6 +5,8 @@
 #ifndef MEDGRAPHICS_WINDOWBAR_H
 #define MEDGRAPHICS_WINDOWBAR_H
 
+#define WINDOW_BAR_HEIGHT 28
+
 #include "../view/ViewGroup.h"
 
 namespace view {

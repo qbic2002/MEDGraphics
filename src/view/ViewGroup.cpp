@@ -67,4 +67,23 @@ namespace view {
             child->render();
         }
     }
+
+    bool ViewGroup::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
+        for (auto* child: children) {
+            if (child->isInside(cursorX, cursorY)) {
+                if (View::onScroll(xOffset, yOffset, cursorX, cursorY)) {
+                    return true;
+                }
+            }
+        }
+
+        return View::onScroll(xOffset, yOffset, cursorX, cursorY);
+    }
+
+    void ViewGroup::onMeasure(const CalculatedPos& parentPos) {
+        View::onMeasure(parentPos);
+        for (auto* child: children) {
+            child->onMeasure(calculatedPos);
+        }
+    }
 } // view

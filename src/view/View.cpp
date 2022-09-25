@@ -10,7 +10,7 @@ namespace view {
         glColor4ubv((GLubyte*) &rgba);
     }
 
-    void glPositionQuad(const position& pos) {
+    void glPositionQuad(const CalculatedPos& pos) {
         glBegin(GL_QUADS);
         glVertex2f(pos.x, pos.y);
         glVertex2f(pos.x + pos.width, pos.y);
@@ -19,7 +19,7 @@ namespace view {
         glEnd();
     }
 
-    void glTextureQuad(const position& pos, const padding& padding) {
+    void glTextureQuad(const CalculatedPos& pos, const padding& padding) {
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0);
         glVertex2f(pos.x + padding.left, pos.y + padding.bottom);
@@ -48,14 +48,14 @@ namespace view {
         if (curBgColor.a != 0) {
             glDisable(GL_TEXTURE_2D);
             glColor(curBgColor);
-            glPositionQuad(style.position);
+            glPositionQuad(calculatedPos);
             glEnable(GL_TEXTURE_2D);
             glColor4f(1, 1, 1, 1);
         }
         gl::Texture* bgImage = style.background.image.get();
         if (bgImage != nullptr) {
             bgImage->bind();
-            glTextureQuad(style.position, style.padding);
+            glTextureQuad(calculatedPos, style.padding);
             bgImage->unbind();
         }
     }
@@ -94,9 +94,8 @@ namespace view {
     }
 
     bool View::isInside(double x, double y) {
-        position& pos = style.position;
-        return pos.x <= x && x <= pos.x + pos.width
-               && pos.y <= y && y <= pos.y + pos.height;
+        return calculatedPos.x <= x && x <= calculatedPos.x + calculatedPos.width
+               && calculatedPos.y <= y && y <= calculatedPos.y + calculatedPos.height;
     }
 
     void View::onMouseEnter() {
@@ -108,4 +107,12 @@ namespace view {
     }
 
     void View::onMouseMove(double x, double y) {}
+
+    bool View::onScroll(double xOffset, double yOffset, double d, double d1) {
+        return false;
+    }
+
+    void View::onMeasure(const CalculatedPos& parentPos) {
+        calculatedPos = CalculatedPos(parentPos, style.position);
+    }
 } // view

@@ -11,15 +11,41 @@
 #include "Assets.h"
 
 namespace view {
+    struct Dimension {
+        float parentK;
+        float pixelK;
+
+        Dimension() : parentK(0), pixelK(0) {}
+
+        Dimension(float pixelK) : parentK(0), pixelK(pixelK) {}
+
+        Dimension(float parentK, float pixelK) : parentK(parentK), pixelK(pixelK) {}
+
+        float evaluate(float parentValue) const {
+            return parentK * parentValue + pixelK;
+        }
+
+        Dimension operator+(const Dimension& other) const {
+            return {parentK + other.parentK, pixelK + other.pixelK};
+        }
+
+        Dimension operator-() const {
+            return {-parentK, -pixelK};
+        }
+
+        Dimension operator-(const Dimension& other) const {
+            return {parentK - other.parentK, pixelK - other.pixelK};
+        }
+    };
+
+    const Dimension FILL_PARENT{1, 0};
+
     struct position {
-        unsigned int x, y, width, height;
+        Dimension x, y, width, height;
     };
 
     struct padding {
-        float left;
-        float top;
-        float right;
-        float bottom;
+        float left, top, right, bottom;
 
         padding() : padding(0) {}
 
@@ -65,6 +91,20 @@ namespace view {
         position position{};
         padding padding{};
         Background background{};
+    };
+
+    struct CalculatedPos {
+        float x, y, width, height;
+
+        CalculatedPos() = default;
+
+        CalculatedPos(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {}
+
+        CalculatedPos(const CalculatedPos& parentPos, const position& pos) :
+                x(pos.x.evaluate(parentPos.width)),
+                y(pos.y.evaluate(parentPos.height)),
+                width(pos.width.evaluate(parentPos.width)),
+                height(pos.height.evaluate(parentPos.height)) {}
     };
 }
 

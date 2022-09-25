@@ -30,6 +30,10 @@ namespace view {
 
         void onMouseMove(double x, double y) override;
 
+        bool onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
+
+        void onMeasure(const CalculatedPos& parentPos) override;
+
     private:
         std::vector<View*> children;
     };

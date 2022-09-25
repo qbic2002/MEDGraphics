@@ -51,6 +51,12 @@ namespace view {
 
         bool isMaximized() const;
 
+        static unsigned getWindowWidth();
+
+        static unsigned getWindowHeight();
+
+        void onScroll(double xOffset, double yOffset, double cursorX, double cursorY);
+
     private:
         RootView* rootView;
         GLFWwindow* window;

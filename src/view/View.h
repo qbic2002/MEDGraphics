@@ -45,6 +45,8 @@ namespace view {
 
         View& setOnClickListener(std::function<void()>&& _onClickListener);
 
+        virtual void onMeasure(const CalculatedPos& parentPos);
+
         virtual void onWindowResize(unsigned int width, unsigned int height);
 
         View& setOnWindowResizeListener(std::function<void(View& v, unsigned int w, unsigned int h)>&& _onWindowResize);
@@ -54,6 +56,8 @@ namespace view {
         virtual void onMouseLeave();
 
         virtual void onMouseMove(double x, double y);
+
+        virtual bool onScroll(double xOffset, double yOffset, double d, double d1);
 
         virtual void renderBackground();
 
@@ -70,6 +74,7 @@ namespace view {
     protected:
         Context* context;
         Style style;
+        CalculatedPos calculatedPos{};
         std::function<void()> onClickListener = nullptr;
         std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
     };

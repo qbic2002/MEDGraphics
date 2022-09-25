@@ -10,11 +10,8 @@
 namespace view {
     RootView::RootView(Context* context, const Style& style) : ViewGroup(context, style) {
         addChild(new BgRenderer(context));
-        addChild(new ImageView(context));
-        addChild(new WindowBar(context, {.position = {0, 0, (unsigned) utils::getWindowWidth(), 28}}));
-
-        setOnWindowResizeListener([](View& view, unsigned width, unsigned height) {
-            view.getStyle().position = {0, 0, width, height};
-        });
+        addChild(new ImageView(context, {.position = {0, WINDOW_BAR_HEIGHT, FILL_PARENT,
+                                                      FILL_PARENT - Dimension(WINDOW_BAR_HEIGHT)}}));
+        addChild(new WindowBar(context, {.position = {0, 0, FILL_PARENT, WINDOW_BAR_HEIGHT}}));
     }
 } // view

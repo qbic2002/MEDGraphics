@@ -12,7 +12,7 @@ namespace view {
 
     class ImageView : public View {
     public:
-        explicit ImageView(Context* context);
+        ImageView(Context* context, const Style& style);
 
         ImageView(const ImageView& other) = delete;
 
@@ -23,6 +23,8 @@ namespace view {
         ImageView& operator=(const ImageView&& other) = delete;
 
         void render() override;
+
+        bool onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
 
         ~ImageView() override;
 

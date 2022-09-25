@@ -15,7 +15,7 @@ namespace view {
         raster = img::loadImageData(fileName);
         textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
 
-        rootView = new RootView(this, {});
+        rootView = new RootView(this, Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
     }
 
     void Context::update() {
@@ -34,6 +34,7 @@ namespace view {
     void Context::onWindowResize(unsigned int width, unsigned int height) {
         glLoadIdentity();
         glOrtho(0, width, height, 0, -100, 100);
+        rootView->onMeasure({0, 0, (int) width, (int) height});
         rootView->onWindowResize(width, height);
     }
 
@@ -91,5 +92,18 @@ namespace view {
 
     bool Context::isMaximized() const {
         return maximized;
+    }
+
+    unsigned Context::getWindowWidth() {
+        return utils::getWindowWidth();
+    }
+
+    unsigned Context::getWindowHeight() {
+        return utils::getWindowHeight();
+    }
+
+    void Context::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
+        rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
+//        std::cout << xOffset << " " << yOffset << std::endl;
     }
 } // view
