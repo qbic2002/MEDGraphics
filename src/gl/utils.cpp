@@ -5,7 +5,13 @@
 #include "utils.h"
 
 namespace gl {
-    GLuint loadTexture(AbstractRaster* raster, GLint wrap, GLint minFilter, GLint magFilter) {
+    void vertexUV(float x, float y, float u, float v) {
+        glTexCoord2f(u, v);
+        glVertex2f(x, y);
+    }
+
+    GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
+                       GLint magFilter) {
         GLuint textureId;
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -13,9 +19,13 @@ namespace gl {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raster->getWidth(), raster->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     raster->getRgbaData());
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glBindTexture(GL_TEXTURE_2D, 0);
         return textureId;
+    }
+
+    GLuint loadTexture(AbstractRaster* raster, GLint wrap, GLint minFilter, GLint magFilter) {
+        return loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight(), GL_RGBA, wrap, minFilter,
+                           magFilter);
     }
 }

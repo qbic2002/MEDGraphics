@@ -10,6 +10,7 @@
 #include "../gl/ShaderProgram.h"
 #include "../gl/Texture.h"
 #include "ClickEvent.h"
+#include "../gl/FontRenderer.h"
 #include <string>
 #include <vector>
 
@@ -61,6 +62,7 @@ namespace view {
         RootView* rootView;
         GLFWwindow* window;
         bool maximized = false;
+        gl::FontRenderer* fontRenderer;
     };
 
 } // view

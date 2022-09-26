@@ -16,6 +16,9 @@ namespace view {
         textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
 
         rootView = new RootView(this, Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
+
+        fontRenderer = new gl::FontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", 28);
+//        fontRenderer = new gl::FontRenderer("assets/fonts/MinecraftRegular.otf", 72);
     }
 
     void Context::update() {
@@ -28,6 +31,10 @@ namespace view {
         glBindTexture(GL_TEXTURE_2D, textureId);
         rootView->render();
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        fontRenderer->renderText("Hello, everyone! abcdefghijklmnopqrstuvwxyz",
+                                 getWindowWidth() / 2, getWindowHeight() / 2);
+
         glDisable(GL_TEXTURE_2D);
     }
 
@@ -45,6 +52,7 @@ namespace view {
     Context::~Context() {
         delete rootView;
         delete raster;
+        delete fontRenderer;
     }
 
     bool grabbing = false;

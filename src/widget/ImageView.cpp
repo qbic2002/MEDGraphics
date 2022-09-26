@@ -84,10 +84,10 @@ namespace view {
     void ImageView::validateZoom() {
         float scaledRasterWidth = context->raster->getWidth() * zoom;
         float scaledRasterHeight = context->raster->getHeight() * zoom;
-        if (scaledRasterWidth < calculatedPos.width) {
+        if (scaledRasterWidth <= calculatedPos.width) {
             translateX = (calculatedPos.width - scaledRasterWidth) / 2;
         }
-        if (scaledRasterHeight < calculatedPos.height) {
+        if (scaledRasterHeight <= calculatedPos.height) {
             translateY = (calculatedPos.height - scaledRasterHeight) / 2;
         }
         if (translateX > calculatedPos.width / 2) {

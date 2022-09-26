@@ -9,6 +9,11 @@
 #include "../img/AbstractRaster.h"
 
 namespace gl {
+    void vertexUV(float x, float y, float u, float v);
+
+    GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
+                       GLint magFilter);
+
     GLuint loadTexture(AbstractRaster* raster, GLint wrap, GLint minFilter, GLint magFilter);
 }
 

@@ -7,11 +7,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 set(LIBS
         libglfw3.a
         OpenGL32.Lib
-        glew/Release/x64/glew32.lib
-        glew/Release/x64/glew32s.lib)
+        win64/glew32.lib
+        win64/glew32s.lib
+        win64/freetype.lib)
 list(TRANSFORM LIBS PREPEND ${CMAKE_CURRENT_LIST_DIR}/libs/)
+set(BINS glew32.dll freetype.dll)
+list(TRANSFORM BINS PREPEND bin/win64/)
 file(
-        COPY ${CMAKE_CURRENT_LIST_DIR}/bin/Release/x64/glew32.dll
+        COPY ${BINS}
         DESTINATION ${CMAKE_BINARY_DIR}/build)
 
 add_custom_target(copy_assets
