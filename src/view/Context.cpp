@@ -111,6 +111,5 @@ namespace view {
 
     void Context::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
         rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
-//        std::cout << xOffset << " " << yOffset << std::endl;
     }
 } // view

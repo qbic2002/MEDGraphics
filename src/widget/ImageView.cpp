@@ -37,6 +37,8 @@ namespace view {
     }
 
     bool ImageView::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
+        cursorX -= calculatedPos.x;
+        cursorY -= calculatedPos.y;
         translateX -= cursorX;
         translateY -= cursorY;
 
