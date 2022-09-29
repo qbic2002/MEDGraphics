@@ -15,10 +15,16 @@ namespace gl {
     FontRenderer::FontRenderer(const std::string& fontFileName, unsigned int fontSize) : fontSize(fontSize) {
         myGlyphData = (GlyphData*) malloc(65536 * sizeof(GlyphData));
         ft::init(ftLibrary);
-        setTextureSize(fontFileName, fontSize);
-        auto* textureData = new unsigned char[textureWidth * textureHeight];
 
-        fillTextureBitmap(fontFileName, fontSize, textureData);
+        FT_Face face = nullptr;
+        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
+        ft::setPixelSizes(face, 0, fontSize, fontFileName);
+
+        defineTextureSize(face);
+        auto* textureData = new unsigned char[textureWidth * textureHeight];
+        fillTextureBitmap(face, textureData);
+
+        ft::doneFace(face);
 
         textureId = gl::loadTexture(textureData, textureWidth, textureHeight, GL_ALPHA, GL_CLAMP, GL_LINEAR,
                                     GL_NEAREST);
@@ -76,12 +82,9 @@ namespace gl {
         free(myGlyphData);
     }
 
-    void FontRenderer::setTextureSize(const std::string& fontFileName, unsigned int fontSize) {
+    void FontRenderer::defineTextureSize(const FT_Face& face) {
         textureHeight = nearestPow2(fontSize);
-
-        FT_Face face = nullptr;
-        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
-        ft::setPixelSizes(face, 0, fontSize, fontFileName);
+        textureWidth = 0;
 
         FT_UInt index = 0;
         FT_ULong charCode = FT_Get_First_Char(face, &index);
@@ -110,15 +113,9 @@ namespace gl {
         }
 
         textureWidth = nearestPow2(textureWidth);
-        ft::doneFace(face);
     }
 
-    void FontRenderer::fillTextureBitmap(const std::string& fontFileName, unsigned int fontSize,
-                                         unsigned char* textureBitMap) {
-        FT_Face face = nullptr;
-        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
-        ft::setPixelSizes(face, 0, fontSize, fontFileName);
-
+    void FontRenderer::fillTextureBitmap(const FT_Face& face, unsigned char* textureBitMap) {
         FT_UInt index = 0;
         FT_ULong charCode = FT_Get_First_Char(face, &index);
 
@@ -141,8 +138,6 @@ namespace gl {
 
             charCode = FT_Get_Next_Char(face, charCode, &index);
         }
-
-        ft::doneFace(face);
     }
 
 

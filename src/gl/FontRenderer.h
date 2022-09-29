@@ -41,9 +41,9 @@ namespace gl {
         ~FontRenderer();
 
     private:
-        void setTextureSize(const std::string& fontFileName, unsigned int fontSize);
+        void defineTextureSize(const FT_Face& face);
 
-        void fillTextureBitmap(const std::string& fontFileName, unsigned int fontSize, unsigned char* textureBitMap);
+        void fillTextureBitmap(const FT_Face& face, unsigned char* textureBitMap);
 
         FT_Library ftLibrary = nullptr;
         GLuint textureId = 0;
