@@ -3,7 +3,7 @@
 //
 
 #include "WindowBar.h"
-#include "../view/ClickEvent.h"
+#include "TextView.h"
 
 namespace view {
     WindowBar::WindowBar(Context* context, const Style& style) : ViewGroup(context, style) {
@@ -57,6 +57,14 @@ namespace view {
         view->setOnClickListener([windowId]() {
             glfwIconifyWindow(windowId);
         });
+        addChild(view);
+
+        unsigned titleBarFontSize = 16;
+        view = new TextView(context, Style{
+                .position = {0, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT},
+                .padding = padding((WINDOW_BAR_HEIGHT - titleBarFontSize) / 2),
+                .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", titleBarFontSize)
+        }, "Hello world! test underline chars q g p , j y");
         addChild(view);
     }
 } // view

@@ -36,6 +36,10 @@ namespace view {
         Dimension operator-(const Dimension& other) const {
             return {parentK - other.parentK, pixelK - other.pixelK};
         }
+
+        Dimension operator*(const float& scalar) const {
+            return {parentK * scalar, pixelK * scalar};
+        }
     };
 
     const Dimension FILL_PARENT{1, 0};
@@ -92,6 +96,7 @@ namespace view {
         padding padding{};
         Background background{};
         bool isDraggable;
+        std::shared_ptr<gl::FontRenderer> fontRenderer;
     };
 
     struct CalculatedPos {

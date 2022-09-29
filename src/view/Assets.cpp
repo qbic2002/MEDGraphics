@@ -33,10 +33,20 @@ namespace assets {
     };
 
     assets_repo<std::string, gl::Texture> textures;
+    assets_repo<unsigned, gl::FontRenderer> fontRenderers;
+
+    std::hash<std::string> stringHasher;
 
     std::shared_ptr<gl::Texture> texture(const std::string& name) {
         return textures.computeIfAbsent(name, [](const std::string& key) {
             return new gl::Texture(key);
         });
+    }
+
+    std::shared_ptr<gl::FontRenderer> fontRenderer(const std::string& name, unsigned fontSize) {
+        return fontRenderers.computeIfAbsent(unsigned(stringHasher(name) + fontSize),
+                                             [name, fontSize](const unsigned& key) {
+                                                 return new gl::FontRenderer(name, fontSize);
+                                             });
     }
 }

@@ -8,13 +8,12 @@
 #include <string>
 #include <memory>
 #include "../gl/Texture.h"
+#include "../gl/FontRenderer.h"
 
 namespace assets {
-//    void init();
-
     std::shared_ptr<gl::Texture> texture(const std::string& name);
 
-//    gl::Texture* texture(const std::string& name);
+    std::shared_ptr<gl::FontRenderer> fontRenderer(const std::string& name, unsigned fontSize);
 }
 
 #endif //MEDGRAPHICS_ASSETS_H
