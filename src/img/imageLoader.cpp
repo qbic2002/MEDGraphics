@@ -11,10 +11,16 @@
 #include "imageLoader.h"
 
 namespace img {
-    Raster<RGBAPixel>* rgbaDataToRaster(const rgba* data, int width, int height) {
+    Raster<RGBAPixel>* rgbaDataToRaster(const unsigned char* data, int width, int height, int channels) {
         auto* raster = new Raster<RGBAPixel>(width, height);
-        for (unsigned int i = 0; i < width * height; i++) {
-            raster->set(i, RGBAPixel(data[i]));
+        if (channels == 3) {
+            for (unsigned int i = 0; i < width * height * channels; i += channels) {
+                raster->set(i / channels, RGBAPixel(data[i], data[i + 1], data[i + 2], 255));
+            }
+        } else {
+            for (unsigned int i = 0; i < width * height * 4; i += 4) {
+                raster->set(i / 4, RGBAPixel(data[i], data[i + 1], data[i + 2], data[i + 3]));
+            }
         }
         return raster;
     }
@@ -47,7 +53,7 @@ namespace img {
             unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width, &height,
                                                         &channels, 0);
 
-            auto* raster = rgbaDataToRaster(reinterpret_cast<const rgba*>(data), width, height);
+            auto* raster = rgbaDataToRaster(data, width, height, channels);
             stbi_image_free(data);
 
             return raster;

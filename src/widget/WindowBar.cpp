@@ -4,6 +4,7 @@
 
 #include "WindowBar.h"
 #include "TextView.h"
+#include <filesystem>
 
 namespace view {
     WindowBar::WindowBar(Context* context, const Style& style) : ViewGroup(context, style) {
@@ -59,12 +60,16 @@ namespace view {
         });
         addChild(view);
 
-        unsigned titleBarFontSize = 16;
-        view = new TextView(context, Style{
+        unsigned titleBarFontSize = 14;
+        auto* titleView = new TextView(context, Style{
                 .position = {0, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT},
-                .padding = padding((WINDOW_BAR_HEIGHT - titleBarFontSize) / 2),
+                .padding = padding((WINDOW_BAR_HEIGHT - (int) titleBarFontSize) / 2.0),
                 .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", titleBarFontSize)
         }, "Hello world! test underline chars q g p , j y");
-        addChild(view);
+        addChild(titleView);
+
+        context->addImageChangedListener([titleView, context]() {
+            titleView->setText(std::filesystem::path(context->getCurrentImageData().fileName).filename().string());
+        });
     }
 } // view

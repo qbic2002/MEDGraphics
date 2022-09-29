@@ -6,19 +6,34 @@
 #include "../gl/utils.h"
 #include "Context.h"
 #include "../widget/RootView.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace view {
 
     Context::Context(GLFWwindow* _window, const std::string& fileName) {
         window = _window;
 
-        raster = img::loadImageData(fileName);
-        textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+        if (fs::is_directory(fileName)) {
+            directoryName = fileName;
+            loadImagesFromDirectory();
+        } else {
+            fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
+            directoryName = path.parent_path().string();
+            loadImagesFromDirectory();
+
+            for (int i = 0; i < imageList.size(); i++) {
+                const auto& imageFileData = imageList[i];
+                if (imageFileData.fileName == path.string()) {
+                    imageIndex = i;
+                    break;
+                }
+            }
+        }
 
         rootView = new RootView(this, Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
-
-        fontRenderer = new gl::FontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", 28);
-//        fontRenderer = new gl::FontRenderer("assets/fonts/MinecraftRegular.otf", 72);
+        chooseImage(imageIndex);
     }
 
     void Context::update() {
@@ -28,13 +43,9 @@ namespace view {
     void Context::render() const {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, textureId);
+        glBindTexture(GL_TEXTURE_2D, imageList[imageIndex].textureId);
         rootView->render();
         glBindTexture(GL_TEXTURE_2D, 0);
-
-        fontRenderer->renderText("Hello, everyone! abcdefghijklmnopqrstuvwxyz",
-                                 getWindowWidth() / 2, getWindowHeight() / 2);
-
         glDisable(GL_TEXTURE_2D);
     }
 
@@ -51,8 +62,9 @@ namespace view {
 
     Context::~Context() {
         delete rootView;
-        delete raster;
-        delete fontRenderer;
+        for (auto& image: imageList) {
+            glDeleteTextures(1, &image.textureId);
+        }
     }
 
     bool grabbing = false;
@@ -101,6 +113,25 @@ namespace view {
         grabbing = false;
     }
 
+    void Context::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
+        rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
+    }
+
+    void Context::onKey(int key, int scancode, int action, int mods) {
+        if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
+            switch (key) {
+                case GLFW_KEY_LEFT:
+                    previousImage();
+                    break;
+                case GLFW_KEY_RIGHT:
+                    nextImage();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     GLFWwindow* Context::getWindowId() const {
         return window;
     }
@@ -117,7 +148,40 @@ namespace view {
         return utils::getWindowHeight();
     }
 
-    void Context::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
-        rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
+    void Context::loadImagesFromDirectory() {
+        for (const auto& file: fs::directory_iterator(directoryName)) {
+            if (fs::is_directory(file))
+                continue;
+
+            auto* raster = img::loadImageData(file.path().string());
+            auto textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+            imageList.push_back(
+                    {textureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
+                     canonical(file.path()).string()});
+            delete raster;
+        }
+    }
+
+    void Context::nextImage() {
+        chooseImage(imageIndex + 1);
+    }
+
+    void Context::previousImage() {
+        chooseImage(imageIndex - 1);
+    }
+
+    const FileImageData& Context::getCurrentImageData() {
+        return imageList[imageIndex];
+    }
+
+    void Context::chooseImage(int index) {
+        if (index < 0)
+            index = imageList.size() - 1;
+        if (index >= imageList.size())
+            index = 0;
+        imageIndex = index;
+        for (const auto& listener: onImageChangedListeners) {
+            listener();
+        }
     }
 } // view

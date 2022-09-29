@@ -13,10 +13,15 @@ namespace view {
         glVertex2f(x, y);
     }
 
-    ImageView::ImageView(Context* context, const Style& style) : View(context, style) {}
+    ImageView::ImageView(Context* context, const Style& style) : View(context, style) {
+        context->addImageChangedListener([&]() {
+            initZoomWithImage();
+        });
+    }
 
     void ImageView::render() {
-        glBindTexture(GL_TEXTURE_2D, context->textureId);
+        auto& imageData = context->getCurrentImageData();
+        glBindTexture(GL_TEXTURE_2D, imageData.textureId);
         glPushMatrix();
         {
             glTranslatef(calculatedPos.x, calculatedPos.y, 0);
@@ -27,9 +32,9 @@ namespace view {
             glBegin(GL_QUADS);
 
             glVertexUV(0, 0, 0, 0);
-            glVertexUV(0, context->raster->getHeight(), 0, 1);
-            glVertexUV(context->raster->getWidth(), context->raster->getHeight(), 1, 1);
-            glVertexUV(context->raster->getWidth(), 0, 1, 0);
+            glVertexUV(0, imageData.height, 0, 1);
+            glVertexUV(imageData.width, imageData.height, 1, 1);
+            glVertexUV(imageData.width, 0, 1, 0);
 
             glEnd();
         }
@@ -70,20 +75,22 @@ namespace view {
     }
 
     void ImageView::initZoomWithImage() {
-        float vertRatio = calculatedPos.height / context->raster->getHeight();
-        float horRatio = calculatedPos.width / context->raster->getWidth();
+        auto& imageData = context->getCurrentImageData();
+        float vertRatio = calculatedPos.height / imageData.height;
+        float horRatio = calculatedPos.width / imageData.width;
         float ratio = (vertRatio < horRatio) ? vertRatio : horRatio;
         zoom = ratio;
         zoomOffset = logf(zoom) / logf(1.5);
-        float scaledRasterWidth = context->raster->getWidth() * ratio;
-        float scaledRasterHeight = context->raster->getHeight() * ratio;
+        float scaledRasterWidth = imageData.width * ratio;
+        float scaledRasterHeight = imageData.height * ratio;
         translateX = (calculatedPos.width - scaledRasterWidth) / 2;
         translateY = (calculatedPos.height - scaledRasterHeight) / 2;
     }
 
     void ImageView::validateZoom() {
-        float scaledRasterWidth = context->raster->getWidth() * zoom;
-        float scaledRasterHeight = context->raster->getHeight() * zoom;
+        auto& imageData = context->getCurrentImageData();
+        float scaledRasterWidth = imageData.width * zoom;
+        float scaledRasterHeight = imageData.height * zoom;
         if (scaledRasterWidth <= calculatedPos.width) {
             translateX = (calculatedPos.width - scaledRasterWidth) / 2;
         }

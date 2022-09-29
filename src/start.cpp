@@ -62,6 +62,10 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
     context->onScroll(xOffset, yOffset, cursorPos.x, cursorPos.y);
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    context->onKey(key, scancode, action, mods);
+}
+
 void init(GLFWwindow* window, const string& fileName) {
     glewInit();
 
@@ -80,6 +84,7 @@ void init(GLFWwindow* window, const string& fileName) {
     glfwSetCursorEnterCallback(window, cursorEnterCallback);
     glfwSetWindowMaximizeCallback(window, maximizeCallback);
     glfwSetScrollCallback(window, scrollCallback);
+    glfwSetKeyCallback(window, keyCallback);
 }
 
 int main([[maybe_unused]] int argc, char** args) {

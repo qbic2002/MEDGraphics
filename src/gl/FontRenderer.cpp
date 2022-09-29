@@ -6,7 +6,7 @@
 
 namespace gl {
     template<typename T>
-    T nearestPow2(const T num) {
+    inline T nearestPow2(const T num) {
         T nearest = 2;
         while ((nearest <<= 1) < num);
         return nearest;
@@ -106,8 +106,6 @@ namespace gl {
                     .offset = offset
             };
 
-            std::cout << "char: \"" << (char) charCode << "\" width: " << charBitMap.width << std::endl;
-
             offset += charBitMap.width;
             charCode = FT_Get_Next_Char(face, charCode, &index);
         }
@@ -130,11 +128,6 @@ namespace gl {
                     textureBitMap[y * textureWidth + myGlyphData[charCode].offset + x] = bmp.buffer[y * bmp.width + x];
                 }
             }
-
-            std::cout << "Load char: " << (char) charCode << ", " << charCode << ". bmp.width: " << bmp.width
-                      << ", divided metrics width: "
-                      << glyph->metrics.width / fontSize << ", metrics.width: " << glyph->metrics.width
-                      << std::endl;
 
             charCode = FT_Get_Next_Char(face, charCode, &index);
         }

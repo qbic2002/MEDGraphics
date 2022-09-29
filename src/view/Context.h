@@ -13,15 +13,20 @@
 #include "../gl/FontRenderer.h"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace view {
     class RootView;
 
+    struct FileImageData {
+        GLuint textureId;
+        unsigned width;
+        unsigned height;
+        std::string fileName;
+    };
+
     class Context : public utils::OnWindowResizeListener {
     public:
-        AbstractRaster* raster;
-        GLuint textureId;
-
         Context(GLFWwindow* window, const std::string& fileName);
 
         Context(const Context& other) = delete;
@@ -48,6 +53,10 @@ namespace view {
 
         void onMouseLeave();
 
+        void onScroll(double xOffset, double yOffset, double cursorX, double cursorY);
+
+        void onKey(int key, int scancode, int action, int mods);
+
         GLFWwindow* getWindowId() const;
 
         bool isMaximized() const;
@@ -56,13 +65,28 @@ namespace view {
 
         static unsigned getWindowHeight();
 
-        void onScroll(double xOffset, double yOffset, double cursorX, double cursorY);
+        void nextImage();
+
+        void previousImage();
+
+        void chooseImage(int index);
+
+        const FileImageData& getCurrentImageData();
+
+        void addImageChangedListener(const std::function<void()>& listener) {
+            onImageChangedListeners.push_back(listener);
+        }
 
     private:
+        void loadImagesFromDirectory();
+
+        std::string directoryName;
+        std::vector<FileImageData> imageList;
+        int imageIndex = 0;
         RootView* rootView;
         GLFWwindow* window;
         bool maximized = false;
-        gl::FontRenderer* fontRenderer;
+        std::vector<std::function<void()>> onImageChangedListeners;
     };
 
 } // view
