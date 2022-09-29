@@ -186,4 +186,8 @@ namespace view {
             listener();
         }
     }
+
+    void Context::addImageChangedListener(const std::function<void()>& listener) {
+        onImageChangedListeners.push_back(listener);
+    }
 } // view
