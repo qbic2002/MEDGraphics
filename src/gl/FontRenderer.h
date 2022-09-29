@@ -48,7 +48,7 @@ namespace gl {
         FT_Library ftLibrary = nullptr;
         GLuint textureId = 0;
         int textureWidth, textureHeight;
-        GlyphData myGlyphData[65536]{};
+        GlyphData* myGlyphData = nullptr;
         int charsCount;
         unsigned fontSize;
     };

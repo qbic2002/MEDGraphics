@@ -13,6 +13,7 @@ namespace gl {
     }
 
     FontRenderer::FontRenderer(const std::string& fontFileName, unsigned int fontSize) : fontSize(fontSize) {
+        myGlyphData = (GlyphData*) malloc(65536 * sizeof(GlyphData));
         ft::init(ftLibrary);
         setTextureSize(fontFileName, fontSize);
         auto* textureData = new unsigned char[textureWidth * textureHeight];
@@ -30,9 +31,9 @@ namespace gl {
                                                                charsCount(other.charsCount),
                                                                fontSize(other.fontSize) {
         other.textureId = 0;
-        for (int i = 0; i < 65536; i++) {
-            myGlyphData[i] = other.myGlyphData[i];
-        }
+        other.ftLibrary = nullptr;
+        myGlyphData = other.myGlyphData;
+        other.myGlyphData = nullptr;
     }
 
     void FontRenderer::renderText(const std::string& str, float x, float y) {
@@ -71,6 +72,8 @@ namespace gl {
     FontRenderer::~FontRenderer() {
         if (textureId != 0)
             glDeleteTextures(1, &textureId);
+
+        free(myGlyphData);
     }
 
     void FontRenderer::setTextureSize(const std::string& fontFileName, unsigned int fontSize) {
