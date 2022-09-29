@@ -81,8 +81,14 @@ namespace view {
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
         {
-            glBindTexture(GL_TEXTURE_2D, context->getCurrentImageData().textureId);
-            glDrawArrays(GL_QUADS, 0, rectsCount * 4);
+            auto& images = context->getImageList();
+            int rendered = 0;
+            for (int i = 0; i < images.size(); i++) {
+                int renderEdge = rectsCount * (i + 1) / images.size();
+                glBindTexture(GL_TEXTURE_2D, images[i].textureId);
+                glDrawArrays(GL_QUADS, rendered * 4, (renderEdge - rendered) * 4);
+                rendered = renderEdge;
+            }
         }
         glBindVertexArray(0);
         glUseProgram(0);

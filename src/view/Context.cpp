@@ -190,4 +190,8 @@ namespace view {
     void Context::addImageChangedListener(const std::function<void()>& listener) {
         onImageChangedListeners.push_back(listener);
     }
+
+    const std::vector<FileImageData>& Context::getImageList() {
+        return imageList;
+    }
 } // view

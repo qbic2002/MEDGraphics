@@ -73,6 +73,8 @@ namespace view {
 
         const FileImageData& getCurrentImageData();
 
+        const std::vector<FileImageData>& getImageList();
+
         void addImageChangedListener(const std::function<void()>& listener);
 
     private:

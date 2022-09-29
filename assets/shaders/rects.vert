@@ -14,6 +14,8 @@ uniform float theta;
 uniform int width;
 uniform int height;
 
+#define rectRadius 20
+
 float cycle(float value, float min, float max) {
     float range = max - min;
     return value - floor((value - min) / range) * range;
@@ -25,8 +27,8 @@ void main()
     texCoord = (cornerVector.xy + vec2(1, 1)) / 2;
 
     vec3 pos = position + velocity * theta;
-    pos.x = cycle(pos.x, -10, width + 10);
-    pos.y = cycle(pos.y, -10, height + 10);
+    pos.x = cycle(pos.x, -rectRadius, width + rectRadius);
+    pos.y = cycle(pos.y, -rectRadius, height + rectRadius);
 
     float angle = rotationAngle + rotationVelocity * theta;
     vec4 q = vec4(rotationAxis * sin(angle / 2), cos(angle / 2));
@@ -34,7 +36,7 @@ void main()
     vec3 temp = cross(q.xyz, cornerVector) + q.w * cornerVector;
     cornerVector += 2.0 * cross(q.xyz, temp);
 
-    pos += cornerVector * 10;
+    pos += cornerVector * rectRadius;
 
     ourColor = vec3(pos.z) / 100;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0f);
