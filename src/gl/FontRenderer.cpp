@@ -14,56 +14,14 @@ namespace gl {
 
     FontRenderer::FontRenderer(const std::string& fontFileName, unsigned int fontSize) : fontSize(fontSize) {
         ft::init(ftLibrary);
-
-        FT_Face face = nullptr;
-        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
-        ft::setPixelSizes(face, 0, fontSize, fontFileName);
-
-        charsCount = 192;
-        textureWidth = nearestPow2(charsCount * fontSize);
-        textureHeight = nearestPow2(fontSize);
-        int nextCharIndex = 0;
-
+        setTextureSize(fontFileName, fontSize);
         auto* textureData = new unsigned char[textureWidth * textureHeight];
 
-        FT_UInt index;
-        FT_ULong charCode = FT_Get_First_Char(face, &index);
+        fillTextureBitmap(fontFileName, fontSize, textureData);
 
-        while (index) {
-            ft::loadChar(face, charCode, FT_LOAD_RENDER);
-
-            auto glyph = face->glyph;
-            auto bmp = glyph->bitmap;
-
-            for (int y = 0; y < bmp.rows; ++y) {
-                for (int x = 0; x < bmp.width; ++x) {
-                    textureData[y * textureWidth + fontSize * nextCharIndex + x] = bmp.buffer[y * bmp.width + x];
-                }
-            }
-
-            myGlyphData[charCode] = {
-                    .index = nextCharIndex,
-                    .bmpWidth = bmp.width,
-                    .bmpHeight = bmp.rows,
-                    .bmpLeft = glyph->bitmap_left,
-                    .bmpTop = glyph->bitmap_top,
-                    .advanceX = (glyph->advance.x >> 6)
-            };
-
-            nextCharIndex++;
-
-            std::cout << "Load char: " << (char) charCode << ", " << charCode << ", count: " << nextCharIndex
-                      << ". bmp.width: " << bmp.width << ", divided metrics width: "
-                      << glyph->metrics.width / fontSize << ", metrics.width: " << glyph->metrics.width
-                      << std::endl;
-
-            charCode = FT_Get_Next_Char(face, charCode, &index);
-        }
         textureId = gl::loadTexture(textureData, textureWidth, textureHeight, GL_ALPHA, GL_CLAMP, GL_LINEAR,
                                     GL_NEAREST);
         delete[] textureData;
-
-        ft::doneFace(face);
     }
 
     FontRenderer::FontRenderer(FontRenderer&& other) noexcept: ftLibrary(other.ftLibrary), textureId(other.textureId),
@@ -89,7 +47,7 @@ namespace gl {
             float top = -glyphData.bmpTop;
             float bottom = top + glyphData.bmpHeight;
 
-            float texLeft = (float) glyphData.index * fontSize / textureWidth;
+            float texLeft = (float) glyphData.offset / textureWidth;
             float texRight = texLeft + (float) glyphData.bmpWidth / textureWidth;
             float texTop = 0;
             float textBottom = (float) glyphData.bmpHeight / textureHeight;
@@ -114,4 +72,75 @@ namespace gl {
         if (textureId != 0)
             glDeleteTextures(1, &textureId);
     }
+
+    void FontRenderer::setTextureSize(const std::string& fontFileName, unsigned int fontSize) {
+        textureHeight = nearestPow2(fontSize);
+
+        FT_Face face = nullptr;
+        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
+        ft::setPixelSizes(face, 0, fontSize, fontFileName);
+
+        FT_UInt index = 0;
+        FT_ULong charCode = FT_Get_First_Char(face, &index);
+
+        unsigned int offset = 0;
+
+        while (index) {
+            ft::loadChar(face, charCode, FT_LOAD_RENDER);
+            auto glyph = face->glyph;
+            auto charBitMap = face->glyph->bitmap;
+            textureWidth += charBitMap.width;
+
+            myGlyphData[charCode] = {
+                    .bmpWidth = charBitMap.width,
+                    .bmpHeight = charBitMap.rows,
+                    .bmpLeft = glyph->bitmap_left,
+                    .bmpTop = glyph->bitmap_top,
+                    .advanceX = (glyph->advance.x >> 6),
+                    .offset = offset
+            };
+
+            std::cout << "char: \"" << (char) charCode << "\" width: " << charBitMap.width << std::endl;
+
+            offset += charBitMap.width;
+            charCode = FT_Get_Next_Char(face, charCode, &index);
+        }
+
+        textureWidth = nearestPow2(textureWidth);
+        ft::doneFace(face);
+    }
+
+    void FontRenderer::fillTextureBitmap(const std::string& fontFileName, unsigned int fontSize,
+                                         unsigned char* textureBitMap) {
+        FT_Face face = nullptr;
+        ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
+        ft::setPixelSizes(face, 0, fontSize, fontFileName);
+
+        FT_UInt index = 0;
+        FT_ULong charCode = FT_Get_First_Char(face, &index);
+
+        while (index) {
+            ft::loadChar(face, charCode, FT_LOAD_RENDER);
+
+            auto glyph = face->glyph;
+            auto bmp = glyph->bitmap;
+
+            for (int y = 0; y < bmp.rows; ++y) {
+                for (int x = 0; x < bmp.width; ++x) {
+                    textureBitMap[y * textureWidth + myGlyphData[charCode].offset + x] = bmp.buffer[y * bmp.width + x];
+                }
+            }
+
+            std::cout << "Load char: " << (char) charCode << ", " << charCode << ". bmp.width: " << bmp.width
+                      << ", divided metrics width: "
+                      << glyph->metrics.width / fontSize << ", metrics.width: " << glyph->metrics.width
+                      << std::endl;
+
+            charCode = FT_Get_Next_Char(face, charCode, &index);
+        }
+
+        ft::doneFace(face);
+    }
+
+
 } // gl

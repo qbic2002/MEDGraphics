@@ -16,12 +16,12 @@
 namespace gl {
 
     struct GlyphData {
-        int index;
         unsigned int bmpWidth;
         unsigned int bmpHeight;
         int bmpLeft;
         int bmpTop;
         int advanceX;
+        unsigned int offset;
     };
 
     class FontRenderer {
@@ -41,6 +41,10 @@ namespace gl {
         ~FontRenderer();
 
     private:
+        void setTextureSize(const std::string& fontFileName, unsigned int fontSize);
+
+        void fillTextureBitmap(const std::string& fontFileName, unsigned int fontSize, unsigned char* textureBitMap);
+
         FT_Library ftLibrary = nullptr;
         GLuint textureId = 0;
         int textureWidth, textureHeight;
