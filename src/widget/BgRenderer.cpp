@@ -75,13 +75,15 @@ namespace view {
 
     void BgRenderer::render() {
         glEnable(GL_DEPTH_TEST);
-        glBindTexture(GL_TEXTURE_2D, context->getCurrentImageData().textureId);
         rectsShader.useProgram();
         glUniform1f(uniformThetaLoc, getCurrentTime());
         glUniform1i(uniformWidthLoc, width);
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
-        glDrawArrays(GL_QUADS, 0, rectsCount * 4);
+        {
+            glBindTexture(GL_TEXTURE_2D, context->getCurrentImageData().textureId);
+            glDrawArrays(GL_QUADS, 0, rectsCount * 4);
+        }
         glBindVertexArray(0);
         glUseProgram(0);
         glDisable(GL_DEPTH_TEST);

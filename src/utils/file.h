@@ -9,6 +9,9 @@
 #include <vector>
 
 namespace utils {
+    /// @return nullptr if file is less than n or bytes array
+    unsigned char* readNBytes(const std::string& fileName, int n);
+
     std::string readAllText(const std::string& fileName);
 
     std::vector<char> readAllBytes(const std::string& fileName);

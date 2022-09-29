@@ -154,6 +154,8 @@ namespace view {
                 continue;
 
             auto* raster = img::loadImageData(file.path().string());
+            if (raster == nullptr)
+                continue;
             auto textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
             imageList.push_back(
                     {textureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),

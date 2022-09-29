@@ -10,7 +10,7 @@
 #include "AbstractRaster.h"
 
 namespace img {
-    AbstractRaster* loadImageData(const std::string& fileName);
+    AbstractRaster* loadImageData(const std::string& supported);
 
     AbstractRaster* loadImageData(const std::vector<char>& bytes);
 }
