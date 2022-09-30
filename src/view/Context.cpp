@@ -40,9 +40,7 @@ namespace view {
         }
 
         rootView = new RootView(this,
-                                Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}, .background = {.color = {255, 255,
-                                                                                                             255,
-                                                                                                             255}}});
+                                Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
         chooseImage(imageIndex);
     }
 
