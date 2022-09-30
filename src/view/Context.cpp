@@ -18,6 +18,7 @@ namespace view {
 
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
+            fillImageListFileNames();
             loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
