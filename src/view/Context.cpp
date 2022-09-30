@@ -19,6 +19,7 @@ namespace view {
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
             fillImageListFileNames();
+            for (auto& item: bgTextureIds) item = 0;
             loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
@@ -157,6 +158,7 @@ namespace view {
 
     void Context::loadPreviewsFromDirectory() {
         GLuint newIds[PREVIEW_IMG_COUNT];
+        for (auto& item: newIds) item = 0;
         for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
             int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
 
