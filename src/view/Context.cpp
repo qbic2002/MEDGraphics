@@ -6,6 +6,7 @@
 #include "../gl/utils.h"
 #include "Context.h"
 #include "../widget/RootView.h"
+#include "../img/Raster.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -43,9 +44,10 @@ namespace view {
     void Context::render() const {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, imageList[imageIndex].textureId);
+//
+//        glBindTexture(GL_TEXTURE_2D, currentTextureId);
         rootView->render();
-        glBindTexture(GL_TEXTURE_2D, 0);
+//        glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);
     }
 
@@ -63,7 +65,8 @@ namespace view {
     Context::~Context() {
         delete rootView;
         for (auto& image: imageList) {
-            glDeleteTextures(1, &image.textureId);
+            delete image.raster;
+            glDeleteTextures(1, &image.compressedTextureId);
         }
     }
 
@@ -156,11 +159,17 @@ namespace view {
             auto* raster = img::loadImageData(file.path().string());
             if (raster == nullptr)
                 continue;
-            auto textureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+
+
+            auto compressedRaster = raster->compress(
+                    (raster->getWidth() < 30) ? raster->getWidth() : raster->getWidth() / 10,
+                    (raster->getHeight() < 10) ? raster->getHeight() : raster->getHeight() / 10);
+
+            auto compressedTextureId = gl::loadTexture(&compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
             imageList.push_back(
-                    {textureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
+                    {raster, compressedTextureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
                      canonical(file.path()).string()});
-            delete raster;
+//            delete raster;
         }
     }
 
@@ -182,6 +191,12 @@ namespace view {
         if (index >= imageList.size())
             index = 0;
         imageIndex = index;
+
+        if (currentTextureId != 0)
+            glDeleteTextures(1, &currentTextureId);
+
+        currentTextureId = gl::loadTexture(imageList[imageIndex].raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+
         for (const auto& listener: onImageChangedListeners) {
             listener();
         }
@@ -193,5 +208,9 @@ namespace view {
 
     const std::vector<FileImageData>& Context::getImageList() {
         return imageList;
+    }
+
+    GLuint Context::getCurrentTextureId() const {
+        return currentTextureId;
     }
 } // view

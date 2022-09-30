@@ -21,7 +21,7 @@ namespace view {
 
     void ImageView::render() {
         auto& imageData = context->getCurrentImageData();
-        glBindTexture(GL_TEXTURE_2D, imageData.textureId);
+        glBindTexture(GL_TEXTURE_2D, context->getCurrentTextureId());
         glPushMatrix();
         {
             glTranslatef(calculatedPos.x, calculatedPos.y, 0);

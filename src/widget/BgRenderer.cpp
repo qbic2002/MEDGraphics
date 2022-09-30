@@ -85,7 +85,7 @@ namespace view {
             int rendered = 0;
             for (int i = 0; i < images.size(); i++) {
                 int renderEdge = rectsCount * (i + 1) / images.size();
-                glBindTexture(GL_TEXTURE_2D, images[i].textureId);
+                glBindTexture(GL_TEXTURE_2D, images[i].compressedTextureId);
                 glDrawArrays(GL_QUADS, rendered * 4, (renderEdge - rendered) * 4);
                 rendered = renderEdge;
             }

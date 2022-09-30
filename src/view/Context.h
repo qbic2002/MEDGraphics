@@ -19,7 +19,8 @@ namespace view {
     class RootView;
 
     struct FileImageData {
-        GLuint textureId;
+        AbstractRaster* raster;
+        GLuint compressedTextureId;
         unsigned width;
         unsigned height;
         std::string fileName;
@@ -77,12 +78,15 @@ namespace view {
 
         void addImageChangedListener(const std::function<void()>& listener);
 
+        GLuint getCurrentTextureId() const;
+
     private:
         void loadImagesFromDirectory();
 
         std::string directoryName;
         std::vector<FileImageData> imageList;
         int imageIndex = 0;
+        GLuint currentTextureId = 0;
         RootView* rootView;
         GLFWwindow* window;
         bool maximized = false;
