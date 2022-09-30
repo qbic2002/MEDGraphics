@@ -6,6 +6,7 @@
 #include "../gl/utils.h"
 #include "Context.h"
 #include "../widget/RootView.h"
+#include "../img/Raster.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
