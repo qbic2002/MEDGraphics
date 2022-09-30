@@ -163,7 +163,7 @@ namespace view {
 
             auto compressedRaster = raster->compress(
                     (raster->getWidth() < 30) ? raster->getWidth() : raster->getWidth() / 10,
-                    (raster->getHeight() < 10) ? raster->getHeight() : raster->getHeight() / 10);
+                    (raster->getHeight() < 30) ? raster->getHeight() : raster->getHeight() / 10);
 
             auto compressedTextureId = gl::loadTexture(&compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
             imageList.push_back(
