@@ -19,7 +19,7 @@ namespace view {
     class RootView;
 
     struct FileImageData {
-        AbstractRaster* raster;
+//        AbstractRaster* raster;
         GLuint compressedTextureId;
         unsigned width;
         unsigned height;

@@ -65,7 +65,7 @@ namespace view {
     Context::~Context() {
         delete rootView;
         for (auto& image: imageList) {
-            delete image.raster;
+//            delete image.raster;
             glDeleteTextures(1, &image.compressedTextureId);
         }
     }
@@ -167,9 +167,9 @@ namespace view {
 
             auto compressedTextureId = gl::loadTexture(&compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
             imageList.push_back(
-                    {raster, compressedTextureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
+                    {compressedTextureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
                      canonical(file.path()).string()});
-//            delete raster;
+            delete raster;
         }
     }
 
@@ -195,7 +195,9 @@ namespace view {
         if (currentTextureId != 0)
             glDeleteTextures(1, &currentTextureId);
 
-        currentTextureId = gl::loadTexture(imageList[imageIndex].raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+        auto* raster = img::loadImageData(imageList[imageIndex].fileName);
+        currentTextureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+        delete raster;
 
         for (const auto& listener: onImageChangedListeners) {
             listener();
