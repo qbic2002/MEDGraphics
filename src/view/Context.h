@@ -18,7 +18,7 @@
 
 namespace view {
 
-#define PREVIEW_IMG_COUNT 11
+#define PREVIEW_IMG_COUNT 5
     static_assert(PREVIEW_IMG_COUNT % 2 == 1, "PREVIEW_IMG_COUNT must be odd");
 
     class RootView;
@@ -77,22 +77,20 @@ namespace view {
 
         void chooseImage(int index);
 
-        const FileImageData& getCurrentImageData();
+        const FileImageData& getCurrentImageData() const;
 
-        const std::vector<FileImageData>& getImageList();
+        const std::vector<FileImageData>& getImageList() const;
 
         void addImageChangedListener(const std::function<void()>& listener);
 
         GLuint getCurrentTextureId() const;
 
-        const GLuint* getBgTextureIds() const;
+        int getImageIndex() const;
 
     private:
         void loadPreviewsFromDirectory();
 
         void fillImageListFileNames();
-
-        void addBgTextureIds(GLuint* newIds);
 
         std::string directoryName;
         std::vector<FileImageData> imageList;
@@ -102,7 +100,6 @@ namespace view {
         GLFWwindow* window;
         bool maximized = false;
         std::vector<std::function<void()>> onImageChangedListeners;
-        GLuint bgTextureIds[PREVIEW_IMG_COUNT];
     };
 
 } // view

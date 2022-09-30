@@ -19,7 +19,7 @@ namespace view {
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
             fillImageListFileNames();
-            for (auto& item: bgTextureIds) item = 0;
+
             loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
@@ -35,7 +35,6 @@ namespace view {
                 }
             }
 
-            for (auto& item: bgTextureIds) item = 0;
             loadPreviewsFromDirectory();
         }
 
@@ -158,13 +157,10 @@ namespace view {
     }
 
     void Context::loadPreviewsFromDirectory() {
-        GLuint newIds[PREVIEW_IMG_COUNT];
-        for (auto& item: newIds) item = 0;
         for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
             int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
 
             if (imageList[index].compressedTextureId != 0) {
-                newIds[i - (imageIndex - PREVIEW_IMG_COUNT / 2)] = imageList[index].compressedTextureId;
                 continue;
             }
             auto* raster = img::loadImageData(imageList[index].path.string());
@@ -173,7 +169,6 @@ namespace view {
                 --i;
                 continue;
             }
-
 
             auto compressedRaster = raster->compress(
                     (raster->getWidth() <= 40) ? raster->getWidth() : 40,
@@ -184,10 +179,8 @@ namespace view {
                     {compressedTextureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
                      canonical(imageList[index].path).string()};
             delete raster;
-            newIds[i - (imageIndex - PREVIEW_IMG_COUNT / 2)] = imageList[index].compressedTextureId;
         }
 
-        addBgTextureIds(newIds);
     }
 
     void Context::nextImage() {
@@ -198,7 +191,7 @@ namespace view {
         chooseImage(imageIndex - 1);
     }
 
-    const FileImageData& Context::getCurrentImageData() {
+    const FileImageData& Context::getCurrentImageData() const {
         return imageList[imageIndex];
     }
 
@@ -236,7 +229,7 @@ namespace view {
         onImageChangedListeners.push_back(listener);
     }
 
-    const std::vector<FileImageData>& Context::getImageList() {
+    const std::vector<FileImageData>& Context::getImageList() const {
         return imageList;
     }
 
@@ -255,40 +248,40 @@ namespace view {
         }
     }
 
-    const GLuint* Context::getBgTextureIds() const {
-        return bgTextureIds;
+    int Context::getImageIndex() const {
+        return imageIndex;
     }
 
-    void Context::addBgTextureIds(GLuint* newIds) {
-        if (std::all_of(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT, [](GLuint a) { return a == 0; })) {
-            std::copy(newIds, newIds + PREVIEW_IMG_COUNT, bgTextureIds);
-            return;
-        }
-
-        bool f = false;
-        for (const auto& item: bgTextureIds) {
-            if (item == newIds[0]) {
-                f = true;
-                break;
-            }
-        }
-
-        if (!f) {
-            bgTextureIds[PREVIEW_IMG_COUNT - 1] = newIds[0];
-            return;
-        }
-
-        f = false;
-        for (const auto& item: bgTextureIds) {
-            if (item == newIds[PREVIEW_IMG_COUNT - 1]) {
-                f = true;
-                break;
-            }
-        }
-
-        if (!f) {
-            bgTextureIds[0] = newIds[PREVIEW_IMG_COUNT - 1];
-            return;
-        }
-    }
+//    void Context::addBgTextureIds(GLuint* newIds) {
+//        if (std::all_of(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT, [](GLuint a) { return a == 0; })) {
+//            std::copy(newIds, newIds + PREVIEW_IMG_COUNT, bgTextureIds);
+//            return;
+//        }
+//
+//        bool f = false;
+//        for (const auto& item: bgTextureIds) {
+//            if (item == newIds[0]) {
+//                f = true;
+//                break;
+//            }
+//        }
+//
+//        if (!f) {
+//            bgTextureIds[PREVIEW_IMG_COUNT - 1] = newIds[0];
+//            return;
+//        }
+//
+//        f = false;
+//        for (const auto& item: bgTextureIds) {
+//            if (item == newIds[PREVIEW_IMG_COUNT - 1]) {
+//                f = true;
+//                break;
+//            }
+//        }
+//
+//        if (!f) {
+//            bgTextureIds[0] = newIds[PREVIEW_IMG_COUNT - 1];
+//            return;
+//        }
+//    }
 } // view
