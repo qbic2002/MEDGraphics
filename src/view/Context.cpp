@@ -6,7 +6,6 @@
 #include "../gl/utils.h"
 #include "Context.h"
 #include "../widget/RootView.h"
-#include "../img/Raster.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -38,7 +37,10 @@ namespace view {
             loadPreviewsFromDirectory();
         }
 
-        rootView = new RootView(this, Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
+        rootView = new RootView(this,
+                                Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}, .background = {.color = {255, 255,
+                                                                                                             255,
+                                                                                                             255}}});
         chooseImage(imageIndex);
     }
 
@@ -57,7 +59,7 @@ namespace view {
 
     void Context::onWindowResize(unsigned int width, unsigned int height) {
         glLoadIdentity();
-        glOrtho(0, width, height, 0, -100, 100);
+        glOrtho(0, width, height, 0.01, -100, 100);
         rootView->onMeasure({0, 0, (int) width, (int) height});
         rootView->onWindowResize(width, height);
     }

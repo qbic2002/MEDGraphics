@@ -25,8 +25,10 @@ namespace img {
     Raster<RGBAPixel>* rgbaDataToRaster(const unsigned char* data, int width, int height, int channels) {
         auto* raster = new Raster<RGBAPixel>(width, height);
         if (channels == 3) {
-            for (unsigned int i = 0; i < width * height * channels; i += channels) {
-                raster->set(i / channels, RGBAPixel(data[i], data[i + 1], data[i + 2], 255));
+            int pixelsCount = width * height;
+            for (unsigned int i = 0; i < pixelsCount; i++) {
+                raster->set(i, RGBAPixel(data[0], data[1], data[2], 255));
+                data += channels;
             }
         } else {
             for (unsigned int i = 0; i < width * height * 4; i += 4) {

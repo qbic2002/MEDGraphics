@@ -13,6 +13,11 @@ namespace view {
         addChild(new ImageView(context, Style{
                 .position = {0, WINDOW_BAR_HEIGHT, FILL_PARENT, FILL_PARENT - Dimension(WINDOW_BAR_HEIGHT)},
                 .isDraggable = true}));
-        addChild(new WindowBar(context, {.position = {0, 0, FILL_PARENT, WINDOW_BAR_HEIGHT}}));
+        addChild(new WindowBar(context, Style{
+                .position = {0, 0, FILL_PARENT, WINDOW_BAR_HEIGHT},
+                .background = Background()
+                        .setColor(rgba{0, 0, 0, 255})
+                        .setColorOnPress(rgba{0, 0, 0, 255})
+                        .setColorOnHover(rgba{0, 0, 0, 255})}));
     }
 } // view
