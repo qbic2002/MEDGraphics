@@ -18,11 +18,12 @@ namespace view {
 
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
-            loadImagesFromDirectory();
+            loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
             directoryName = path.parent_path().string();
-            loadImagesFromDirectory();
+
+            fillImageListFileNames();
 
             for (int i = 0; i < imageList.size(); i++) {
                 const auto& imageFileData = imageList[i];
@@ -31,6 +32,9 @@ namespace view {
                     break;
                 }
             }
+
+            for (auto& item: bgTextureIds) item = 0;
+            loadPreviewsFromDirectory();
         }
 
         rootView = new RootView(this, Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
@@ -44,10 +48,9 @@ namespace view {
     void Context::render() const {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_TEXTURE_2D);
-//
-//        glBindTexture(GL_TEXTURE_2D, currentTextureId);
+
         rootView->render();
-//        glBindTexture(GL_TEXTURE_2D, 0);
+
         glDisable(GL_TEXTURE_2D);
     }
 
@@ -151,26 +154,36 @@ namespace view {
         return utils::getWindowHeight();
     }
 
-    void Context::loadImagesFromDirectory() {
-        for (const auto& file: fs::directory_iterator(directoryName)) {
-            if (fs::is_directory(file))
-                continue;
+    void Context::loadPreviewsFromDirectory() {
+        GLuint newIds[PREVIEW_IMG_COUNT];
+        for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
+            int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
 
-            auto* raster = img::loadImageData(file.path().string());
-            if (raster == nullptr)
+            if (imageList[index].compressedTextureId != 0) {
+                newIds[i - (imageIndex - PREVIEW_IMG_COUNT / 2)] = imageList[index].compressedTextureId;
                 continue;
+            }
+            auto* raster = img::loadImageData(imageList[index].path.string());
+            if (raster == nullptr) {
+                imageList.erase(imageList.begin() + index);
+                --i;
+                continue;
+            }
 
 
             auto compressedRaster = raster->compress(
-                    (raster->getWidth() < 30) ? raster->getWidth() : raster->getWidth() / 10,
-                    (raster->getHeight() < 30) ? raster->getHeight() : raster->getHeight() / 10);
+                    (raster->getWidth() <= 40) ? raster->getWidth() : 40,
+                    (raster->getHeight() <= 40) ? raster->getHeight() : 40);
 
             auto compressedTextureId = gl::loadTexture(&compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
-            imageList.push_back(
+            imageList[index] =
                     {compressedTextureId, (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
-                     canonical(file.path()).string()});
+                     canonical(imageList[index].path).string()};
             delete raster;
+            newIds[i - (imageIndex - PREVIEW_IMG_COUNT / 2)] = imageList[index].compressedTextureId;
         }
+
+        addBgTextureIds(newIds);
     }
 
     void Context::nextImage() {
@@ -195,9 +208,20 @@ namespace view {
         if (currentTextureId != 0)
             glDeleteTextures(1, &currentTextureId);
 
-        auto* raster = img::loadImageData(imageList[imageIndex].fileName);
-        currentTextureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
-        delete raster;
+        try {
+            auto* raster = img::loadImageData(imageList[imageIndex].fileName);
+            if (raster == nullptr) {
+                imageList.erase(imageList.begin() + index);
+                chooseImage(index);
+                return;
+            }
+            currentTextureId = gl::loadTexture(raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+            delete raster;
+        } catch (const std::exception& e) {
+            currentTextureId = 0;
+        }
+
+        loadPreviewsFromDirectory();
 
         for (const auto& listener: onImageChangedListeners) {
             listener();
@@ -214,5 +238,53 @@ namespace view {
 
     GLuint Context::getCurrentTextureId() const {
         return currentTextureId;
+    }
+
+    void Context::fillImageListFileNames() {
+        for (const auto& file: fs::directory_iterator(directoryName)) {
+            if (fs::is_directory(file))
+                continue;
+
+            imageList.push_back(
+                    {0, 0, 0, canonical(file.path()).string(), file.path()}
+            );
+        }
+    }
+
+    const GLuint* Context::getBgTextureIds() const {
+        return bgTextureIds;
+    }
+
+    void Context::addBgTextureIds(GLuint* newIds) {
+        if (std::all_of(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT, [](GLuint a) { return a == 0; })) {
+            std::copy(newIds, newIds + PREVIEW_IMG_COUNT, bgTextureIds);
+            return;
+        }
+
+        bool f = false;
+        for (const auto& item: bgTextureIds) {
+            if (item == newIds[0]) {
+                f = true;
+                break;
+            }
+        }
+
+        if (!f) {
+            bgTextureIds[PREVIEW_IMG_COUNT - 1] = newIds[0];
+            return;
+        }
+
+        f = false;
+        for (const auto& item: bgTextureIds) {
+            if (item == newIds[PREVIEW_IMG_COUNT - 1]) {
+                f = true;
+                break;
+            }
+        }
+
+        if (!f) {
+            bgTextureIds[0] = newIds[PREVIEW_IMG_COUNT - 1];
+            return;
+        }
     }
 } // view

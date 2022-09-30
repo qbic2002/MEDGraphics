@@ -14,16 +14,21 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <filesystem>
 
 namespace view {
+
+#define PREVIEW_IMG_COUNT 11
+    static_assert(PREVIEW_IMG_COUNT % 2 == 1, "PREVIEW_IMG_COUNT must be odd");
+
     class RootView;
 
     struct FileImageData {
-//        AbstractRaster* raster;
-        GLuint compressedTextureId;
+        GLuint compressedTextureId = 0;
         unsigned width;
         unsigned height;
         std::string fileName;
+        std::filesystem::path path;
     };
 
     class Context : public utils::OnWindowResizeListener {
@@ -80,8 +85,14 @@ namespace view {
 
         GLuint getCurrentTextureId() const;
 
+        const GLuint* getBgTextureIds() const;
+
     private:
-        void loadImagesFromDirectory();
+        void loadPreviewsFromDirectory();
+
+        void fillImageListFileNames();
+
+        void addBgTextureIds(GLuint* newIds);
 
         std::string directoryName;
         std::vector<FileImageData> imageList;
@@ -91,6 +102,7 @@ namespace view {
         GLFWwindow* window;
         bool maximized = false;
         std::vector<std::function<void()>> onImageChangedListeners;
+        GLuint bgTextureIds[PREVIEW_IMG_COUNT];
     };
 
 } // view

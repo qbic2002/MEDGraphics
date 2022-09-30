@@ -81,11 +81,11 @@ namespace view {
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
         {
-            auto& images = context->getImageList();
+            auto images = context->getBgTextureIds();
             int rendered = 0;
-            for (int i = 0; i < images.size(); i++) {
-                int renderEdge = rectsCount * (i + 1) / images.size();
-                glBindTexture(GL_TEXTURE_2D, images[i].compressedTextureId);
+            for (int i = 0; i < PREVIEW_IMG_COUNT; i++) {
+                int renderEdge = rectsCount * (i + 1) / PREVIEW_IMG_COUNT;
+                glBindTexture(GL_TEXTURE_2D, images[i]);
                 glDrawArrays(GL_QUADS, rendered * 4, (renderEdge - rendered) * 4);
                 rendered = renderEdge;
             }
