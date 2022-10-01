@@ -20,7 +20,7 @@ namespace view {
             directoryName = fileName;
             fillImageListFileNames();
 
-//            loadPreviewsFromDirectory();
+            loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
             directoryName = path.parent_path().string();
@@ -35,7 +35,7 @@ namespace view {
                 }
             }
 
-//            loadPreviewsFromDirectory();
+            loadPreviewsFromDirectory();
         }
 
         rootView = new RootView(this,
@@ -72,8 +72,8 @@ namespace view {
         delete rootView;
         for (auto& image: imageList) {
             delete image.raster;
-            delete image.mutex;
-            glDeleteTextures(1, &image.compressedTextureId);
+            delete image.compressedRaster;
+            pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(image.mutex));
         }
     }
 
@@ -163,25 +163,19 @@ namespace view {
         for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
             int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
 
-            if (imageList[index].compressedTextureId != 0) {
+            if (imageList[index].compressedRaster != nullptr) {
                 continue;
             }
             auto* raster = img::loadImageData(imageList[index].path.string());
             if (raster == nullptr) {
-                delete imageList[index].mutex;
-                imageList.erase(imageList.begin() + index);
-                --i;
-                continue;
+                raster = img::loadImageData("assets/qbic.ppm");
             }
-            auto compressedRaster = raster->compress(
+            auto* compressedRaster = new Raster<RGBAPixel>(raster->compress(
                     (raster->getWidth() <= 40) ? raster->getWidth() : 40,
-                    (raster->getHeight() <= 40) ? raster->getHeight() : 40);
+                    (raster->getHeight() <= 40) ? raster->getHeight() : 40));
 
-            auto compressedTextureId = gl::loadTexture(&compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
-            imageList[index] =
-                    {imageList[index].raster, imageList[imageIndex].mutex, compressedTextureId,
-                     (unsigned) raster->getWidth(), (unsigned) raster->getHeight(),
-                     imageList[index].fileName, imageList[index].path};
+//            auto compressedTextureId = gl::loadTexture(compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+            imageList[index].compressedRaster = compressedRaster;
             delete raster;
         }
         std::cout << "ura!\n";
@@ -231,8 +225,8 @@ namespace view {
             currentTextureId = 0;
         }
 
-//        std::thread thr(&Context::loadPreviewsFromDirectory, std::ref(*this));
-//        thr.detach();
+        std::thread thr(&Context::loadPreviewsFromDirectory, std::ref(*this));
+        thr.detach();
 
         for (const auto& listener: onImageChangedListeners) {
             listener();
@@ -244,7 +238,7 @@ namespace view {
         onImageChangedListeners.push_back(listener);
     }
 
-    const std::vector<FileImageData>& Context::getImageList() const {
+    std::vector<FileImageData>& Context::getImageList() {
         return imageList;
     }
 
@@ -258,7 +252,7 @@ namespace view {
                 continue;
 
             imageList.push_back(
-                    {nullptr, new std::mutex, 0, 0, 0, canonical(file.path()).string(), file.path()}
+                    {nullptr, new std::mutex, nullptr, 0, 0, 0, canonical(file.path()).string(), file.path()}
             );
         }
     }

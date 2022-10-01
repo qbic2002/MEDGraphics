@@ -77,8 +77,6 @@ namespace view {
     }
 
     void BgRenderer::render() {
-        int currentImageIndex = context->getImageIndex();
-        if (currentImageIndex == previousImageIndex) return;
         glEnable(GL_DEPTH_TEST);
         rectsShader.useProgram();
         glUniform1f(uniformThetaLoc, getCurrentTime());
@@ -86,16 +84,27 @@ namespace view {
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
         {
-            auto allImages = context->getImageList();
+            int currentImageIndex = context->getImageIndex();
 
-            GLuint newIds[PREVIEW_IMG_COUNT];
-            for (int i = currentImageIndex - PREVIEW_IMG_COUNT / 2;
-                 i <= currentImageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
-                int index = ((i % allImages.size()) + allImages.size()) % allImages.size();
-                newIds[i - (currentImageIndex - PREVIEW_IMG_COUNT / 2)] = allImages[index].compressedTextureId;
+            if (true) {
+                auto& allImages = context->getImageList();
+
+                GLuint newIds[PREVIEW_IMG_COUNT];
+                for (int i = currentImageIndex - PREVIEW_IMG_COUNT / 2;
+                     i <= currentImageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
+                    int index = ((i % allImages.size()) + allImages.size()) % allImages.size();
+                    if (allImages[index].compressedTextureId == 0) {
+                        if (allImages[index].compressedRaster != nullptr) {
+                            GLuint textureId = gl::loadTexture(allImages[index].compressedRaster, GL_CLAMP, GL_LINEAR,
+                                                               GL_NEAREST);
+                            allImages[index].compressedTextureId = textureId;
+                        }
+                    }
+                    newIds[i - (currentImageIndex - PREVIEW_IMG_COUNT / 2)] = allImages[index].compressedTextureId;
+                }
+
+                addBgTextureIds(newIds);
             }
-
-            addBgTextureIds(newIds);
 
             int rendered = 0;
             for (int i = 0; i < PREVIEW_IMG_COUNT; i++) {
@@ -104,6 +113,8 @@ namespace view {
                 glDrawArrays(GL_QUADS, rendered * 4, (renderEdge - rendered) * 4);
                 rendered = renderEdge;
             }
+
+            previousImageIndex = currentImageIndex;
         }
         glBindVertexArray(0);
         glUseProgram(0);
@@ -163,14 +174,6 @@ namespace view {
             std::copy(newIds, newIds + PREVIEW_IMG_COUNT, bgTextureIds);
             return;
         }
-
-//        std::vector<GLuint> reallyNewIds;
-//
-//        for (int i = 0; i < PREVIEW_IMG_COUNT; ++i) {
-//            if (!std::any_of(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT, [&](GLuint textureId) {return textureId == newIds[i];})){
-//                reallyNewIds.push_back(newIds[i]);
-//            }
-//        }
 
         std::vector<int> oldIdsIndexes;
         std::set<GLuint> reallyNewIds;

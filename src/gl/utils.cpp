@@ -2,9 +2,12 @@
 // Created by danil on 19.09.2022.
 //
 
+#include <iostream>
 #include "utils.h"
 
 namespace gl {
+    std::mutex loadTextureMutex;
+
     void vertexUV(float x, float y, float u, float v) {
         glTexCoord2f(u, v);
         glVertex2f(x, y);
@@ -12,7 +15,9 @@ namespace gl {
 
     GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
                        GLint magFilter) {
-        GLuint textureId;
+        loadTextureMutex.lock();
+
+        GLuint textureId = 0;
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
@@ -21,6 +26,12 @@ namespace gl {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+//        GLenum err = glGetError();
+//        std::cout << "error " << glewGetErrorString(err) << "\n";
+
+        loadTextureMutex.unlock();
+
         return textureId;
     }
 

@@ -5,8 +5,10 @@
 #ifndef MEDGRAPHICS_UTILS_H
 #define MEDGRAPHICS_UTILS_H
 
+#include <mutex>
 #include "GL/glew.h"
 #include "../img/AbstractRaster.h"
+
 
 namespace gl {
     void vertexUV(float x, float y, float u, float v);

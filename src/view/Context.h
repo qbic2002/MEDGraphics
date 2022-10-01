@@ -30,9 +30,10 @@ namespace view {
         AbstractRaster* raster = nullptr;
         std::mutex* mutex = nullptr;
 
+        AbstractRaster* compressedRaster = nullptr;
         GLuint compressedTextureId = 0;
-        unsigned width;
-        unsigned height;
+        unsigned width = 0;
+        unsigned height = 0;
         std::string fileName;
         std::filesystem::path path;
         bool isBroken = false;
@@ -86,7 +87,7 @@ namespace view {
 
         const FileImageData& getCurrentImageData() const;
 
-        const std::vector<FileImageData>& getImageList() const;
+        std::vector<FileImageData>& getImageList();
 
         void addImageChangedListener(const std::function<void()>& listener);
 
