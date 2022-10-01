@@ -15,20 +15,27 @@
 #include <vector>
 #include <functional>
 #include <filesystem>
+#include <thread>
 
 namespace view {
 
 #define PREVIEW_IMG_COUNT 5
     static_assert(PREVIEW_IMG_COUNT % 2 == 1, "PREVIEW_IMG_COUNT must be odd");
+#define IMG_COUNT 5
+    static_assert(IMG_COUNT % 2 == 1, "IMG_COUNT must be odd");
 
     class RootView;
 
     struct FileImageData {
+        AbstractRaster* raster = nullptr;
+        std::mutex* mutex = nullptr;
+
         GLuint compressedTextureId = 0;
         unsigned width;
         unsigned height;
         std::string fileName;
         std::filesystem::path path;
+        bool isBroken = false;
     };
 
     class Context : public utils::OnWindowResizeListener {
@@ -91,6 +98,12 @@ namespace view {
         void loadPreviewsFromDirectory();
 
         void fillImageListFileNames();
+
+        std::mutex bgMutex;
+
+        void loadNearImageData();
+
+        void loadNearDataThreadMethod();
 
         std::string directoryName;
         std::vector<FileImageData> imageList;
