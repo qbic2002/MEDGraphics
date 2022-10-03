@@ -42,10 +42,10 @@ namespace gl {
         other.myGlyphData = nullptr;
     }
 
-    void FontRenderer::renderText(const std::string& str, float x, float y) {
+    void FontRenderer::renderText(const std::string& str, float x, float y) { // TODO: add support of russian letters
         glBindTexture(GL_TEXTURE_2D, textureId);
         glPushMatrix();
-        std::wstring wstr = utils::toUtf16(str);
+        std::wstring wstr = utils::toUtf16(str); // this is my attempts
         glTranslatef(x, y + fontSize, 0);
         for (const auto& c: wstr) {
             auto glyphData = myGlyphData[c];
