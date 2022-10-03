@@ -45,8 +45,9 @@ namespace gl {
     void FontRenderer::renderText(const std::string& str, float x, float y) {
         glBindTexture(GL_TEXTURE_2D, textureId);
         glPushMatrix();
+        std::wstring wstr = utils::toUtf16(str);
         glTranslatef(x, y + fontSize, 0);
-        for (const auto& c: str) {
+        for (const auto& c: wstr) {
             auto glyphData = myGlyphData[c];
 
             float left = glyphData.bmpLeft;

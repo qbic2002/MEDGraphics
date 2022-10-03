@@ -9,6 +9,8 @@
 #include <vector>
 
 namespace utils {
+    std::wstring toUtf16(const std::string& str);
+
     /// @return nullptr if file is less than n or bytes array
     unsigned char* readNBytes(const std::string& fileName, int n);
 

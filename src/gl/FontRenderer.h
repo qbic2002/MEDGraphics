@@ -12,6 +12,7 @@
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <iostream>
+#include "../utils/file.h"
 
 namespace gl {
 
