@@ -12,7 +12,6 @@
 #include <cmath>
 
 namespace img {
-    typedef std::basic_string<unsigned char> ustring;
 
     std::vector<ustring> supportedSignatures({ // NOLINT(cert-err58-cpp)
                                                      {0xFF, 0xD8, 0xFF},
@@ -43,14 +42,7 @@ namespace img {
     }
 
     AbstractRaster* loadImageData(const std::string& fileName) {
-        unsigned char* signatureBytes = utils::readNBytes(fileName, 8);
-        if (signatureBytes == nullptr) return nullptr;
-
-        ustring signature(signatureBytes);
-
-        if (std::any_of(supportedSignatures.begin(), supportedSignatures.end(), [signature](ustring& supported) {
-            return signature.starts_with(supported);
-        }))
+        if (isImage(fileName))
             return loadImageData(utils::readAllBytes(fileName));
 
         return nullptr;
@@ -83,5 +75,20 @@ namespace img {
 
             return raster;
         }
+    }
+
+    bool isImage(const std::string& fileName) {
+        unsigned char* signatureBytes = utils::readNBytes(fileName, 8);
+        if (signatureBytes == nullptr) return false;
+
+        ustring signature(signatureBytes);
+
+        delete signatureBytes;
+
+        if (std::any_of(supportedSignatures.begin(), supportedSignatures.end(), [signature](ustring& supported) {
+            return signature.starts_with(supported);
+        }))
+            return true;
+        return false;
     }
 }

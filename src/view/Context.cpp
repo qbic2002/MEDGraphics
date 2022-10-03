@@ -215,7 +215,7 @@ namespace view {
 //                    currentTextureId = 0;
 //                    return;
                 }
-                std::cout << imageList[imageIndex].isBroken << " " << imageList[imageIndex].fileName << "\n";
+                std::cout << imageList[imageIndex].isBroken << " " << imageList[imageIndex].fileName.c_str() << "\n";
             }
             imageList[imageIndex].mutex->lock();
             currentTextureId = gl::loadTexture(imageList[imageIndex].raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
@@ -251,9 +251,10 @@ namespace view {
             if (fs::is_directory(file))
                 continue;
 
-            imageList.push_back(
-                    {nullptr, new std::mutex, nullptr, 0, 0, 0, canonical(file.path()).string(), file.path()}
-            );
+            if (img::isImage(canonical(file.path()).string()))
+                imageList.push_back(
+                        {nullptr, new std::mutex, nullptr, 0, 0, 0, canonical(file.path()).string(), file.path()}
+                );
         }
     }
 

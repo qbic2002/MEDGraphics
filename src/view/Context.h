@@ -16,6 +16,7 @@
 #include <functional>
 #include <filesystem>
 #include <thread>
+#include "../img/imageLoader.h"
 
 namespace view {
 
