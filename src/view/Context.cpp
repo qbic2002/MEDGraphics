@@ -195,6 +195,8 @@ namespace view {
     }
 
     void Context::chooseImage(int index) {
+        while (clock() - timeOfLoading < 100) {}
+
         if (index < 0)
             index = imageList.size() - 1;
         if (index >= imageList.size())
@@ -209,17 +211,11 @@ namespace view {
 
         try {
             while (imageList[imageIndex].raster == nullptr) {
-                if (imageList[imageIndex].isBroken) {
-//                    imageList.erase(imageList.begin() + imageIndex);
-//                    std::cout << "hm\n";
-//                    currentTextureId = 0;
-//                    return;
-                }
-                std::cout << imageList[imageIndex].isBroken << " " << imageList[imageIndex].fileName.c_str() << "\n";
             }
             imageList[imageIndex].mutex->lock();
             currentTextureId = gl::loadTexture(imageList[imageIndex].raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
             imageList[imageIndex].mutex->unlock();
+            timeOfLoading = clock();
 
         } catch (const std::exception& e) {
             currentTextureId = 0;

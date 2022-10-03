@@ -16,6 +16,7 @@
 #include <functional>
 #include <filesystem>
 #include <thread>
+#include <ctime>
 #include "../img/imageLoader.h"
 
 namespace view {
@@ -115,6 +116,8 @@ namespace view {
         GLFWwindow* window;
         bool maximized = false;
         std::vector<std::function<void()>> onImageChangedListeners;
+
+        std::time_t timeOfLoading;
     };
 
 } // view
