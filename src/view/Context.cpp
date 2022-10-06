@@ -19,8 +19,6 @@ namespace view {
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
             fillImageListFileNames();
-
-            loadPreviewsFromDirectory();
         } else {
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
             directoryName = path.parent_path().string();
@@ -34,13 +32,12 @@ namespace view {
                     break;
                 }
             }
-
-            loadPreviewsFromDirectory();
         }
+        loadPreviewsFromDirectory();
 
         rootView = new RootView(this,
                                 Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
-//        loadNearImageData();
+
         chooseImage(imageIndex);
     }
 
@@ -73,6 +70,9 @@ namespace view {
         for (auto& image: imageList) {
             delete image.raster;
             delete image.compressedRaster;
+            if (image.compressedTextureId != 0) {
+                glDeleteTextures(1, &image.compressedTextureId);
+            }
             pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(image.mutex));
         }
     }
@@ -159,6 +159,11 @@ namespace view {
     }
 
     void Context::loadPreviewsFromDirectory() {
+        std::thread loadPreviewsThread(&Context::loadPreviewsFromDirectoryMethod, std::ref(*this));
+        loadPreviewsThread.detach();
+    }
+
+    void Context::loadPreviewsFromDirectoryMethod() {
         bgMutex.lock();
         for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
             int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
@@ -208,6 +213,7 @@ namespace view {
         }
 
         loadNearImageData();
+        loadPreviewsFromDirectory();
 
         try {
             while (imageList[imageIndex].raster == nullptr) {
@@ -220,9 +226,6 @@ namespace view {
         } catch (const std::exception& e) {
             currentTextureId = 0;
         }
-
-        std::thread thr(&Context::loadPreviewsFromDirectory, std::ref(*this));
-        thr.detach();
 
         for (const auto& listener: onImageChangedListeners) {
             listener();

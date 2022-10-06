@@ -100,12 +100,13 @@ namespace view {
     private:
         void loadPreviewsFromDirectory();
 
+        void loadPreviewsFromDirectoryMethod();
+
         void fillImageListFileNames();
 
         std::mutex bgMutex;
 
         void loadNearImageData();
-
         void loadNearDataThreadMethod();
 
         std::string directoryName;
