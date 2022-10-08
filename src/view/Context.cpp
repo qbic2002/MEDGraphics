@@ -33,7 +33,9 @@ namespace view {
                 }
             }
         }
-        loadPreviewsFromDirectory();
+
+        std::thread loadPreviewsThread(&Context::loadPreviewsFromDirectoryMethod, std::ref(*this));
+        loadPreviewsThread.detach();
 
         rootView = new RootView(this,
                                 Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
@@ -66,6 +68,7 @@ namespace view {
     }
 
     Context::~Context() {
+        isWorking = false;
         delete rootView;
         for (auto& image: imageList) {
             delete image.raster;
@@ -158,33 +161,33 @@ namespace view {
         return utils::getWindowHeight();
     }
 
-    void Context::loadPreviewsFromDirectory() {
-        std::thread loadPreviewsThread(&Context::loadPreviewsFromDirectoryMethod, std::ref(*this));
-        loadPreviewsThread.detach();
-    }
-
     void Context::loadPreviewsFromDirectoryMethod() {
-        bgMutex.lock();
-        for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
-            int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
+        while (isWorking.load()) {
+            if (isImageSwitched.load()) {
+                isImageSwitched = false;
+                for (int i = imageIndex - PREVIEW_IMG_COUNT / 2; i <= imageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
+                    int index = ((i % imageList.size()) + imageList.size()) % imageList.size();
 
-            if (imageList[index].compressedRaster != nullptr) {
-                continue;
-            }
-            auto* raster = img::loadImageData(imageList[index].path.string());
-            if (raster == nullptr) {
-                raster = img::loadImageData("assets/qbic.ppm");
-            }
-            auto* compressedRaster = new Raster<RGBAPixel>(raster->compress(
-                    (raster->getWidth() <= 40) ? raster->getWidth() : 40,
-                    (raster->getHeight() <= 40) ? raster->getHeight() : 40));
+                    if (imageList[index].compressedRaster != nullptr) {
+                        continue;
+                    }
+                    auto* raster = img::loadImageData(imageList[index].path.string());
+                    if (raster == nullptr) {
+                        raster = img::loadImageData("assets/qbic.ppm");
+                    }
+                    auto* compressedRaster = new Raster<RGBAPixel>(raster->compress(
+                            (raster->getWidth() <= 40) ? raster->getWidth() : 40,
+                            (raster->getHeight() <= 40) ? raster->getHeight() : 40));
 
 //            auto compressedTextureId = gl::loadTexture(compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
-            imageList[index].compressedRaster = compressedRaster;
-            delete raster;
+                    imageList[index].compressedRaster = compressedRaster;
+                    delete raster;
+                }
+            }
+
         }
+
         std::cout << "ura!\n";
-        bgMutex.unlock();
     }
 
     void Context::nextImage() {
@@ -212,8 +215,8 @@ namespace view {
             glDeleteTextures(1, &currentTextureId);
         }
 
+        isImageSwitched = true;
         loadNearImageData();
-        loadPreviewsFromDirectory();
 
         try {
             while (imageList[imageIndex].raster == nullptr) {

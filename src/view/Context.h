@@ -98,8 +98,6 @@ namespace view {
         int getImageIndex() const;
 
     private:
-        void loadPreviewsFromDirectory();
-
         void loadPreviewsFromDirectoryMethod();
 
         void fillImageListFileNames();
@@ -119,6 +117,9 @@ namespace view {
         std::vector<std::function<void()>> onImageChangedListeners;
 
         std::time_t timeOfLoading;
+
+        std::atomic_bool isWorking = true;
+        std::atomic_bool isImageSwitched = true;
     };
 
 } // view
