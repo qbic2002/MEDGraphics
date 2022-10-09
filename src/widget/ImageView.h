@@ -30,9 +30,13 @@ namespace view {
 
         void onMeasure(const CalculatedPos& parentPos) override;
 
-        void initZoomWithImage();
+        void imageFitScreen();
+
+        void imageOriginalScale();
 
     private:
+        void setZoomRatio(float ratio);
+
         void validateZoom();
 
         float zoom = 1;

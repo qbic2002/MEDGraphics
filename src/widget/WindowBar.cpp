@@ -83,7 +83,20 @@ namespace view {
                         .colorOnPress = {63, 63, 63, 127}}
                         .setImage("assets/icons/ic_fit_screen.png")});
         view->setOnClickListener([imageView]() {
-            imageView->initZoomWithImage();
+            imageView->imageFitScreen();
+        });
+        addChild(view);
+
+        /// Original Scale Button
+        view = new View(context, Style{
+                .position = {FILL_PARENT - btnWidth * 3 - controlSize * 2 - 12, 0, controlSize, controlSize},
+                .padding = controlPadding,
+                .background = Background{
+                        .colorOnHover = {127, 127, 127, 127},
+                        .colorOnPress = {63, 63, 63, 127}}
+                        .setImage("assets/icons/ic_original_scale.png")});
+        view->setOnClickListener([imageView]() {
+            imageView->imageOriginalScale();
         });
         addChild(view);
 

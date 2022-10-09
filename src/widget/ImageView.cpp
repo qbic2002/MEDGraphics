@@ -15,7 +15,7 @@ namespace view {
 
     ImageView::ImageView(Context* context, const Style& style) : View(context, style) {
         context->addImageChangedListener([&]() {
-            initZoomWithImage();
+            imageFitScreen();
         });
     }
 
@@ -71,20 +71,18 @@ namespace view {
 
     void ImageView::onMeasure(const CalculatedPos& parentPos) {
         View::onMeasure(parentPos);
-        initZoomWithImage();
+        imageFitScreen();
     }
 
-    void ImageView::initZoomWithImage() {
+    void ImageView::imageFitScreen() {
         auto& imageData = context->getCurrentImageData();
         float vertRatio = calculatedPos.height / imageData.height;
         float horRatio = calculatedPos.width / imageData.width;
-        float ratio = (vertRatio < horRatio) ? vertRatio : horRatio;
-        zoom = ratio;
-        zoomOffset = logf(zoom) / logf(1.5);
-        float scaledRasterWidth = imageData.width * ratio;
-        float scaledRasterHeight = imageData.height * ratio;
-        translateX = (calculatedPos.width - scaledRasterWidth) / 2;
-        translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+        setZoomRatio((vertRatio < horRatio) ? vertRatio : horRatio);
+    }
+
+    void ImageView::imageOriginalScale() {
+        setZoomRatio(1);
     }
 
     void ImageView::validateZoom() {
@@ -111,5 +109,14 @@ namespace view {
         }
     }
 
+    void ImageView::setZoomRatio(float ratio) {
+        zoom = ratio;
+        zoomOffset = logf(zoom) / logf(1.5);
+        auto& imageData = context->getCurrentImageData();
+        float scaledRasterWidth = imageData.width * ratio;
+        float scaledRasterHeight = imageData.height * ratio;
+        translateX = (calculatedPos.width - scaledRasterWidth) / 2;
+        translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+    }
 
 } // view
