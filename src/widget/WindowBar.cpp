@@ -61,14 +61,6 @@ namespace view {
         });
         addChild(view);
 
-        unsigned titleBarFontSize = 14;
-        auto* titleView = new TextView(context, Style{
-                .position = {0, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT},
-                .padding = padding((WINDOW_BAR_HEIGHT - (int) titleBarFontSize) / 2.0),
-                .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", titleBarFontSize)
-        }, "Hello world! test underline chars q g p , j y");
-        addChild(titleView);
-
         const unsigned controlIconSize = 32;
         const unsigned controlSize = WINDOW_BAR_HEIGHT;
 
@@ -99,6 +91,27 @@ namespace view {
             imageView->imageOriginalScale();
         });
         addChild(view);
+
+        /// Application Icon
+        const unsigned appIconSize = 32;
+
+        view = new View(context, Style{
+                .position = {0, 0, WINDOW_BAR_HEIGHT, WINDOW_BAR_HEIGHT},
+                .padding = padding((float) (WINDOW_BAR_HEIGHT - appIconSize) / 2),
+                .background = Background{
+                        .colorOnHover = {127, 127, 127, 127},
+                        .colorOnPress = {63, 63, 63, 127}}
+                        .setImage("assets/icons/ic_launcher.png")});
+        addChild(view);
+
+        /// Title Text View
+        unsigned titleBarFontSize = 14;
+        auto* titleView = new TextView(context, Style{
+                .position = {WINDOW_BAR_HEIGHT, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT},
+                .padding = padding((WINDOW_BAR_HEIGHT - (int) titleBarFontSize) / 2.0),
+                .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", titleBarFontSize)
+        }, "Hello world! test underline chars q g p , j y");
+        addChild(titleView);
 
         context->addImageChangedListener([titleView, context]() {
             titleView->setText(std::filesystem::path(context->getCurrentImageData().fileName).filename().string());
