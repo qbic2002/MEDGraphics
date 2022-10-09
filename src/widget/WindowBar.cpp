@@ -2,17 +2,18 @@
 // Created by danil on 23.09.2022.
 //
 
+#include "ImageView.h"
 #include "WindowBar.h"
 #include "TextView.h"
 #include <filesystem>
 
 namespace view {
-    WindowBar::WindowBar(Context* context, const Style& style) : ViewGroup(context, style) {
+    WindowBar::WindowBar(Context* context, const Style& style, ImageView* imageView) : ViewGroup(context, style) {
         GLFWwindow* windowId = context->getWindowId();
 
         const unsigned iconSize = 16;
         const unsigned btnWidth = 46;
-        const unsigned btnHeight = WINDOW_BAR_HEIGHT;
+        const unsigned btnHeight = 30;
 
         const padding btnPadding = padding((float) (btnWidth - iconSize) / 2, (float) (btnHeight - iconSize) / 2);
 
@@ -67,6 +68,24 @@ namespace view {
                 .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", titleBarFontSize)
         }, "Hello world! test underline chars q g p , j y");
         addChild(titleView);
+
+        const unsigned controlIconSize = 32;
+        const unsigned controlSize = WINDOW_BAR_HEIGHT;
+
+        const padding controlPadding = padding((float) (controlSize - controlIconSize) / 2);
+
+        /// Fit Content Button
+        view = new View(context, Style{
+                .position = {FILL_PARENT - btnWidth * 3 - controlSize - 12, 0, controlSize, controlSize},
+                .padding = controlPadding,
+                .background = Background{
+                        .colorOnHover = {127, 127, 127, 127},
+                        .colorOnPress = {63, 63, 63, 127}}
+                        .setImage("assets/icons/ic_fit_screen.png")});
+        view->setOnClickListener([imageView]() {
+            imageView->initZoomWithImage();
+        });
+        addChild(view);
 
         context->addImageChangedListener([titleView, context]() {
             titleView->setText(std::filesystem::path(context->getCurrentImageData().fileName).filename().string());

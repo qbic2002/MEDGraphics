@@ -94,8 +94,8 @@ namespace view {
     }
 
     bool View::isInside(double x, double y) {
-        return calculatedPos.x <= x && x <= calculatedPos.x + calculatedPos.width
-               && calculatedPos.y <= y && y <= calculatedPos.y + calculatedPos.height;
+        return calculatedPos.x <= x && x < calculatedPos.x + calculatedPos.width
+               && calculatedPos.y <= y && y < calculatedPos.y + calculatedPos.height;
     }
 
     void View::onMouseEnter() {
@@ -118,5 +118,9 @@ namespace view {
 
     bool View::onDrag(double x, double y, double dx, double dy) {
         return false;
+    }
+
+    const Context* View::getContext() const {
+        return context;
     }
 } // view

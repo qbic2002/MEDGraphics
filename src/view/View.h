@@ -67,9 +67,7 @@ namespace view {
 
         virtual bool isInside(double x, double y);
 
-        const Context* getContext() const {
-            return context;
-        }
+        const Context* getContext() const;
 
         State state = DEFAULT;
 

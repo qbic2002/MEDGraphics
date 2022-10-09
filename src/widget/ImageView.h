@@ -30,9 +30,9 @@ namespace view {
 
         void onMeasure(const CalculatedPos& parentPos) override;
 
-    private:
         void initZoomWithImage();
 
+    private:
         void validateZoom();
 
         float zoom = 1;

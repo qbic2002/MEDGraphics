@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_WINDOWBAR_H
 #define MEDGRAPHICS_WINDOWBAR_H
 
-#define WINDOW_BAR_HEIGHT 28
+#define WINDOW_BAR_HEIGHT 48
 
 #include "../view/ViewGroup.h"
 
@@ -13,7 +13,7 @@ namespace view {
 
     class WindowBar : public ViewGroup {
     public:
-        WindowBar(Context* context, const Style& style);
+        WindowBar(Context* context, const Style& style, ImageView* imageView);
     };
 
 } // view
