@@ -78,7 +78,12 @@ namespace view {
         return false;
     }
 
-    View& View::setOnClickListener(std::function<void()>&& _onClickListener) {
+    View& View::setOnClickListener(const std::function<void()>& _onClickListener) {
+        onClickListener = _onClickListener;
+        return *this;
+    }
+
+    View& View::setOnClickListener(const std::function<void()>&& _onClickListener) {
         onClickListener = _onClickListener;
         return *this;
     }

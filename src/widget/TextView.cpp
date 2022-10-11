@@ -18,4 +18,8 @@ namespace view {
     void TextView::setText(const std::string& _text) {
         text = _text;
     }
+
+    const std::string& TextView::getText() const {
+        return text;
+    }
 } // view

@@ -27,6 +27,8 @@ namespace view {
 
         void setText(const std::string& _text);
 
+        const std::string& getText() const;
+
     private:
         std::string text;
     };

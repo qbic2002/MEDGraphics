@@ -2,6 +2,7 @@
 // Created by danil on 26.09.2022.
 //
 
+#include <cmath>
 #include "FontRenderer.h"
 
 namespace gl {
@@ -19,6 +20,7 @@ namespace gl {
         FT_Face face = nullptr;
         ft::newFace(ftLibrary, fontFileName.c_str(), 0, &face);
         ft::setPixelSizes(face, 0, fontSize, fontFileName);
+        lineHeight = roundf(((float) face->height / face->units_per_EM) * fontSize);
 
         defineTextureSize(face);
         auto* textureData = new unsigned char[textureWidth * textureHeight];
@@ -40,6 +42,16 @@ namespace gl {
         other.ftLibrary = nullptr;
         myGlyphData = other.myGlyphData;
         other.myGlyphData = nullptr;
+    }
+
+    float FontRenderer::getTextWidth(const std::string& str) const {
+        std::wstring wstr = utils::toUtf16(str);
+        float width = 0;
+        for (const auto& c: wstr) {
+            width += myGlyphData[c].advanceX;
+        }
+
+        return width;
     }
 
     void FontRenderer::renderText(const std::string& str, float x, float y) { // TODO: add support of russian letters
@@ -132,6 +144,10 @@ namespace gl {
 
             charCode = FT_Get_Next_Char(face, charCode, &index);
         }
+    }
+
+    int FontRenderer::getLineHeight() const {
+        return lineHeight;
     }
 
 

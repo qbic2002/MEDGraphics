@@ -5,6 +5,7 @@
 #include "ImageView.h"
 #include "WindowBar.h"
 #include "TextView.h"
+#include "DropDownView.h"
 #include <filesystem>
 
 namespace view {

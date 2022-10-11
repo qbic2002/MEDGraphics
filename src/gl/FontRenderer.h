@@ -37,6 +37,10 @@ namespace gl {
 
         FontRenderer& operator=(const FontRenderer&& other) = delete;
 
+        float getTextWidth(const std::string& str) const;
+
+        int getLineHeight() const;
+
         void renderText(const std::string& str, float x, float y);
 
         ~FontRenderer();
@@ -52,6 +56,7 @@ namespace gl {
         GlyphData* myGlyphData = nullptr;
         int charsCount;
         unsigned fontSize;
+        int lineHeight;
     };
 
 } // gl

@@ -107,8 +107,8 @@ namespace view {
         CalculatedPos(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {}
 
         CalculatedPos(const CalculatedPos& parentPos, const position& pos) :
-                x(pos.x.evaluate(parentPos.width)),
-                y(pos.y.evaluate(parentPos.height)),
+                x(parentPos.x + pos.x.evaluate(parentPos.width)),
+                y(parentPos.y + pos.y.evaluate(parentPos.height)),
                 width(pos.width.evaluate(parentPos.width)),
                 height(pos.height.evaluate(parentPos.height)) {}
     };

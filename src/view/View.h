@@ -45,7 +45,9 @@ namespace view {
 
         virtual bool onDrag(double x, double y, double dx, double dy);
 
-        View& setOnClickListener(std::function<void()>&& _onClickListener);
+        View& setOnClickListener(const std::function<void()>& _onClickListener);
+
+        View& setOnClickListener(const std::function<void()>&& _onClickListener);
 
         virtual void onMeasure(const CalculatedPos& parentPos);
 

@@ -6,6 +6,7 @@
 #include "BgRenderer.h"
 #include "ImageView.h"
 #include "WindowBar.h"
+#include "DropDownView.h"
 
 namespace view {
     RootView::RootView(Context* context, const Style& style) : ViewGroup(context, style) {
@@ -23,5 +24,24 @@ namespace view {
                                 .setColorOnPress(rgba{0, 0, 0, 255})
                                 .setColorOnHover(rgba{0, 0, 0, 255})},
                 imageView));
+        addChild(
+                new DropDownView(context, Style{
+                                         .position = {0, WINDOW_BAR_HEIGHT, 0, 0},
+                                         .padding = padding(0)},
+                                 {
+                                         DropDownViewElementPrototype("Fast exit", []() {
+                                             throw std::exception();
+                                         }),
+                                         DropDownViewElementPrototype("Hello from the second line", nullptr)
+                                 },
+                                 Style{
+                                         .position = {0, 0, FILL_PARENT, 24},
+                                         .padding = padding(4),
+                                         .background = Background{
+                                                 .color = {60, 63, 63, 255},
+                                                 .colorOnHover = {75, 110, 175, 255},
+                                                 .colorOnPress = {66, 98, 155, 255}},
+                                         .fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf",
+                                                                              14)}));
     }
 } // view
