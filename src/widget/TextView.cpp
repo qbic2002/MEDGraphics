@@ -12,7 +12,8 @@ namespace view {
 
     void TextView::render() {
         View::renderBackground();
-        style.fontRenderer->renderText(text, calculatedPos.x + style.padding.left, calculatedPos.y + style.padding.top);
+        styleState->fontRenderer->renderText(text, calculatedPos.x + styleState->padding.left,
+                                             calculatedPos.y + styleState->padding.top);
     }
 
     void TextView::setText(const std::string& _text) {

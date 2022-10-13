@@ -33,18 +33,7 @@ namespace view {
     }
 
     void View::renderBackground() {
-        rgba curBgColor;
-        switch (state) {
-            case DEFAULT:
-                curBgColor = style.background.color;
-                break;
-            case HOVERED:
-                curBgColor = style.background.colorOnHover;
-                break;
-            case PRESSED:
-                curBgColor = style.background.colorOnPress;
-                break;
-        }
+        rgba curBgColor = styleState->background.color;
         if (curBgColor.a != 0) {
             glDisable(GL_TEXTURE_2D);
             glColor(curBgColor);
@@ -52,10 +41,10 @@ namespace view {
             glEnable(GL_TEXTURE_2D);
             glColor4f(1, 1, 1, 1);
         }
-        gl::Texture* bgImage = style.background.image.get();
+        gl::Texture* bgImage = styleState->background.image.get();
         if (bgImage != nullptr) {
             bgImage->bind();
-            glTextureQuad(calculatedPos, style.padding);
+            glTextureQuad(calculatedPos, styleState->padding);
             bgImage->unbind();
         }
     }
@@ -104,11 +93,11 @@ namespace view {
     }
 
     void View::onMouseEnter() {
-        state = HOVERED;
+        setState(HOVERED);
     }
 
     void View::onMouseLeave() {
-        state = DEFAULT;
+        setState(DEFAULT);
     }
 
     void View::onMouseMove(double x, double y) {}
@@ -118,7 +107,7 @@ namespace view {
     }
 
     void View::onMeasure(const CalculatedPos& parentPos) {
-        calculatedPos = CalculatedPos(parentPos, style.position);
+        calculatedPos = CalculatedPos(parentPos, styleState->position);
     }
 
     bool View::onDrag(double x, double y, double dx, double dy) {
@@ -127,5 +116,44 @@ namespace view {
 
     const Context* View::getContext() const {
         return context;
+    }
+
+    int View::getId() const {
+        return id;
+    }
+
+    View* View::setId(int _id) {
+        this->id = _id;
+        return this;
+    }
+
+    View* View::findViewById(int _id) {
+        if (this->id == _id)
+            return this;
+
+        return nullptr;
+    }
+
+    const StyleState* View::getStyleState() const {
+        return styleState;
+    }
+
+    State View::getState() const {
+        return state;
+    }
+
+    void View::setState(State _state) {
+        state = _state;
+        switch (state) {
+            case DEFAULT:
+                styleState = &style.stateDefault;
+                break;
+            case HOVERED:
+                styleState = &style.stateHover;
+                break;
+            case PRESSED:
+                styleState = &style.statePress;
+                break;
+        }
     }
 } // view

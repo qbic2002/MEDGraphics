@@ -71,14 +71,27 @@ namespace view {
 
         const Context* getContext() const;
 
-        State state = DEFAULT;
+        int getId() const;
+
+        View* setId(int _id);
+
+        virtual View* findViewById(int _id);
+
+        const StyleState* getStyleState() const;
+
+        State getState() const;
+
+        void setState(State _state);
 
     protected:
         Context* context;
+        State state = DEFAULT;
         Style style;
+        StyleState* styleState = &style.stateDefault;
         CalculatedPos calculatedPos{};
         std::function<void()> onClickListener = nullptr;
         std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
+        int id;
     };
 
 } // view

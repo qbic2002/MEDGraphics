@@ -16,7 +16,7 @@ namespace view {
     bool ViewGroup::onClick(const ClickEvent& event) {
         for (View* child: children) {
             if (child->isInside(event.x, event.y)) {
-                child->state = event.action == GLFW_PRESS ? PRESSED : HOVERED;
+                child->setState(event.action == GLFW_PRESS ? PRESSED : HOVERED);
                 if (child->onClick(event)) {
                     return true;
                 }
@@ -34,7 +34,7 @@ namespace view {
 
     void ViewGroup::onMouseLeave() {
         for (View* child: children) {
-            if (child->state != DEFAULT) {
+            if (child->getState() != DEFAULT) {
                 child->onMouseLeave();
             }
         }
@@ -44,12 +44,12 @@ namespace view {
     void ViewGroup::onMouseMove(double x, double y) {
         for (View* child: children) {
             if (child->isInside(x, y)) {
-                if (child->state == DEFAULT) {
+                if (child->getState() == DEFAULT) {
                     child->onMouseEnter();
                 }
                 child->onMouseMove(x, y);
             } else {
-                if (child->state != DEFAULT) {
+                if (child->getState() != DEFAULT) {
                     child->onMouseLeave();
                 }
             }
@@ -89,11 +89,20 @@ namespace view {
 
     bool ViewGroup::onDrag(double x, double y, double dx, double dy) {
         for (auto* child: children) {
-            if (child->isInside(x, y) && child->state == PRESSED) {
+            if (child->isInside(x, y) && child->getState() == PRESSED) {
                 if (child->onDrag(x, y, dx, dy))
                     return true;
             }
         }
         return View::onDrag(x, y, dx, dy);
+    }
+
+    View* ViewGroup::findViewById(int id) {
+        for (auto* child: children) {
+            View* found = child->findViewById(id);
+            if (found)
+                return found;
+        }
+        return View::findViewById(id);
     }
 } // view
