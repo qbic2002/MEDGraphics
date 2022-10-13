@@ -1,5 +1,5 @@
 //
-// Created by danil on 13.10.2022.
+// Created by edgar on 13.10.2022.
 //
 
 #ifndef MEDGRAPHICS_R_H
