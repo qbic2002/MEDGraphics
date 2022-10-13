@@ -36,6 +36,8 @@ namespace view {
 
         void onMeasure(const CalculatedPos& parentPos) override;
 
+        View* findViewById(int id) override;
+
     protected:
         std::vector<View*> children;
     };

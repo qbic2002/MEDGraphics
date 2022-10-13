@@ -37,8 +37,7 @@ namespace view {
         std::thread loadPreviewsThread(&Context::loadPreviewsFromDirectoryMethod, std::ref(*this));
         loadPreviewsThread.detach();
 
-        rootView = new RootView(this,
-                                Style{.position = {0, 0, FILL_PARENT, FILL_PARENT}});
+        rootView = new RootView(this, Style{{.position = {0, 0, FILL_PARENT, FILL_PARENT}}});
 
         chooseImage(imageIndex);
     }
@@ -338,5 +337,9 @@ namespace view {
         }
 
         std::cout << "povezlo, potok offnulsya sam!\n";
+    }
+
+    ViewGroup* Context::getRootView() {
+        return rootView;
     }
 } // view
