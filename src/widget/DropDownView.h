@@ -26,13 +26,6 @@ namespace view {
                 Context* context,
                 const Style& style,
                 const std::string& text) : TextView(context, style, text) {}
-
-//        const std::string& getText() const {
-//            return text;
-//        }
-
-//    private:
-//        std::string text;
     };
 
     class DropDownView : public ViewGroup {
@@ -53,48 +46,53 @@ namespace view {
         void onMeasure(const view::CalculatedPos& parentPos) override {
             float maxStringWidth = 0;
             float childrenHeight = 0;
-            for (const auto* child: children) {
+            for (auto* child: children) {
                 auto* element = (DropDownViewElement*) child;
-                auto* childStyle = &element->getStyle();
+                auto* childStyle = element->getStyleState();
                 float width = childStyle->fontRenderer->getTextWidth(element->getText());
                 if (maxStringWidth < width) {
                     maxStringWidth = width;
                 }
                 float childHeight = childStyle->padding.top + childStyle->padding.bottom +
                                     childStyle->fontRenderer->getLineHeight();
-                childStyle->position.height = childHeight;
-                childStyle->position.y = childrenHeight;
+                child->getStyle().forEach([&childHeight, &childrenHeight](StyleState& state) {
+                    state.position.height = childHeight;
+                    state.position.y = childrenHeight;
+                });
                 childrenHeight += childHeight;
             }
 
-            float childHorPadding = children[0]->getStyle().padding.left + children[0]->getStyle().padding.right;
+            float childHorPadding =
+                    children[0]->getStyleState()->padding.left + children[0]->getStyleState()->padding.right;
 
-            style.position.width = maxStringWidth + childHorPadding;
-            style.position.height = childrenHeight;
+            style.forEach([&maxStringWidth, &childHorPadding, &childrenHeight](StyleState& state) {
+                state.position.width = maxStringWidth + childHorPadding;
+                state.position.height = childrenHeight;
+            });
 
             ViewGroup::onMeasure(parentPos);
-//            CalculatedPos(
-//            const CalculatedPos& parentPos,
-//            const position& pos) :
-//            x(pos.x.evaluate(parentPos.width)),
-//                    y(pos.y.evaluate(parentPos.height)),
-//                    width(pos.width.evaluate(parentPos.width)),
-//                    height(pos.height.evaluate(parentPos.height))
-//            {}
-
-//            calculatedPos = {
-//                    style.position.x.evaluate(parentPos)
-//            };
-
-//            for (const auto* child: children) {
-//                auto* element = (DropDownViewElement*) child;
-//                element->onMeasure();
-////                float width = element->getStyle().fontRenderer->getTextWidth(element->getText());
-////                if (maxWidth < width) {
-////                    maxWidth = width;
-////                }
-//            }
         }
+
+        bool isInside(double x, double y) override {
+            if (!isOpened)
+                return false;
+
+            return View::isInside(x, y);
+        }
+
+        void render() override {
+            if (!isOpened)
+                return;
+
+            ViewGroup::render();
+        }
+
+        void toggleOpened() {
+            isOpened = !isOpened;
+        }
+
+    protected:
+        bool isOpened = false;
     };
 
 } // view

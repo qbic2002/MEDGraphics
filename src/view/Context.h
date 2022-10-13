@@ -26,7 +26,7 @@ namespace view {
 #define IMG_COUNT 5
     static_assert(IMG_COUNT % 2 == 1, "IMG_COUNT must be odd");
 
-    class RootView;
+    class ViewGroup;
 
     struct FileImageData {
         AbstractRaster* raster = nullptr;
@@ -97,6 +97,8 @@ namespace view {
 
         int getImageIndex() const;
 
+        ViewGroup* getRootView();
+
     private:
         void loadPreviewsFromDirectoryMethod();
 
@@ -105,13 +107,14 @@ namespace view {
         std::mutex bgMutex;
 
         void loadNearImageData();
+
         void loadNearDataThreadMethod();
 
         std::string directoryName;
         std::vector<FileImageData> imageList;
         int imageIndex = 0;
         GLuint currentTextureId = 0;
-        RootView* rootView;
+        ViewGroup* rootView;
         GLFWwindow* window;
         bool maximized = false;
         std::vector<std::function<void()>> onImageChangedListeners;

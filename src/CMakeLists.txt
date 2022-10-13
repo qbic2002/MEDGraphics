@@ -9,7 +9,7 @@ add_executable(MEDGraphics
         gl/ShaderProgram.cpp gl/ShaderProgram.h gl/Texture.cpp gl/Texture.h gl/utils.cpp gl/utils.h
         view/Context.cpp view/Context.h view/View.cpp view/View.h view/Assets.cpp view/Assets.h view/Style.h view/ViewGroup.cpp view/ViewGroup.h
         widget/BgRenderer.cpp widget/BgRenderer.h widget/ImageView.cpp widget/ImageView.h widget/WindowBar.cpp widget/WindowBar.h widget/RootView.cpp widget/RootView.h
-        img/imageLoader.cpp img/imageLoader.h img/rgba.h img/AbstractRaster.h gl/FontRenderer.cpp gl/FontRenderer.h utils/ft_error_check.cpp utils/ft_error_check.h widget/TextView.cpp widget/TextView.h widget/DropDownView.cpp widget/DropDownView.h)
+        img/imageLoader.cpp img/imageLoader.h img/rgba.h img/AbstractRaster.h gl/FontRenderer.cpp gl/FontRenderer.h utils/ft_error_check.cpp utils/ft_error_check.h widget/TextView.cpp widget/TextView.h widget/DropDownView.cpp widget/DropDownView.h utils/R.h)
 target_link_libraries(MEDGraphics ${LIBS})
 add_dependencies(MEDGraphics copy_assets)
 

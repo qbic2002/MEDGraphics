@@ -9,6 +9,7 @@
 #include "../img/rgba.h"
 #include "../gl/Texture.h"
 #include "Assets.h"
+#include "../utils/R.h"
 
 namespace view {
     struct Dimension {
@@ -63,11 +64,30 @@ namespace view {
                                                                     bottom(bottom) {}
     };
 
+    struct border {
+        float left, top, right, bottom;
+        rgba color{};
+
+        border() : border(0) {}
+
+        explicit border(float value) : border(value, value) {}
+
+        border(float horizontal, float vertical) : left(horizontal), top(vertical), right(horizontal),
+                                                   bottom(vertical) {
+        }
+
+        border(float left, float top, float right, float bottom) : left(left), top(top), right(right),
+                                                                   bottom(bottom) {}
+
+        border& setColor(rgba _color) {
+            color = _color;
+            return *this;
+        }
+    };
+
     class Background {
     public:
         rgba color{};
-        rgba colorOnHover{};
-        rgba colorOnPress{};
         std::shared_ptr<gl::Texture> image;
 
         Background& setImage(const std::string& fileName) {
@@ -80,23 +100,53 @@ namespace view {
             return *this;
         }
 
-        Background& setColorOnHover(const rgba& _colorOnHover) {
-            colorOnHover = _colorOnHover;
+        Background& setFontColor(const rgba& _color) {
+            color = _color;
             return *this;
         }
 
-        Background& setColorOnPress(const rgba& _colorOnPress) {
-            colorOnPress = _colorOnPress;
+        Background& edit(const std::function<void(Background&)>& editor) {
+            editor(*this);
             return *this;
         }
     };
 
-    struct Style {
+    struct StyleState {
         position position{};
         padding padding{};
+        border border{};
         Background background{};
-        bool isDraggable;
+        rgba fontColor{COLOR_FONT_PRIMARY};
         std::shared_ptr<gl::FontRenderer> fontRenderer;
+    };
+
+
+    struct Style {
+        StyleState stateDefault;
+        StyleState stateHover;
+        StyleState statePress;
+        bool isDraggable{};
+
+        Style() : stateDefault(), stateHover(), statePress() {}
+
+        Style(const StyleState& style) : stateDefault(style), stateHover(style), statePress(style) {}
+
+        Style& set(const StyleState& style) {
+            stateDefault = stateHover = statePress = style;
+            return *this;
+        }
+
+        Style& forEach(const std::function<void(StyleState&)>& editor) {
+            editor(stateDefault);
+            editor(stateHover);
+            editor(statePress);
+            return *this;
+        }
+
+        Style& edit(const std::function<void(Style&)>& editor) {
+            editor(*this);
+            return *this;
+        }
     };
 
     struct CalculatedPos {
