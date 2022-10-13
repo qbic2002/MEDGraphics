@@ -32,7 +32,7 @@ namespace view {
                                          DropDownViewElementPrototype("Fast exit", []() {
                                              throw std::exception();
                                          }),
-                                         DropDownViewElementPrototype("Hello from the second line", nullptr)
+                                         DropDownViewElementPrototype("Save to", [&]() { this->context->saveImage(); })
                                  },
                                  Style{
                                          .position = {0, 0, FILL_PARENT, 24},

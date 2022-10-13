@@ -343,7 +343,8 @@ namespace view {
     }
 
     void Context::saveImage() const {
-        std::string filename = utils::getOpenFileName();
-        pnm::writePNMImage(PNMImage(imageList[imageIndex].raster), filename.c_str());
+        std::string filename = utils::getSaveFileName();
+        pnm::writePNMImage(PNMImage(imageList[imageIndex].raster),
+                           filename.c_str());
     }
 } // view

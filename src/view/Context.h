@@ -97,8 +97,9 @@ namespace view {
 
         int getImageIndex() const;
 
-    private:
         void saveImage() const;
+    private:
+
 
         void loadPreviewsFromDirectoryMethod();
 
