@@ -6,7 +6,6 @@
 #include "utils.h"
 
 namespace gl {
-    std::mutex loadTextureMutex;
 
     void vertexUV(float x, float y, float u, float v) {
         glTexCoord2f(u, v);
@@ -15,7 +14,6 @@ namespace gl {
 
     GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
                        GLint magFilter) {
-        loadTextureMutex.lock();
 
         GLuint textureId = 0;
         glGenTextures(1, &textureId);
@@ -29,8 +27,6 @@ namespace gl {
 
 //        GLenum err = glGetError();
 //        std::cout << "error " << glewGetErrorString(err) << "\n";
-
-        loadTextureMutex.unlock();
 
         return textureId;
     }

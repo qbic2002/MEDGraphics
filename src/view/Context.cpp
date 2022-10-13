@@ -7,6 +7,8 @@
 #include "Context.h"
 #include "../widget/RootView.h"
 #include "../img/Raster.h"
+#include "../utils/explorerUtils.h"
+#include "../pnm/utils/pnmUtil.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -338,5 +340,10 @@ namespace view {
         }
 
         std::cout << "povezlo, potok offnulsya sam!\n";
+    }
+
+    void Context::saveImage() const {
+        std::string filename = utils::getOpenFileName();
+        pnm::writePNMImage(PNMImage(imageList[imageIndex].raster), filename.c_str());
     }
 } // view

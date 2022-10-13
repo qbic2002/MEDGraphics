@@ -98,6 +98,8 @@ namespace view {
         int getImageIndex() const;
 
     private:
+        void saveImage() const;
+
         void loadPreviewsFromDirectoryMethod();
 
         void fillImageListFileNames();
@@ -105,6 +107,7 @@ namespace view {
         std::mutex bgMutex;
 
         void loadNearImageData();
+
         void loadNearDataThreadMethod();
 
         std::string directoryName;
