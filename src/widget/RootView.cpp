@@ -7,6 +7,7 @@
 #include "ImageView.h"
 #include "WindowBar.h"
 #include "DropDownView.h"
+#include "MessageView.h"
 
 namespace view {
     RootView::RootView(Context* context, const Style& style) : ViewGroup(context, style) {
@@ -45,5 +46,13 @@ namespace view {
                             style.stateHover.background.color = {75, 110, 175, 255};
                             style.statePress.background.color = {66, 98, 155, 255};
                         })))->setId(APP_ICON_MENU_ID));
+        auto* messageView = new MessageView(
+                context,
+                Style().forEach([](StyleState& state) {
+                    state.position = {FILL_PARENT * 0.25, FILL_PARENT * 0.25, FILL_PARENT * 0.5, FILL_PARENT * 0.5};
+                    state.padding = padding(12);
+                    state.background.color = rgba{COLOR_PRIMARY_LIGHT};
+                }));
+        addChild(messageView);
     }
 } // view
