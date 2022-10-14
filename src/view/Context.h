@@ -109,6 +109,8 @@ namespace view {
 
         const std::string& getRootDirectory() const;
 
+        void showError(const std::string& message);
+
     private:
         GLuint corruptedId;
         int corruptedHeight = 0;
