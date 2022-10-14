@@ -71,7 +71,7 @@ namespace view {
     private:
         std::string title = "Error";
         view::TextView* msgView;
-        bool isOpened = true;
+        bool isOpened = false;
     };
 }
 
