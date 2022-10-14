@@ -421,4 +421,8 @@ namespace view {
     const std::string& Context::getRootDirectory() const {
         return rootDirectory;
     }
+
+    void Context::showError(const std::string& message) {
+
+    }
 } // view
