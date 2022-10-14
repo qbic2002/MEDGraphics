@@ -263,11 +263,12 @@ namespace view {
         for (const auto& file: fs::directory_iterator(directoryName)) {
             if (fs::is_directory(file))
                 continue;
-
-            if (img::isImage(canonical(file.path()).string()))
-                imageList.push_back(
-                        {nullptr, new std::mutex, nullptr, 0, 0, 0, canonical(file.path()).string(), file.path()}
-                );
+            try {
+                if (img::isImage(canonical(file.path()).string()))
+                    imageList.push_back(
+                            {nullptr, new std::mutex, nullptr, 0, 0, 0, canonical(file.path()).string(), file.path()}
+                    );
+            } catch (std::exception&) {}
         }
     }
 
@@ -384,7 +385,8 @@ namespace view {
             directoryName = fileName;
             fillImageListFileNames();
         } else {
-            fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets\\qbic.ppm");
+            fs::path path = fs::canonical(fs::exists(fileName) ? fileName :
+                                          rootDirectory + "assets\\qbic.ppm");
             directoryName = path.parent_path().string();
 
             fillImageListFileNames();

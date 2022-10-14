@@ -253,6 +253,9 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
         result.insert(item.second, item.first);
     }
     std::ofstream fileStream(filename, std::ios::binary);
+    if (!fileStream.is_open()) {
+        throw std::exception();
+    }
     writeToFile(result.c_str(), fileStream, result.length());
     fileStream.close();
 
