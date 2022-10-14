@@ -15,32 +15,21 @@ namespace fs = std::filesystem;
 
 namespace view {
 
-    Context::Context(GLFWwindow* _window, const std::string& fileName) {
+    Context::Context(GLFWwindow* _window, const std::string& fileName, const std::string& root) {
+        rootDirectory = root;
         window = _window;
 
-        if (fs::is_directory(fileName)) {
-            directoryName = fileName;
-            fillImageListFileNames();
-        } else {
-            fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets/qbic.ppm");
-            directoryName = path.parent_path().string();
+        AbstractRaster* corruptedRaster = img::loadImageData(root + "assets/corrupted.png");
+        corruptedId = gl::loadTexture(corruptedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+        corruptedHeight = corruptedRaster->getHeight();
+        corruptedWidth = corruptedRaster->getWidth();
+        delete corruptedRaster;
 
-            fillImageListFileNames();
-
-            for (int i = 0; i < imageList.size(); i++) {
-                const auto& imageFileData = imageList[i];
-                if (imageFileData.fileName == path.string()) {
-                    imageIndex = i;
-                    break;
-                }
-            }
-        }
+        openImage(fileName);
 
         std::thread loadPreviewsThread(&Context::loadPreviewsFromDirectoryMethod, std::ref(*this));
         loadPreviewsThread.detach();
-
         rootView = new RootView(this, Style{{.position = {0, 0, FILL_PARENT, FILL_PARENT}}});
-
         chooseImage(imageIndex);
     }
 
@@ -71,6 +60,8 @@ namespace view {
     Context::~Context() {
         isWorking = false;
         delete rootView;
+
+        glDeleteTextures(1, &corruptedId);
         for (auto& image: imageList) {
             delete image.raster;
             delete image.compressedRaster;
@@ -163,6 +154,7 @@ namespace view {
     }
 
     void Context::loadPreviewsFromDirectoryMethod() {
+        HANDLE_SIGSEGV
         while (isWorking.load()) {
             if (isImageSwitched.load()) {
                 isImageSwitched = false;
@@ -174,14 +166,13 @@ namespace view {
                     }
                     auto* raster = img::loadImageData(imageList[index].path.string());
                     if (raster == nullptr) {
-                        raster = img::loadImageData("assets/qbic.ppm");
+                        imageList[index].isBroken = true;
+                    } else {
+                        auto* compressedRaster = new Raster<RGBAPixel>(raster->compress(
+                                (raster->getWidth() <= 40) ? raster->getWidth() : 40,
+                                (raster->getHeight() <= 40) ? raster->getHeight() : 40));
+                        imageList[index].compressedRaster = compressedRaster;
                     }
-                    auto* compressedRaster = new Raster<RGBAPixel>(raster->compress(
-                            (raster->getWidth() <= 40) ? raster->getWidth() : 40,
-                            (raster->getHeight() <= 40) ? raster->getHeight() : 40));
-
-//            auto compressedTextureId = gl::loadTexture(compressedRaster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
-                    imageList[index].compressedRaster = compressedRaster;
                     delete raster;
                 }
             }
@@ -212,7 +203,7 @@ namespace view {
             index = 0;
         imageIndex = index;
 
-        if (currentTextureId != 0) {
+        if (currentTextureId != 0 && currentTextureId != corruptedId) {
             glDeleteTextures(1, &currentTextureId);
         }
 
@@ -221,6 +212,16 @@ namespace view {
 
         try {
             while (imageList[imageIndex].raster == nullptr) {
+                if (imageList[imageIndex].isBroken) {
+                    currentTextureId = corruptedId;
+
+                    timeOfLoading = clock();
+
+                    for (const auto& listener: onImageChangedListeners) {
+                        listener();
+                    }
+                    return;
+                }
             }
             imageList[imageIndex].mutex->lock();
             currentTextureId = gl::loadTexture(imageList[imageIndex].raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
@@ -250,6 +251,15 @@ namespace view {
     }
 
     void Context::fillImageListFileNames() {
+        for (auto& image: imageList) {
+            delete image.raster;
+            delete image.compressedRaster;
+            if (image.compressedTextureId != 0) {
+                glDeleteTextures(1, &image.compressedTextureId);
+            }
+            pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(image.mutex));
+        }
+        imageList.clear();
         for (const auto& file: fs::directory_iterator(directoryName)) {
             if (fs::is_directory(file))
                 continue;
@@ -271,19 +281,22 @@ namespace view {
     }
 
     void Context::loadNearDataThreadMethod() {
+        HANDLE_SIGSEGV
 
         imageList[imageIndex].mutex->lock();
         if (imageList[imageIndex].raster == nullptr) {
             imageList[imageIndex].raster = img::loadImageData(imageList[imageIndex].fileName);
             if (imageList[imageIndex].raster == nullptr) {
                 imageList[imageIndex].isBroken = true;
-                imageList[imageIndex].raster = img::loadImageData("assets/qbic.ppm");
+                imageList[imageIndex].width = corruptedWidth;
+                imageList[imageIndex].height = corruptedHeight;
+            } else {
+                imageList[imageIndex].width = imageList[imageIndex].raster->getWidth();
+                imageList[imageIndex].height = imageList[imageIndex].raster->getHeight();
             }
-            imageList[imageIndex].width = imageList[imageIndex].raster->getWidth();
-            imageList[imageIndex].height = imageList[imageIndex].raster->getHeight();
         }
-        std::cout << "loaded " << imageList[imageIndex].fileName << "\n";
         imageList[imageIndex].mutex->unlock();
+        std::cout << "loaded " << imageList[imageIndex].fileName << "\n";
 
         int rightIndex = (((imageIndex + IMG_COUNT / 2 + 1) % imageList.size()) + imageList.size()) % imageList.size();
         if (imageList.size() > IMG_COUNT && imageList[rightIndex].raster != nullptr) {
@@ -310,12 +323,16 @@ namespace view {
             imageList[index].raster = img::loadImageData(imageList[index].fileName);
             if (imageList[index].raster == nullptr) {
                 imageList[index].isBroken = true;
-                imageList[index].raster = img::loadImageData("assets/qbic.ppm");
+                imageList[index].width = corruptedWidth;
+                imageList[index].height = corruptedHeight;
+            } else {
+                imageList[index].width = imageList[index].raster->getWidth();
+                imageList[index].height = imageList[index].raster->getHeight();
+
             }
-            imageList[index].width = imageList[index].raster->getWidth();
-            imageList[index].height = imageList[index].raster->getHeight();
-            std::cout << "loaded " << imageList[index].fileName << " " << imageList[index].isBroken << "\n";
+
             imageList[index].mutex->unlock();
+            std::cout << "loaded " << imageList[index].fileName << " " << imageList[index].isBroken << "\n";
         }
 
         for (int i = 1; i <= IMG_COUNT / 2; ++i) {
@@ -330,12 +347,16 @@ namespace view {
             imageList[index].raster = img::loadImageData(imageList[index].fileName);
             if (imageList[index].raster == nullptr) {
                 imageList[index].isBroken = true;
-                imageList[index].raster = img::loadImageData("assets/qbic.ppm");
+//                imageList[index].raster = img::loadImageData("assets\\corrupted.png");
+                imageList[index].width = corruptedWidth;
+                imageList[index].height = corruptedHeight;
+            } else {
+                imageList[index].width = imageList[index].raster->getWidth();
+                imageList[index].height = imageList[index].raster->getHeight();
             }
-            imageList[index].width = imageList[index].raster->getWidth();
-            imageList[index].height = imageList[index].raster->getHeight();
-            std::cout << "loaded " << imageList[index].fileName << " " << imageList[index].isBroken << "\n";
+
             imageList[index].mutex->unlock();
+            std::cout << "loaded " << imageList[index].fileName << " " << imageList[index].isBroken << "\n";
         }
 
         std::cout << "povezlo, potok offnulsya sam!\n";
@@ -349,5 +370,40 @@ namespace view {
 
     ViewGroup* Context::getRootView() {
         return rootView;
+    }
+
+
+    void Context::openImage() {
+        std::string fileName = utils::getOpenFileName();
+        openImage(fileName);
+        chooseImage(imageIndex);
+    }
+
+    void Context::openImage(const std::string& fileName) {
+        if (fs::is_directory(fileName)) {
+            directoryName = fileName;
+            fillImageListFileNames();
+        } else {
+            fs::path path = fs::canonical(fs::exists(fileName) ? fileName : "assets\\qbic.ppm");
+            directoryName = path.parent_path().string();
+
+            fillImageListFileNames();
+
+            for (int i = 0; i < imageList.size(); i++) {
+                const auto& imageFileData = imageList[i];
+                if (imageFileData.fileName == path.string()) {
+                    imageIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    GLuint Context::getCorruptedId() const {
+        return corruptedId;
+    }
+
+    const std::string& Context::getRootDirectory() const {
+        return rootDirectory;
     }
 } // view

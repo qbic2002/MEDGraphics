@@ -33,7 +33,8 @@ namespace view {
                                 DropDownViewElementPrototype("Fast exit", []() {
                                     throw std::exception();
                                 }),
-                                DropDownViewElementPrototype("Save to", [&]() { this->context->saveImage(); })
+                                DropDownViewElementPrototype("Save to", [&]() { this->context->saveImage(); }),
+                                DropDownViewElementPrototype("Open...", [&]() { this->context->openImage(); })
                         },
                         Style().forEach([](StyleState& state) {
                             state.position = {0, 0, FILL_PARENT, 24};

@@ -116,16 +116,20 @@ int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
     return offset;
 }
 
-AbstractRaster* pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader) {
+AbstractRaster*
+pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader, unsigned int length) {
 
     int k = 0;
     if (pnmHeader.pnmMode == PNMMode::P5) {
+        if (offset + pnmHeader.width * pnmHeader.height > length)
+            throw std::exception();
+
         auto* grayData = new Raster<GrayPixel>(pnmHeader.width, pnmHeader.height);
         for (int j = 0; j < pnmHeader.height; ++j) {
             for (int i = 0; i < pnmHeader.width; ++i) {
                 unsigned char color = fileData[offset + k++];
                 if (color > pnmHeader.maxGrey) {
-                    throw -1;
+                    throw std::exception();
                 }
                 grayData->set(i, j, GrayPixel(color));
             }
@@ -135,6 +139,9 @@ AbstractRaster* pnm::parseData(const unsigned char* fileData, int offset, const 
     }
 
     if (pnmHeader.pnmMode == PNMMode::P6) {
+        if (offset + pnmHeader.width * pnmHeader.height * 3 > length)
+            throw std::exception();
+
         auto* rgbaData = new Raster<RGBAPixel>(pnmHeader.width, pnmHeader.height);
 
         for (int j = 0; j < pnmHeader.height; ++j) {
@@ -143,7 +150,7 @@ AbstractRaster* pnm::parseData(const unsigned char* fileData, int offset, const 
                 unsigned char g = fileData[offset + k++];
                 unsigned char b = fileData[offset + k++];
                 if (r > pnmHeader.maxGrey || g > pnmHeader.maxGrey || b > pnmHeader.maxGrey) {
-                    throw -1;
+                    throw std::exception();
                 }
                 rgbaData->set(i, j, RGBAPixel(r, g, b, 255));
             }
@@ -152,20 +159,21 @@ AbstractRaster* pnm::parseData(const unsigned char* fileData, int offset, const 
         return rgbaData;
     }
 
-    throw -1;
+    throw std::exception();
 }
 
-PNMImage pnm::readPNMImageFromMemory(char* data) {
+PNMImage pnm::readPNMImageFromMemory(const char* data, unsigned int length) {
     PNMImage pnmImage{};
 
     int offset = pnm::parsePnmHeader(data, pnmImage.pnmHeader);
     if (offset == -1) {
-        throw -1;
+        throw std::exception();
     }
 
     pnmImage.pnmMeta = pnm::parseMeta(data, offset);
 
-    pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader);
+
+    pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader, length);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
         std::cout << item.first;
@@ -175,7 +183,7 @@ PNMImage pnm::readPNMImageFromMemory(char* data) {
 
 PNMImage pnm::readPNMImage(const char* fileName) {
     std::vector<char> data = utils::readAllBytes(fileName);
-    return readPNMImageFromMemory(data.data());
+    return readPNMImageFromMemory(data.data(), data.size());
 }
 
 PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {

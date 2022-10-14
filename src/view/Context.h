@@ -43,7 +43,7 @@ namespace view {
 
     class Context : public utils::OnWindowResizeListener {
     public:
-        Context(GLFWwindow* window, const std::string& fileName);
+        Context(GLFWwindow* window, const std::string& fileName, const std::string& root);
 
         Context(const Context& other) = delete;
 
@@ -100,7 +100,20 @@ namespace view {
         ViewGroup* getRootView();
 
         void saveImage() const;
+
+        void openImage();
+
+        void openImage(const std::string& fileName);
+
+        GLuint getCorruptedId() const;
+
+        const std::string& getRootDirectory() const;
+
     private:
+        GLuint corruptedId;
+        int corruptedHeight = 0;
+        int corruptedWidth = 0;
+
         void loadPreviewsFromDirectoryMethod();
 
         void fillImageListFileNames();
@@ -124,6 +137,8 @@ namespace view {
 
         std::atomic_bool isWorking = true;
         std::atomic_bool isImageSwitched = true;
+
+        std::string rootDirectory;
     };
 
 } // view

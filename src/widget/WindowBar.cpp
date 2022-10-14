@@ -51,8 +51,8 @@ namespace view {
         view->setOnWindowResizeListener([](View& view, unsigned width, unsigned height) {
             view.getStyle().forEach([&view](StyleState& state) {
                 state.background.setImage(view.getContext()->isMaximized()
-                                          ? "assets/icons/ic_maximized.png"
-                                          : "assets/icons/ic_minimized.png");
+                                          ? view.getContext()->getRootDirectory() + "assets/icons/ic_maximized.png"
+                                          : view.getContext()->getRootDirectory() + "assets/icons/ic_minimized.png");
             });
         });
         addChild(view);

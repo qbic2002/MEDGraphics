@@ -1,5 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "utils/R.h"
 #include "stb_image.h"
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -66,14 +67,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     context->onKey(key, scancode, action, mods);
 }
 
-void init(GLFWwindow* window, const string& fileName) {
+void init(GLFWwindow* window, const string& fileName, const std::string& root) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    context = new Context(window, fileName);
+    context = new Context(window, fileName, root);
 
     utils::initTimer();
     utils::setOnWindowResize((OnWindowResizeListener*) (context));
@@ -88,6 +89,7 @@ void init(GLFWwindow* window, const string& fileName) {
 }
 
 int main([[maybe_unused]] int argc, char** args) {
+    HANDLE_SIGSEGV
     if (argc == 0) {
         throw std::exception();
     }
@@ -98,7 +100,7 @@ int main([[maybe_unused]] int argc, char** args) {
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
     if (window == nullptr) return -1;
 
-    init(window, args[1]);
+    init(window, args[1], std::filesystem::path(args[0]).parent_path().string() + "\\");
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

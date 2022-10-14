@@ -111,7 +111,7 @@ public:
 
     Raster<RGBAPixel> compress(int newWidth, int newHeight) const override {
         if (newWidth > width_ || newHeight > height_) {
-            throw -1;
+            throw std::exception();
         }
         Raster<RGBAPixel> rgbaR(width_, height_);
         for (int i = 0; i < height_; ++i) {
