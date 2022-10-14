@@ -11,7 +11,8 @@
 namespace pnm {
     int parsePnmHeader(const char* fileData, PNMHeader& pnmHeader);
 
-    AbstractRaster* parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader);
+    AbstractRaster*
+    parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader, unsigned int length);
 
     PNMMeta parseMeta(const char* fileData, int headerSize);
 
@@ -21,7 +22,7 @@ namespace pnm {
 
     PNMImage convertP6ToP5(const PNMImage& other);
 
-    PNMImage readPNMImageFromMemory(char* data);
+    PNMImage readPNMImageFromMemory(const char* data, unsigned int length);
 }
 
 

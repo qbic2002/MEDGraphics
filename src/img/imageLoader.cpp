@@ -49,31 +49,36 @@ namespace img {
     }
 
     AbstractRaster* loadImageData(const std::vector<char>& bytes) {
-        if (isPNMSignature(bytes)) {
-            auto pnmImage = pnm::readPNMImageFromMemory(const_cast<char*>(bytes.data()));
-            switch (pnmImage.data->getPixelType()) {
-                case RGBA: {
-                    return new Raster(*((Raster<RGBAPixel>*) pnmImage.data));
+        try {
+            if (isPNMSignature(bytes)) {
+                auto pnmImage = pnm::readPNMImageFromMemory(bytes.data(), bytes.size());
+                switch (pnmImage.data->getPixelType()) {
+                    case RGBA: {
+                        return new Raster(*((Raster<RGBAPixel>*) pnmImage.data));
+                    }
+                    case GRAY: {
+                        return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
+                    }
+                    default : {
+                        return nullptr;
+                    }
                 }
-                case GRAY: {
-                    return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
-                }
-                default : {
-                    throw std::exception();
-                }
+            } else {
+                int width, height, channels;
+                unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,
+                                                            &height,
+                                                            &channels, 0);
+
+                if (data == nullptr)
+                    return nullptr;
+
+                auto* raster = rgbaDataToRaster(data, width, height, channels);
+                stbi_image_free(data);
+
+                return raster;
             }
-        } else {
-            int width, height, channels;
-            unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width, &height,
-                                                        &channels, 0);
-
-            if (data == nullptr)
-                return nullptr;
-
-            auto* raster = rgbaDataToRaster(data, width, height, channels);
-            stbi_image_free(data);
-
-            return raster;
+        } catch (std::exception&) {
+            return nullptr;
         }
     }
 

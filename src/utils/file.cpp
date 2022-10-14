@@ -5,7 +5,9 @@
 #include <iostream>
 #include <fstream>
 #include <winnls.h>
+#include <filesystem>
 #include "file.h"
+#include "R.h"
 
 namespace utils {
     std::wstring toUtf16(const std::string& str) {
@@ -22,6 +24,7 @@ namespace utils {
         std::ifstream ifs(toUtf16(fileName).c_str(), mode);
         if (!ifs.is_open()) {
             std::cerr << "Could not open file '" << fileName << "'" << std::endl;
+            std::wcerr << toUtf16(fileName) << "\n";
             throw std::exception();
         }
         return ifs;
