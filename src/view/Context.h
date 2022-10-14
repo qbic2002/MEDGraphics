@@ -99,7 +99,7 @@ namespace view {
 
         ViewGroup* getRootView();
 
-        void saveImage() const;
+        void saveImage();
 
         void openImage();
 
