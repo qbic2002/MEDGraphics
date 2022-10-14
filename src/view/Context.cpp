@@ -364,9 +364,16 @@ namespace view {
     }
 
     void Context::saveImage() const {
-        std::string filename = utils::getSaveFileName();
-        pnm::writePNMImage(PNMImage(imageList[imageIndex].raster),
-                           filename.c_str());
+        std::string filename;
+        try {
+            filename = utils::getSaveFileName();
+        } catch (std::exception&) {
+            return;
+        }
+        try {
+            pnm::writePNMImage(PNMImage(imageList[imageIndex].raster),
+                               filename.c_str());
+        } catch (std::exception&) {}
     }
 
     ViewGroup* Context::getRootView() {
@@ -375,7 +382,12 @@ namespace view {
 
 
     void Context::openImage() {
-        std::string fileName = utils::getOpenFileName();
+        std::string fileName;
+        try {
+            fileName = utils::getOpenFileName();
+        } catch (std::exception&) {
+            return;
+        }
         openImage(fileName);
         chooseImage(imageIndex);
     }
@@ -385,6 +397,7 @@ namespace view {
             directoryName = fileName;
             fillImageListFileNames();
         } else {
+
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName :
                                           rootDirectory + "assets\\qbic.ppm");
             directoryName = path.parent_path().string();
