@@ -364,7 +364,7 @@ namespace view {
         std::cout << "povezlo, potok offnulsya sam!\n";
     }
 
-    void Context::saveImage() const {
+    void Context::saveImage() {
         std::string filename;
         try {
             filename = utils::getSaveFileName();
@@ -374,7 +374,9 @@ namespace view {
         try {
             pnm::writePNMImage(PNMImage(imageList[imageIndex].raster),
                                filename.c_str());
-        } catch (std::exception&) {}
+        } catch (std::exception&) {
+            showError("Error with saving(");
+        }
     }
 
     ViewGroup* Context::getRootView() {
@@ -397,6 +399,9 @@ namespace view {
         if (fs::is_directory(fileName)) {
             directoryName = fileName;
             fillImageListFileNames();
+            if (imageList.size() == 0) {
+                openImage(rootDirectory + "assets\\");
+            }
         } else {
 
             fs::path path = fs::canonical(fs::exists(fileName) ? fileName :
@@ -405,6 +410,9 @@ namespace view {
 
             fillImageListFileNames();
 
+            if (imageList.size() == 0) {
+                openImage(rootDirectory + "assets\\");
+            }
             for (int i = 0; i < imageList.size(); i++) {
                 const auto& imageFileData = imageList[i];
                 if (imageFileData.fileName == path.string()) {

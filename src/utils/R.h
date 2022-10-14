@@ -26,7 +26,7 @@
 #define HANDLE_SIGSEGV signal(SIGSEGV, SIGSEGV_HANDLER);
 
 static void posix_death_signal(int signum) {
-    MessageBoxA(NULL, "Ha-ha SEGFAULT!!!!", "POSIX Signal", MB_OK);
+    MessageBoxA(NULL, "Ha-ha SEGFAULT!!!!\nRemember what did you do and don't do this again!", "POSIX Signal", MB_OK);
     signal(signum, SIG_DFL);
     exit(SIGSEGV);
 }
