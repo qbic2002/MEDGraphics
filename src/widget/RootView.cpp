@@ -53,6 +53,7 @@ namespace view {
                     state.padding = padding(12);
                     state.background.color = rgba{COLOR_PRIMARY_LIGHT};
                 }));
+        messageView->setId(MESSAGE_VIEW_ID);
         addChild(messageView);
     }
 } // view

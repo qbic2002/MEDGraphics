@@ -6,6 +6,7 @@
 #define MEDGRAPHICS_R_H
 
 #define APP_ICON_MENU_ID 1
+#define MESSAGE_VIEW_ID 2
 
 #define COLOR_PRIMARY 33, 33, 33, 255
 #define COLOR_PRIMARY_DARK 0, 0, 0, 255

@@ -9,6 +9,7 @@
 #include "../img/Raster.h"
 #include "../utils/explorerUtils.h"
 #include "../pnm/utils/pnmUtil.h"
+#include "../widget/MessageView.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -423,6 +424,7 @@ namespace view {
     }
 
     void Context::showError(const std::string& message) {
-
+        auto* msgView = (view::MessageView*) rootView->findViewById(MESSAGE_VIEW_ID);
+        msgView->showMessage(message);
     }
 } // view
