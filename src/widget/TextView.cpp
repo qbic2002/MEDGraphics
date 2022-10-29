@@ -3,7 +3,6 @@
 //
 
 #include "TextView.h"
-#include "../utils/encoding.h"
 
 namespace view {
     TextView::TextView(Context* context, const Style& style) : View(context, style) {}

@@ -122,18 +122,6 @@ void ImageFileStorage::runService() {
             }
         }
 
-//        int beginIndex = std::max(prevNotifiedIndex - IMG_LOAD_R, 0);
-//        int endIndex = std::min(prevNotifiedIndex + IMG_LOAD_R + 1, (int) curDirImageFiles.size());
-//        for (int i = beginIndex; i < endIndex; i++) {
-//            auto& imageFile = curDirImageFiles[i];
-//            if (imageFile.raster == nullptr) {
-//                info() << "load image data start: " << imageFile.getPath().string() << std::endl;
-//                utils::TimeStamp loadImageTs;
-//                imageFile.raster = img::loadImageData(imageFile.getPath());
-//                loadImageTs.report("load image data " + imageFile.getPath().filename().string());
-//            }
-//        }
-
         lock.unlock();
     }
 }
@@ -141,16 +129,6 @@ void ImageFileStorage::runService() {
 int ImageFileStorage::getCurImageIndex() const {
     return curIndex;
 }
-//
-//CyclicVectorIterator ImageFileStorage::begin() {
-//    if (curDirImageFiles.empty()) return CyclicVectorIterator(curDirImageFiles, 0);
-//    return CyclicVectorIterator(curDirImageFiles, curIndex - IMG_LOAD_R);
-//}
-//
-//CyclicVectorIterator ImageFileStorage::end() {
-//    if (curDirImageFiles.empty()) return CyclicVectorIterator(curDirImageFiles, 0);
-//    return CyclicVectorIterator(curDirImageFiles, curIndex + IMG_LOAD_R + 1);
-//}
 
 CyclicImageFileSpan ImageFileStorage::nearImageFiles() {
     if (curDirImageFiles.empty()) {
