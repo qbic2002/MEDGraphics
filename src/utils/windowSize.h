@@ -16,7 +16,6 @@ namespace utils {
 
     int getWindowHeight();
 
-//    void setOnWindowResize(void (* _onResize)(unsigned w, unsigned h));
     void setOnWindowResize(OnWindowResizeListener* onWindowResizeListener);
 
     float getWindowRatio();

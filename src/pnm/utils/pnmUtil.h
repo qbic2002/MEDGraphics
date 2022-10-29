@@ -18,6 +18,8 @@ namespace pnm {
 
     PNMImage readPNMImage(const char* fileName);
 
+    bool writePNMImage(const PNMImage& pnmImage, std::ofstream& os);
+
     bool writePNMImage(const PNMImage& pnmImage, const char* filename);
 
     PNMImage convertP6ToP5(const PNMImage& other);

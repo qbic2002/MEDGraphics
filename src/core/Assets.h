@@ -11,9 +11,9 @@
 #include "../gl/FontRenderer.h"
 
 namespace assets {
-    std::shared_ptr<gl::Texture> texture(const std::string& name);
+    std::shared_ptr<gl::Texture> texture(const std::filesystem::path& file);
 
-    std::shared_ptr<gl::FontRenderer> fontRenderer(const std::string& name, unsigned fontSize);
+    std::shared_ptr<gl::FontRenderer> fontRenderer(const std::filesystem::path& file, unsigned fontSize);
 }
 
 #endif //MEDGRAPHICS_ASSETS_H

@@ -31,5 +31,7 @@ static void posix_death_signal(int signum) {
     exit(SIGSEGV);
 }
 
+typedef std::wstring String;
+
 #endif //MEDGRAPHICS_R_H
 

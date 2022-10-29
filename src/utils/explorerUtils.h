@@ -6,13 +6,17 @@
 #define MEDGRAPHICS_EXPLORERUTILS_H
 
 #include <string>
-#include <windows.h>
-#include <Commdlg.h>
-#include <iostream>
 
 namespace utils {
-    std::string getOpenFileName();
 
-    std::string getSaveFileName();
+    /// Call explorer to choose file to open
+    /// \param fileName
+    /// \return true if result is got, false otherwise
+    bool getOpenFileName(std::wstring& fileName);
+
+    /// Call explorer to choose file to save into
+    /// \param fileName
+    /// \return true if result is got, false otherwise
+    bool getSaveFileName(std::wstring& fileName);
 }
 #endif //MEDGRAPHICS_EXPLORERUTILS_H

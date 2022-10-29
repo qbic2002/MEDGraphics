@@ -6,7 +6,6 @@
 #include "WindowBar.h"
 #include "TextView.h"
 #include "DropDownView.h"
-#include <filesystem>
 
 namespace view {
     WindowBar::WindowBar(Context* context, const Style& style, ImageView* imageView) : ViewGroup(context, style) {
@@ -20,10 +19,10 @@ namespace view {
 
         /// Close Icon
         auto view = new View(context, Style()
-                .forEach([&btnPadding](StyleState& style) {
+                .forEach([&btnPadding, context](StyleState& style) {
                     style.position = {FILL_PARENT - btnWidth, 0, btnWidth, btnHeight};
                     style.padding = btnPadding;
-                    style.background.setImage("assets/icons/ic_close.png");
+                    style.background.setImage(context->getAppDir() / "assets/icons/ic_close.png");
                 })
                 .edit([](Style& style) {
                     style.stateHover.background.color = {196, 43, 28, 255};
@@ -48,21 +47,21 @@ namespace view {
         view->setOnClickListener([context, windowId]() {
             (context->isMaximized() ? glfwRestoreWindow : glfwMaximizeWindow)(windowId);
         });
-        view->setOnWindowResizeListener([](View& view, unsigned width, unsigned height) {
-            view.getStyle().forEach([&view](StyleState& state) {
+        view->setOnWindowResizeListener([context](View& view, unsigned width, unsigned height) {
+            view.getStyle().forEach([&view, context](StyleState& state) {
                 state.background.setImage(view.getContext()->isMaximized()
-                                          ? view.getContext()->getRootDirectory() + "assets/icons/ic_maximized.png"
-                                          : view.getContext()->getRootDirectory() + "assets/icons/ic_minimized.png");
+                                          ? context->getAppDir() / "assets/icons/ic_maximized.png"
+                                          : context->getAppDir() / "assets/icons/ic_minimized.png");
             });
         });
         addChild(view);
 
         /// Iconify Icon
         view = new View(context, Style()
-                .forEach([btnPadding](StyleState& style) {
+                .forEach([context, btnPadding](StyleState& style) {
                     style.position = {FILL_PARENT - btnWidth * 3, 0, btnWidth, btnHeight};
                     style.padding = btnPadding;
-                    style.background.setImage("assets/icons/ic_iconify.png");
+                    style.background.setImage(context->getAppDir() / "assets/icons/ic_iconify.png");
                 })
                 .edit([](Style& style) {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
@@ -80,10 +79,10 @@ namespace view {
 
         /// Fit Content Button
         view = new View(context, Style{}
-                .forEach([controlPadding](StyleState& style) {
+                .forEach([controlPadding, context](StyleState& style) {
                     style.position = {FILL_PARENT - btnWidth * 3 - controlSize - 12, 0, controlSize, controlSize};
                     style.padding = controlPadding;
-                    style.background.setImage("assets/icons/ic_fit_screen.png");
+                    style.background.setImage(context->getAppDir() / "assets/icons/ic_fit_screen.png");
                 })
                 .edit([](Style& style) {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
@@ -96,10 +95,10 @@ namespace view {
 
         /// Original Scale Button
         view = new View(context, Style{}
-                .forEach([controlPadding](StyleState& style) {
+                .forEach([controlPadding, context](StyleState& style) {
                     style.position = {FILL_PARENT - btnWidth * 3 - controlSize * 2 - 12, 0, controlSize, controlSize};
                     style.padding = controlPadding;
-                    style.background.setImage("assets/icons/ic_original_scale.png");
+                    style.background.setImage(context->getAppDir() / "assets/icons/ic_original_scale.png");
                 })
                 .edit([](Style& style) {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
@@ -114,10 +113,10 @@ namespace view {
         const unsigned appIconSize = 32;
 
         view = new View(context, Style{}
-                .forEach([](StyleState& style) {
+                .forEach([context](StyleState& style) {
                     style.position = {0, 0, WINDOW_BAR_HEIGHT, WINDOW_BAR_HEIGHT};
                     style.padding = padding((float) (WINDOW_BAR_HEIGHT - appIconSize) / 2);
-                    style.background.setImage("assets/icons/ic_launcher.png");
+                    style.background.setImage(context->getAppDir() / "assets/icons/ic_launcher.png");
                 })
                 .edit([](Style& style) {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
@@ -138,17 +137,23 @@ namespace view {
         auto* titleView = new TextView(
                 context,
                 Style{}
-                        .forEach([](StyleState& state) {
+                        .forEach([context](StyleState& state) {
                             state.position = {WINDOW_BAR_HEIGHT, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT};
                             state.padding = padding((WINDOW_BAR_HEIGHT - (int) titleBarFontSize) / 2.0);
-                            state.fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf",
-                                                                      titleBarFontSize);
+                            state.fontRenderer = assets::fontRenderer(
+                                    context->getAppDir() / "assets/fonts/segoe-ui/Segoe UI.ttf",
+                                    titleBarFontSize);
                         }),
-                "MED Graphics");
+                L"MED Graphics");
         addChild(titleView);
 
-        context->addImageChangedListener([titleView, context]() {
-            titleView->setText(std::filesystem::path(context->getCurrentImageData().fileName).filename().string());
+        context->getImageFileStorage().addImageChangedListener([titleView, context]() {
+            auto* imageFile = context->getImageFileStorage().getCurImageFile();
+            if (imageFile == nullptr) {
+                titleView->setText(L"MEDGraphics");
+            } else {
+                titleView->setText(imageFile->getPath().filename().wstring());
+            }
         });
     }
 } // view

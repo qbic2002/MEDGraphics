@@ -5,9 +5,8 @@
 #ifndef MEDGRAPHICS_TEXTURE_H
 #define MEDGRAPHICS_TEXTURE_H
 
-
 #include <string>
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace gl {
     class Texture {

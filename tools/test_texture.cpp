@@ -1,15 +1,15 @@
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "stb_image.h"
+#include "../src/stb_image.h"
 
 using namespace std;
 
 GLuint textureId;
 
-GLFWwindow *createWindow(int width, int height, const char *title, bool vsync) {
+GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
     GLFWwindow *window;
 
     if (!glfwInit())

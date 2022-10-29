@@ -10,10 +10,13 @@
 #include "pnm/PNMImage.h"
 #include "gl/ShaderProgram.h"
 #include "view/Context.h"
+#include "utils/encoding.h"
+#include "utils/logging.h"
 
 using namespace std;
 using namespace utils;
 using namespace view;
+namespace fs = std::filesystem;
 
 Context* context;
 
@@ -67,14 +70,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     context->onKey(key, scancode, action, mods);
 }
 
-void init(GLFWwindow* window, const string& fileName, const std::string& root) {
+void init(GLFWwindow* window, const wstring& fileName, const fs::path& appDir) {
     glewInit();
 
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    context = new Context(window, fileName, root);
+    context = new Context(window, appDir);
+    context->getImageFileStorage().open(fileName);
 
     utils::initTimer();
     utils::setOnWindowResize((OnWindowResizeListener*) (context));
@@ -88,19 +92,18 @@ void init(GLFWwindow* window, const string& fileName, const std::string& root) {
     glfwSetKeyCallback(window, keyCallback);
 }
 
-int main([[maybe_unused]] int argc, char** args) {
+int main([[maybe_unused]] int argc, char** argv) {
     HANDLE_SIGSEGV
-    if (argc == 0) {
-        throw std::exception();
-    }
-
+    utils::configureUtf8();
+    auto args = utils::readArgs(argc, argv);
     int width = 640;
     int height = 480;
 
     GLFWwindow* window = createWindow(width, height, "Hello World", true);
-    if (window == nullptr) return -1;
+    if (window == nullptr)
+        exceptional_exit("Could not create window");
 
-    init(window, args[1], std::filesystem::path(args[0]).parent_path().string() + "\\");
+    init(window, args[1], std::filesystem::path(args[0]).parent_path());
 
     while (!glfwWindowShouldClose(window)) {
         utils::checkWindowSize(window);

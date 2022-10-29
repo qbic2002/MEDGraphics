@@ -7,7 +7,7 @@ layout (location = 3) in float rotationAngle;
 layout (location = 4) in float rotationVelocity;
 layout (location = 5) in int index;
 
-out vec3 ourColor;
+out float alpha;
 out vec2 texCoord;
 
 uniform float theta;
@@ -38,6 +38,6 @@ void main()
 
     pos += cornerVector * rectRadius;
 
-    ourColor = vec3(pos.z) / 100;
+    alpha = pos.z / 100;
     gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0f);
 }

@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="process_assets" type="CMakeRunConfiguration" factoryName="Application" folderName="Tools" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MEDGraphics" TARGET_NAME="process_assets" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MEDGraphics" RUN_TARGET_NAME="process_assets">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -6,7 +6,7 @@
 #define MEDGRAPHICS_SHADERPROGRAM_H
 
 #include <string>
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 class ShaderProgram {
 

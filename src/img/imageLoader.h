@@ -7,16 +7,15 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 #include "AbstractRaster.h"
 
 namespace img {
-    typedef std::basic_string<unsigned char> ustring;
-
-    AbstractRaster* loadImageData(const std::string& supported);
+    AbstractRaster* loadImageData(const std::filesystem::path& file);
 
     AbstractRaster* loadImageData(const std::vector<char>& bytes);
 
-    bool isImage(const std::string& fileName);
+    bool isImage(const std::filesystem::path& file) noexcept;
 }
 
 #endif //MEDGRAPHICS_IMAGELOADER_H

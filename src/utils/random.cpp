@@ -1,5 +1,5 @@
-#include <random>
 #include "random.h"
+#include <random>
 
 namespace utils {
     std::uniform_real_distribution<> uniform(0, 1);

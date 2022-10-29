@@ -3,15 +3,16 @@
 //
 
 
+#include "imageLoader.h"
 #include "../utils/file.h"
 #include "../stb_image.h"
 #include "RGBAPixel.h"
 #include "Raster.h"
 #include "../pnm/utils/pnmUtil.h"
-#include "imageLoader.h"
 #include <cmath>
 
 namespace img {
+    typedef std::basic_string<unsigned char> ustring;
 
     std::vector<ustring> supportedSignatures({ // NOLINT(cert-err58-cpp)
                                                      {0xFF, 0xD8, 0xFF},
@@ -41,9 +42,10 @@ namespace img {
         return bytes.size() >= 2 && bytes[0] == 'P' && (bytes[1] == '5' || bytes[1] == '6');
     }
 
-    AbstractRaster* loadImageData(const std::string& fileName) {
-        if (isImage(fileName))
-            return loadImageData(utils::readAllBytes(fileName));
+    AbstractRaster* loadImageData(const std::filesystem::path& file) {
+        if (isImage(file)) {
+            return loadImageData(utils::readAllBytes(file));
+        }
 
         return nullptr;
     }
@@ -59,7 +61,7 @@ namespace img {
                     case GRAY: {
                         return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
                     }
-                    default : {
+                    default: {
                         return nullptr;
                     }
                 }
@@ -82,8 +84,13 @@ namespace img {
         }
     }
 
-    bool isImage(const std::string& fileName) {
-        unsigned char* signatureBytes = utils::readNBytes(fileName, 8);
+    bool isImage(const std::filesystem::path& file) noexcept {
+        unsigned char* signatureBytes;
+        try {
+            signatureBytes = utils::readNBytes(file, 8);
+        } catch (std::exception& e) {
+            return false;
+        }
         if (signatureBytes == nullptr) return false;
 
         ustring signature(signatureBytes);

@@ -2,10 +2,8 @@
 // Created by danil on 17.09.2022.
 //
 
-#include <cmath>
-#include <set>
 #include "BgRenderer.h"
-#include "GL/glew.h"
+#include <cmath>
 #include "../utils/random.h"
 #include "../utils/measureFps.h"
 
@@ -63,9 +61,7 @@ namespace view {
         return rectVertices;
     }
 
-    BgRenderer::BgRenderer(Context* context) : View(context) {
-        std::fill(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT, 0);
-    }
+    BgRenderer::BgRenderer(Context* context) : View(context) {}
 
     void BgRenderer::onWindowResize(unsigned int _width, unsigned int _height) {
         clear();
@@ -84,37 +80,22 @@ namespace view {
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
         {
-            int currentImageIndex = context->getImageIndex();
-
-            if (true) {
-                auto& allImages = context->getImageList();
-
-                GLuint newIds[PREVIEW_IMG_COUNT];
-                for (int i = currentImageIndex - PREVIEW_IMG_COUNT / 2;
-                     i <= currentImageIndex + PREVIEW_IMG_COUNT / 2; ++i) {
-                    int index = ((i % allImages.size()) + allImages.size()) % allImages.size();
-                    if (allImages[index].compressedTextureId == 0) {
-                        if (allImages[index].compressedRaster != nullptr) {
-                            GLuint textureId = gl::loadTexture(allImages[index].compressedRaster, GL_CLAMP, GL_LINEAR,
-                                                               GL_NEAREST);
-                            allImages[index].compressedTextureId = textureId;
-                        }
-                    }
-                    newIds[i - (currentImageIndex - PREVIEW_IMG_COUNT / 2)] = allImages[index].compressedTextureId;
+            auto& imageStorage = context->getImageFileStorage();
+            int i = 0;
+            for (auto& imageFile: imageStorage.nearImageFiles()) {
+                if (imageFile.textureId == 0) {
+                    i++;
+                    continue;
                 }
 
-                addBgTextureIds(newIds);
-            }
+                int trueIndex = (i + imageStorage.getCurImageIndex()) % IMG_LOAD_D;
+                int renderBeginEdge = rectsCount * (trueIndex) / IMG_LOAD_D;
+                int renderEndEdge = rectsCount * (trueIndex + 1) / IMG_LOAD_D;
 
-            int rendered = 0;
-            for (int i = 0; i < PREVIEW_IMG_COUNT; i++) {
-                int renderEdge = rectsCount * (i + 1) / PREVIEW_IMG_COUNT;
-                glBindTexture(GL_TEXTURE_2D, bgTextureIds[i]);
-                glDrawArrays(GL_QUADS, rendered * 4, (renderEdge - rendered) * 4);
-                rendered = renderEdge;
+                glBindTexture(GL_TEXTURE_2D, imageFile.textureId);
+                glDrawArrays(GL_QUADS, renderBeginEdge * 4, (renderEndEdge - renderBeginEdge) * 4);
+                i++;
             }
-
-            previousImageIndex = currentImageIndex;
         }
         glBindVertexArray(0);
         glUseProgram(0);
@@ -167,39 +148,4 @@ namespace view {
     BgRenderer::~BgRenderer() {
         clear();
     }
-
-    void BgRenderer::addBgTextureIds(GLuint* newIds) {
-        if (std::all_of(bgTextureIds, bgTextureIds + PREVIEW_IMG_COUNT,
-                        [](GLuint textureId) { return textureId == 0; })) {
-            std::copy(newIds, newIds + PREVIEW_IMG_COUNT, bgTextureIds);
-            return;
-        }
-
-        std::vector<int> oldIdsIndexes;
-        std::set<GLuint> reallyNewIds;
-        reallyNewIds.insert(newIds, newIds + PREVIEW_IMG_COUNT);
-
-        for (int i = 0; i < PREVIEW_IMG_COUNT; ++i) {
-            bool f = false;
-            for (int j = 0; j < PREVIEW_IMG_COUNT; ++j) {
-                if (bgTextureIds[i] == newIds[j]) {
-                    reallyNewIds.extract(newIds[j]);
-                    f = true;
-                    break;
-                }
-            }
-            if (!f) {
-                oldIdsIndexes.push_back(i);
-            }
-        }
-
-        for (int i = 0; i < oldIdsIndexes.size(); ++i) {
-            if (!reallyNewIds.empty()) {
-                bgTextureIds[oldIdsIndexes[i]] = reallyNewIds.extract(reallyNewIds.begin()).value();
-            } else {
-                bgTextureIds[oldIdsIndexes[i]] = bgTextureIds[oldIdsIndexes[0]];
-            }
-        }
-    }
-
 }

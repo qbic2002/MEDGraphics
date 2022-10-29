@@ -31,16 +31,17 @@ namespace view {
                                       .position = {0, WINDOW_BAR_HEIGHT, 0, 0},
                                       .padding = padding(0)}),
                         {
-                                DropDownViewElementPrototype("Fast exit", []() {
+                                DropDownViewElementPrototype(L"Fast exit", []() {
                                     throw std::exception();
                                 }),
-                                DropDownViewElementPrototype("Save to", [&]() { this->context->saveImage(); }),
-                                DropDownViewElementPrototype("Open...", [&]() { this->context->openImage(); })
+                                DropDownViewElementPrototype(L"Save to", [&]() { this->context->saveImage(); }),
+                                DropDownViewElementPrototype(L"Open...", [&]() { this->context->openImage(); })
                         },
-                        Style().forEach([](StyleState& state) {
+                        Style().forEach([context](StyleState& state) {
                             state.position = {0, 0, FILL_PARENT, 24};
                             state.padding = padding(4);
-                            state.fontRenderer = assets::fontRenderer("assets/fonts/segoe-ui/Segoe UI.ttf", 14);
+                            state.fontRenderer = assets::fontRenderer(
+                                    context->getAppDir() / "assets/fonts/segoe-ui/Segoe UI.ttf", 14);
                         }).edit([](Style& style) {
                             style.stateDefault.background.color = {COLOR_PRIMARY};
                             style.stateHover.background.color = {75, 110, 175, 255};

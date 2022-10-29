@@ -2,7 +2,6 @@
 // Created by danil on 19.09.2022.
 //
 
-#include <iostream>
 #include "utils.h"
 
 namespace gl {
@@ -10,6 +9,12 @@ namespace gl {
     void vertexUV(float x, float y, float u, float v) {
         glTexCoord2f(u, v);
         glVertex2f(x, y);
+    }
+
+    GLint getMaxTextureSize() {
+        GLint size;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+        return size;
     }
 
     GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
@@ -24,9 +29,6 @@ namespace gl {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glBindTexture(GL_TEXTURE_2D, 0);
-
-//        GLenum err = glGetError();
-//        std::cout << "error " << glewGetErrorString(err) << "\n";
 
         return textureId;
     }

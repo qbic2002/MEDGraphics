@@ -8,11 +8,12 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
-#include "stb_image.h"
-#include "stb_image_write.h"
+#include "../src/stb_image.h"
+#include "../src/stb_image_write.h"
 
 using namespace std;
 
+// TODO relative path
 string root = R"(C:\Workspace\University\Semester-5\Graphics\cpp-experiments\assets\icons\)";
 
 typedef unsigned char uchar;

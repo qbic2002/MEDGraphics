@@ -5,56 +5,52 @@
 #ifndef MEDGRAPHICS_FONTRENDERER_H
 #define MEDGRAPHICS_FONTRENDERER_H
 
-#include <string>
-#include "GL/glew.h"
-#include "utils.h"
+#include <GL/glew.h>
 #include "../utils/ft_error_check.h"
 #include <ft2build.h>
 #include <freetype/freetype.h>
-#include <iostream>
-#include "../utils/file.h"
+#include <filesystem>
+#include "../utils/R.h"
 
 namespace gl {
 
     struct GlyphData {
-        unsigned int bmpWidth;
-        unsigned int bmpHeight;
-        int bmpLeft;
-        int bmpTop;
+        /// In pixels
         int advanceX;
-        unsigned int offset;
+        int paddingLeft, paddingTop;
+        unsigned width, height;
+        /// In texture coords
+        float texLeft, texRight, texTop, texBottom;
     };
 
     class FontRenderer {
     public:
-        FontRenderer(const std::string& fontFileName, unsigned fontSize);
+        FontRenderer(const std::filesystem::path& fontFileName, unsigned fontSize);
 
         FontRenderer(const FontRenderer& other) = delete;
 
         FontRenderer(FontRenderer&& other) noexcept;
 
+        ~FontRenderer();
+
         FontRenderer& operator=(const FontRenderer& other) = delete;
 
         FontRenderer& operator=(const FontRenderer&& other) = delete;
 
-        float getTextWidth(const std::string& str) const;
+        float getTextWidth(const String& str) const;
 
         int getLineHeight() const;
 
-        void renderText(const std::string& str, float x, float y);
-
-        ~FontRenderer();
+        void renderText(const String& str, float x, float y);
 
     private:
-        void defineTextureSize(const FT_Face& face);
+        unsigned char* initTextureBitmap(const FT_Face& face);
 
-        void fillTextureBitmap(const FT_Face& face, unsigned char* textureBitMap);
+        void fillTextureBitmap(const FT_Face& face, unsigned char* textureBmp);
 
-        FT_Library ftLibrary = nullptr;
         GLuint textureId = 0;
         int textureWidth, textureHeight;
         GlyphData* myGlyphData = nullptr;
-        int charsCount;
         unsigned fontSize;
         int lineHeight;
     };

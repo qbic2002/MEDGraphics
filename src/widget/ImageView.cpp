@@ -3,7 +3,7 @@
 //
 
 #include "ImageView.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include <cmath>
 
 namespace view {
@@ -14,14 +14,16 @@ namespace view {
     }
 
     ImageView::ImageView(Context* context, const Style& style) : View(context, style) {
-        context->addImageChangedListener([&]() {
+        context->getImageFileStorage().addImageChangedListener([&]() {
             imageFitScreen();
         });
     }
 
     void ImageView::render() {
-        auto& imageData = context->getCurrentImageData();
-        glBindTexture(GL_TEXTURE_2D, context->getCurrentTextureId());
+        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        if (imageData == nullptr || imageData->textureId == 0)
+            return;
+        glBindTexture(GL_TEXTURE_2D, imageData->textureId);
         glPushMatrix();
         {
             glTranslatef(calculatedPos.x, calculatedPos.y, 0);
@@ -32,9 +34,9 @@ namespace view {
             glBegin(GL_QUADS);
 
             glVertexUV(0, 0, 0, 0);
-            glVertexUV(0, imageData.height, 0, 1);
-            glVertexUV(imageData.width, imageData.height, 1, 1);
-            glVertexUV(imageData.width, 0, 1, 0);
+            glVertexUV(0, imageData->raster->getHeight(), 0, 1);
+            glVertexUV(imageData->raster->getWidth(), imageData->raster->getHeight(), 1, 1);
+            glVertexUV(imageData->raster->getWidth(), 0, 1, 0);
 
             glEnd();
         }
@@ -75,9 +77,11 @@ namespace view {
     }
 
     void ImageView::imageFitScreen() {
-        auto& imageData = context->getCurrentImageData();
-        float vertRatio = calculatedPos.height / imageData.height;
-        float horRatio = calculatedPos.width / imageData.width;
+        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        if (imageData == nullptr || imageData->textureId == 0)
+            return;
+        float horRatio = calculatedPos.width / imageData->raster->getWidth();
+        float vertRatio = calculatedPos.height / imageData->raster->getHeight();
         setZoomRatio((vertRatio < horRatio) ? vertRatio : horRatio);
     }
 
@@ -86,9 +90,11 @@ namespace view {
     }
 
     void ImageView::validateZoom() {
-        auto& imageData = context->getCurrentImageData();
-        float scaledRasterWidth = imageData.width * zoom;
-        float scaledRasterHeight = imageData.height * zoom;
+        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        if (imageData == nullptr || imageData->textureId == 0)
+            return;
+        float scaledRasterWidth = imageData->raster->getWidth() * zoom;
+        float scaledRasterHeight = imageData->raster->getHeight() * zoom;
         if (scaledRasterWidth <= calculatedPos.width) {
             translateX = (calculatedPos.width - scaledRasterWidth) / 2;
         }
@@ -112,9 +118,11 @@ namespace view {
     void ImageView::setZoomRatio(float ratio) {
         zoom = ratio;
         zoomOffset = logf(zoom) / logf(1.5);
-        auto& imageData = context->getCurrentImageData();
-        float scaledRasterWidth = imageData.width * ratio;
-        float scaledRasterHeight = imageData.height * ratio;
+        auto* imageFile = context->getImageFileStorage().getCurImageFile();
+        if (imageFile == nullptr || imageFile->textureId == 0)
+            return;
+        float scaledRasterWidth = imageFile->raster->getWidth() * ratio;
+        float scaledRasterHeight = imageFile->raster->getHeight() * ratio;
         translateX = (calculatedPos.width - scaledRasterWidth) / 2;
         translateY = (calculatedPos.height - scaledRasterHeight) / 2;
     }

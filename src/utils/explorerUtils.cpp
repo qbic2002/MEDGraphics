@@ -2,14 +2,13 @@
 // Created by golov on 13.10.2022.
 //
 
-#include <string>
 #include "explorerUtils.h"
-#include <codecvt>
-#include <locale>
+#include <windows.h>
+#include "logging.h"
 
-std::string utils::getOpenFileName() {
-    OPENFILENAMEA ofn;
-    char szFile[100];
+bool utils::getOpenFileName(std::wstring& fileName) {
+    OPENFILENAMEW ofn;
+    wchar_t szFile[300];
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
@@ -17,43 +16,40 @@ std::string utils::getOpenFileName() {
     ofn.lpstrFile = szFile;
     ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile);
-    ofn.lpstrFilter = "All\0*.*\0PNM\0*.pnm; *.ppm; *pgm\0";
+    ofn.lpstrFilter = L"All\0*.*\0PNM\0*.pnm; *.ppm; *pgm\0";
     ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
+    ofn.lpstrFileTitle = nullptr;
     ofn.nMaxFileTitle = 0;
-    ofn.lpstrInitialDir = NULL;
+    ofn.lpstrInitialDir = nullptr;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-    bool status = GetOpenFileNameA(&ofn);
-    if (!status) {
-        throw std::exception();
-    }
-
-//    std::locale::global(std::locale("ru_RU.CP1251"));
-    return ofn.lpstrFile;
+    info("GetOpenFileName call");
+    bool status = GetOpenFileNameW(&ofn);
+    info("GetOpenFileName finished");
+    fileName = ofn.lpstrFile;
+    return status;
 }
 
-std::string utils::getSaveFileName() {
-    OPENFILENAMEA ofn;
-    char szFile[100];
+bool utils::getSaveFileName(std::wstring& fileName) {
+    OPENFILENAMEW ofn;
+    wchar_t szFile[300];
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL;
+    ofn.hwndOwner = nullptr;
     ofn.lpstrFile = szFile;
     ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile);
-    ofn.lpstrFilter = "All\0*.*\0PNM\0*.pnm; *.ppm; *pgm\0";
+    ofn.lpstrFilter = L"All\0*.*\0PNM\0*.pnm; *.ppm; *pgm\0";
     ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
+    ofn.lpstrFileTitle = nullptr;
     ofn.nMaxFileTitle = 0;
-    ofn.lpstrInitialDir = NULL;
+    ofn.lpstrInitialDir = nullptr;
     ofn.Flags = OFN_EXPLORER;
 
-    bool status = GetOpenFileNameA(&ofn);
-    if (!status) {
-        throw std::exception();
-    }
-
-    return ofn.lpstrFile;
+    info("GetOpenFileName call");
+    bool status = GetOpenFileNameW(&ofn);
+    info("GetOpenFileName finished");
+    fileName = ofn.lpstrFile;
+    return status;
 }

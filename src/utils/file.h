@@ -5,18 +5,21 @@
 #ifndef MEDGRAPHICS_FILE_H
 #define MEDGRAPHICS_FILE_H
 
-#include <string>
-#include <vector>
+#include <fstream>
+#include <filesystem>
 
 namespace utils {
-    std::wstring toUtf16(const std::string& str);
+    std::ofstream
+    openFileOStream(const std::filesystem::path& file, const std::ios_base::openmode& mode = std::ios::binary);
 
-    /// @return nullptr if file is less than n or bytes array
-    unsigned char* readNBytes(const std::string& fileName, int n);
+    std::ifstream openFileIStream(const std::filesystem::path& file, const std::ios_base::openmode& mode);
 
-    std::string readAllText(const std::string& fileName);
+    std::string readAllText(const std::filesystem::path& file);
 
-    std::vector<char> readAllBytes(const std::string& fileName);
+    std::vector<char> readAllBytes(const std::filesystem::path& file);
+
+    /// @return nullptr if file is less than n, bytes array otherwise (delete is on caller responsibility)
+    unsigned char* readNBytes(const std::filesystem::path& file, int n);
 }
 
 #endif //MEDGRAPHICS_FILE_H

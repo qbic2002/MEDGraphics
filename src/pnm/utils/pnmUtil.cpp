@@ -4,7 +4,6 @@
 
 #include <string>
 #include "pnmUtil.h"
-#include "fileUtil.h"
 #include "../../utils/file.h"
 
 int parsePnmMode(const char* fileData, PNMMode& pnmMode) {
@@ -207,7 +206,7 @@ PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
     return pnmMeta;
 }
 
-bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
+bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     std::string mode;
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
         mode = "P5";
@@ -252,14 +251,17 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
         result.insert(item.second, item.first);
     }
+    os.write(result.c_str(), result.length());
+    os.flush();
+    return true;
+}
+
+bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
     std::ofstream fileStream(filename, std::ios::binary);
     if (!fileStream.is_open()) {
         throw std::exception();
     }
-    writeToFile(result.c_str(), fileStream, result.length());
-    fileStream.close();
-
-    return true;
+    return writePNMImage(pnmImage, fileStream);
 }
 
 PNMImage pnm::convertP6ToP5(const PNMImage& other) {

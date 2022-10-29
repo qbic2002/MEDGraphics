@@ -57,11 +57,6 @@ namespace view {
         void clear();
 
         void uploadVertexData();
-
-        int previousImageIndex = -1;
-        GLuint bgTextureIds[PREVIEW_IMG_COUNT];
-
-        void addBgTextureIds(GLuint* newIds);
     };
 }
 

@@ -13,7 +13,7 @@ namespace view {
     public:
         TextView(Context* context, const Style& style);
 
-        TextView(Context* context, const Style& style, const std::string& _text);
+        TextView(Context* context, const Style& style, const String& _text);
 
         TextView(const TextView& other) = delete;
 
@@ -25,12 +25,12 @@ namespace view {
 
         void render() override;
 
-        void setText(const std::string& _text);
+        void setText(const String& _text);
 
-        const std::string& getText() const;
+        const String& getText() const;
 
     private:
-        std::string text;
+        String text;
     };
 
 } // view

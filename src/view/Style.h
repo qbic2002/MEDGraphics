@@ -8,7 +8,7 @@
 #include <iostream>
 #include "../img/rgba.h"
 #include "../gl/Texture.h"
-#include "Assets.h"
+#include "../core/Assets.h"
 #include "../utils/R.h"
 
 namespace view {
@@ -90,7 +90,7 @@ namespace view {
         rgba color{};
         std::shared_ptr<gl::Texture> image;
 
-        Background& setImage(const std::string& fileName) {
+        Background& setImage(const std::filesystem::path& fileName) {
             image = assets::texture(fileName);
             return *this;
         }

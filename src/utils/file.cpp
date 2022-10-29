@@ -2,42 +2,36 @@
 // Created by danil on 16.09.2022.
 //
 
-#include <iostream>
-#include <fstream>
-#include <winnls.h>
-#include <filesystem>
 #include "file.h"
-#include "R.h"
+#include <iostream>
 
 namespace utils {
-    std::wstring toUtf16(const std::string& str) {
-        std::wstring res;
-        int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), nullptr, 0);
-        if (len > 0) {
-            res.resize(len);
-            MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), &res[0], len);
+    std::ofstream openFileOStream(const std::filesystem::path& file, const std::ios_base::openmode& mode) {
+        std::ofstream ofs(file, mode);
+        if (!ofs.is_open()) {
+            std::cerr << "Could not open file " << file << std::endl;
+            throw std::exception();
         }
-        return res;
+        return ofs;
     }
 
-    std::ifstream openFileStream(const std::string& fileName, const std::ios_base::openmode& mode) {
-        std::ifstream ifs(toUtf16(fileName).c_str(), mode);
+    std::ifstream openFileIStream(const std::filesystem::path& file, const std::ios_base::openmode& mode) {
+        std::ifstream ifs(file, mode);
         if (!ifs.is_open()) {
-            std::cerr << "Could not open file '" << fileName << "'" << std::endl;
-            std::wcerr << toUtf16(fileName) << "\n";
+            std::cerr << "Could not open file " << file << std::endl;
             throw std::exception();
         }
         return ifs;
     }
 
-    std::string readAllText(const std::string& fileName) {
-        std::ifstream ifs = openFileStream(fileName, std::ios::in);
+    std::string readAllText(const std::filesystem::path& file) {
+        std::ifstream ifs = openFileIStream(file, std::ios::in);
         std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
         return content;
     }
 
-    std::vector<char> readAllBytes(const std::string& fileName) {
-        std::ifstream ifs = openFileStream(fileName, std::ios::binary | std::ios::ate);
+    std::vector<char> readAllBytes(const std::filesystem::path& file) {
+        std::ifstream ifs = openFileIStream(file, std::ios::binary | std::ios::ate);
         std::ifstream::pos_type length = ifs.tellg();
 
         std::vector<char> content(length);
@@ -48,8 +42,8 @@ namespace utils {
         return content;
     }
 
-    unsigned char* readNBytes(const std::string& fileName, int n) {
-        std::ifstream ifs = openFileStream(fileName, std::ios::binary | std::ios::ate);
+    unsigned char* readNBytes(const std::filesystem::path& file, int n) {
+        std::ifstream ifs = openFileIStream(file, std::ios::binary | std::ios::ate);
         std::ifstream::pos_type length = ifs.tellg();
 
         if (length < n) return nullptr;
