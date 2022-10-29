@@ -9,7 +9,7 @@
 #include "utils/windowSize.h"
 #include "pnm/PNMImage.h"
 #include "gl/ShaderProgram.h"
-#include "view/Context.h"
+#include "core/Context.h"
 #include "utils/encoding.h"
 #include "utils/logging.h"
 

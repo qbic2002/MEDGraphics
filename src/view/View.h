@@ -6,7 +6,7 @@
 #define MEDGRAPHICS_VIEW_H
 
 #include <functional>
-#include "Context.h"
+#include "../core/Context.h"
 #include "../gl/Texture.h"
 #include "../img/rgba.h"
 #include "Style.h"

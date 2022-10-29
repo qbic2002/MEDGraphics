@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_ROOTVIEW_H
 #define MEDGRAPHICS_ROOTVIEW_H
 
-#include "../view/Context.h"
+#include "../core/Context.h"
 #include "../view/Style.h"
 #include "../view/ViewGroup.h"
 
