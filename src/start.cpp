@@ -12,6 +12,7 @@
 #include "core/Context.h"
 #include "utils/encoding.h"
 #include "utils/logging.h"
+#include "utils/OsLock.h"
 
 using namespace std;
 using namespace utils;
@@ -93,6 +94,8 @@ void init(GLFWwindow* window, const wstring& fileName, const fs::path& appDir) {
 }
 
 int main([[maybe_unused]] int argc, char** argv) {
+//    OsLock() << "hey " << 5 << std::endl;
+    OsLock() << "hey1 " << 5 << "\n";
     HANDLE_SIGSEGV
     utils::configureUtf8();
     auto args = utils::readArgs(argc, argv);

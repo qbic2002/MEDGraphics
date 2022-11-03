@@ -15,7 +15,7 @@ ImageFileStorage::ImageFileStorage() {
 }
 
 void ImageFileStorage::open(const std::filesystem::path& file) {
-    info() << "open " << file << std::endl;
+    info() << "open " << file;
     {
         std::lock_guard lock(mutex);
         if (!exists(file)) {
@@ -40,14 +40,14 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
 void ImageFileStorage::update() {
     for (auto& imageFile: nearImageFiles()) {
         if (imageFile.raster != nullptr && imageFile.textureId == 0) {
-            info() << "load texture " << imageFile.getPath().filename().string() << std::endl;
+            info() << "load texture " << imageFile.getPath().filename().string();
             imageFile.textureId = gl::loadTexture(imageFile.raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
         }
     }
 
     for (auto& imageFile: notNearImageFiles()) {
         if (imageFile.raster != nullptr) {
-            info() << "unload texture " << imageFile.getPath().filename().string() << std::endl;
+            info() << "unload texture " << imageFile.getPath().filename().string();
             imageFile.deleteRaster();
             imageFile.deleteTexture();
         }
@@ -92,7 +92,7 @@ void ImageFileStorage::addImageChangedListener(const std::function<void()>& list
 }
 
 void ImageFileStorage::setCurDir(const fs::path& dir) {
-    info() << "setCurDir " << dir << std::endl;
+    info() << "setCurDir " << dir;
     curDir = dir;
     curDirImageFiles.clear();
 
@@ -104,7 +104,7 @@ void ImageFileStorage::setCurDir(const fs::path& dir) {
             curDirImageFiles.emplace_back(file);
         }
     }
-    info() << "setCurDir " << dir << " finished" << std::endl;
+    info() << "setCurDir " << dir << " finished";
 }
 
 void ImageFileStorage::runService() {

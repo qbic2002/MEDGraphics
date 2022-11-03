@@ -14,7 +14,7 @@ namespace utils {
 
     void TimeStamp::report(const std::string& label) const {
         auto time = duration_cast<milliseconds>(high_resolution_clock::now() - start);
-        info() << label << " took " << time.count() << " ms" << std::endl;
+        info() << label << " took " << time.count() << " ms";
     }
 
     unsigned long long TimeStamp::ms() const {

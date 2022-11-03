@@ -7,8 +7,9 @@
 
 #include <iostream>
 #include <string>
+#include "OsLock.h"
 
-std::ostream& info();
+utils::OsLock info(std::ostream& = std::cout);
 
 void info(const std::string& s);
 

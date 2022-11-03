@@ -5,6 +5,7 @@
 #include <string>
 #include "pnmUtil.h"
 #include "../../utils/file.h"
+#include "../../utils/logging.h"
 
 PNMMode readPnmMode(const char* fileData) {
     if (fileData[0] == 'P') {
@@ -112,7 +113,7 @@ PNMImage pnm::readPNMImageFromMemory(const char* data, unsigned int length) {
     pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader, length);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
-        std::cout << item.first;
+        info() << item.first;
     }
     return std::move(pnmImage);
 }
@@ -131,11 +132,11 @@ PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
             int offset = i;
             metaInf.push_back(ch);
             ch = fileData[++i];
-            while (ch != '\n') {
+            while (!isNewLine(ch)) {
                 metaInf.push_back(ch);
                 ch = fileData[++i];
             }
-            metaInf.push_back(ch);
+
             pnmMeta.addMeta(metaInf, offset);
         }
     }
@@ -186,7 +187,8 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
             .append(data);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
-        result.insert(item.second, item.first);
+        std::string curr_meta = item.first + '\n';
+        result.insert(item.second, curr_meta);
     }
     os.write(result.c_str(), result.length());
     os.flush();
