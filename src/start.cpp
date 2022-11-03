@@ -29,11 +29,15 @@ GLFWwindow* createWindow(int width, int height, const char* title, bool vsync) {
 
     glfwWindowHint(GLFW_SAMPLES, 16);
     glfwWindowHint(GLFW_DECORATED, 0);
+    glfwWindowHint(GLFW_VISIBLE, 0);
+    auto* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return nullptr;
     }
+    glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
+    glfwShowWindow(window);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(vsync ? 1 : 0);
     return window;
