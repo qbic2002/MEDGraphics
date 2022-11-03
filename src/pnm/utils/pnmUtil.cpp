@@ -21,30 +21,27 @@ inline bool isDigit(char c) {
     return '0' <= c && c <= '9';
 }
 
-int parsePnmInt(const char* fileData, int& offset) {
+inline bool isNewLine(char c) {
+    return c == '\n' || c == '\r';
+}
+
+int parsePnmInt(const char* data, int& offset) {
     int num = 0;
+    bool hasReadNum = false;
 
     while (true) {
-        if (fileData[offset] == '#') {
-            while (fileData[offset] != '\n' && fileData[offset] != '\r') {
+        if (data[offset] == '#') {
+            while (!isNewLine(data[offset])) {
                 offset++;
             }
-            offset++;
             continue;
-        }
-        if ('0' <= fileData[offset] && fileData[offset] <= '9')
+        } else if (isDigit(data[offset])) {
+            num = num * 10 + data[offset] - '0';
+            hasReadNum = true;
+        } else if (hasReadNum) {
             break;
-        offset++;
-    }
-
-    while ('0' <= fileData[offset] && fileData[offset] <= '9') {
-        num = num * 10 + fileData[offset] - '0';
-        offset++;
-    }
-    if (fileData[offset] == '#') {
-        while (fileData[offset] != '\n' && fileData[offset] != '\r') {
-            offset++;
         }
+        offset++;
     }
     offset++;
 
