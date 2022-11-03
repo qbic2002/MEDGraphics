@@ -16,7 +16,7 @@ public:
     PNMMode pnmMode;
     int width;
     int height;
-    int maxGrey;
+    int maxGray;
 };
 
 

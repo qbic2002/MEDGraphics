@@ -7,10 +7,12 @@
 
 #include <type_traits>
 #include "RGBAPixel.h"
-#include "GrayPixel.h"
+#include "PixelGray8.h"
+#include "PixelRGB8.h"
 
 enum PixelType {
     RGBA,
+    RGB8,
     GRAY
 };
 
@@ -20,7 +22,10 @@ namespace utils {
         if (std::is_same<T, RGBAPixel>::value) {
             return RGBA;
         }
-        if (std::is_same<T, GrayPixel>::value) {
+        if (std::is_same<T, PixelRGB8>::value) {
+            return RGB8;
+        }
+        if (std::is_same<T, PixelGray8>::value) {
             return GRAY;
         }
     }

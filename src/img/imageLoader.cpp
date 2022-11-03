@@ -54,17 +54,7 @@ namespace img {
         try {
             if (isPNMSignature(bytes)) {
                 auto pnmImage = pnm::readPNMImageFromMemory(bytes.data(), bytes.size());
-                switch (pnmImage.data->getPixelType()) {
-                    case RGBA: {
-                        return new Raster(*((Raster<RGBAPixel>*) pnmImage.data));
-                    }
-                    case GRAY: {
-                        return new Raster(*((Raster<GrayPixel>*) pnmImage.data));
-                    }
-                    default: {
-                        return nullptr;
-                    }
-                }
+                return pnmImage.data->clone();
             } else {
                 int width, height, channels;
                 unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,

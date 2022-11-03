@@ -11,7 +11,7 @@
 #include "rgba.h"
 #include "AbstractRaster.h"
 
-template<class T> requires CheckType<T>
+template<class T> requires CheckPixelType<T>
 class Raster : public AbstractRaster {
 public:
     Raster() = default;
@@ -227,6 +227,10 @@ public:
 
     const T* getRaster() const {
         return raster;
+    }
+
+    AbstractRaster* clone() const override {
+        return new Raster<T>(*this);
     }
 
 private:

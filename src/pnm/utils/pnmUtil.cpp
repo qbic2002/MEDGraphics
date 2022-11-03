@@ -6,156 +6,101 @@
 #include "pnmUtil.h"
 #include "../../utils/file.h"
 
-int parsePnmMode(const char* fileData, PNMMode& pnmMode) {
-    if (fileData[0] == 'P' && fileData[1] == '5') {
-        pnmMode = PNMMode::P5;
-        return 2;
+PNMMode readPnmMode(const char* fileData) {
+    if (fileData[0] == 'P') {
+        if (fileData[1] == '5')
+            return PNMMode::P5;
+        if (fileData[1] == '6')
+            return PNMMode::P6;
     }
 
-    if (fileData[0] == 'P' && fileData[1] == '6') {
-        pnmMode = PNMMode::P6;
-        return 2;
-    }
-
-    return -1;
+    throw std::exception();
 }
 
-int parsePnmWidth(const char* fileData, int offset, int& width) {
-    int i = offset;
-
-    std::string widthString;
-    while (true) {
-        char ch = fileData[i++];
-        if (ch == '#') {
-            while (fileData[i++] != '\n') {
-
-            }
-        }
-        if (ch >= '0' && ch <= '9') {
-            widthString.push_back(ch);
-        } else if (widthString.length() != 0) {
-            break;
-        }
-    }
-
-    width = std::stoi(widthString);
-
-    return i;
+inline bool isDigit(char c) {
+    return '0' <= c && c <= '9';
 }
 
-int parsePnmHeight(const char* fileData, int offset, int& height) {
-    int i = offset;
+int parsePnmInt(const char* fileData, int& offset) {
+    int num = 0;
 
-    std::string heightString;
     while (true) {
-        char ch = fileData[i++];
-        if (ch == '#') {
-            while (fileData[i++] != '\n') {
-
+        if (fileData[offset] == '#') {
+            while (fileData[offset] != '\n' && fileData[offset] != '\r') {
+                offset++;
             }
+            offset++;
+            continue;
         }
-        if (ch >= '0' && ch <= '9') {
-            heightString.push_back(ch);
-        } else if (heightString.length() != 0) {
+        if ('0' <= fileData[offset] && fileData[offset] <= '9')
             break;
-        }
+        offset++;
     }
 
-    height = std::stoi(heightString);
-
-    return i;
-}
-
-int parsePnmMaxGrey(const char* fileData, int offset, int& maxGrey) {
-    int i = offset;
-
-    std::string maxGreyString;
-    while (true) {
-        char ch = fileData[i++];
-        if (ch == '#') {
-            while (fileData[i++] != '\n') {
-
-            }
-        }
-        if (ch >= '0' && ch <= '9') {
-            maxGreyString.push_back(ch);
-        } else if (maxGreyString.length() != 0) {
-            break;
+    while ('0' <= fileData[offset] && fileData[offset] <= '9') {
+        num = num * 10 + fileData[offset] - '0';
+        offset++;
+    }
+    if (fileData[offset] == '#') {
+        while (fileData[offset] != '\n' && fileData[offset] != '\r') {
+            offset++;
         }
     }
+    offset++;
 
-    maxGrey = std::stoi(maxGreyString);
-
-    return i;
+    return num;
 }
 
 int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
-    PNMMode pnmMode;
-
-    int offset;
-    offset = parsePnmMode(fileData, pnmMode);
-    if (offset == -1) {
-        return -1;
-    }
-
-    int width;
-    offset = parsePnmWidth(fileData, offset, width);
-
-    int height;
-    offset = parsePnmHeight(fileData, offset, height);
-
-    int maxGrey;
-    offset = parsePnmMaxGrey(fileData, offset, maxGrey);
-
-    pnmHeader.pnmMode = pnmMode;
-    pnmHeader.width = width;
-    pnmHeader.height = height;
-    pnmHeader.maxGrey = maxGrey;
-
+    pnmHeader.pnmMode = readPnmMode(fileData);
+    int offset = 2;
+    pnmHeader.width = parsePnmInt(fileData, offset);
+    pnmHeader.height = parsePnmInt(fileData, offset);
+    pnmHeader.maxGray = parsePnmInt(fileData, offset);
     return offset;
 }
 
 AbstractRaster*
 pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader, unsigned int length) {
+    int i = offset;
+    switch (pnmHeader.pnmMode) {
+        case PNMMode::P5: {
+            if (offset + pnmHeader.width * pnmHeader.height > length)
+                throw std::exception();
 
-    int k = 0;
-    if (pnmHeader.pnmMode == PNMMode::P5) {
-        if (offset + pnmHeader.width * pnmHeader.height > length)
-            throw std::exception();
-
-        auto* grayData = new Raster<GrayPixel>(pnmHeader.width, pnmHeader.height);
-        for (int j = 0; j < pnmHeader.height; ++j) {
-            for (int i = 0; i < pnmHeader.width; ++i) {
-                unsigned char color = fileData[offset + k++];
-                if (color > pnmHeader.maxGrey) {
-                    throw std::exception();
+            auto* raster = new Raster<PixelGray8>(pnmHeader.width, pnmHeader.height);
+            for (int y = 0; y < pnmHeader.height; ++y) {
+                for (int x = 0; x < pnmHeader.width; ++x) {
+                    unsigned char color = fileData[i++];
+                    if (color > pnmHeader.maxGray) {
+                        throw std::exception();
+                    }
+                    raster->set(x, y, PixelGray8(color));
                 }
-                grayData->set(i, j, GrayPixel(color));
             }
+
+            return raster;
         }
+        case PNMMode::P6: {
+            if (offset + pnmHeader.width * pnmHeader.height * 3 > length)
+                throw std::exception();
 
-        return grayData;
-    }
+            auto* raster = new Raster<PixelRGB8>(pnmHeader.width, pnmHeader.height);
 
-    if (pnmHeader.pnmMode == PNMMode::P6) {
-        if (offset + pnmHeader.width * pnmHeader.height * 3 > length)
-            throw std::exception();
-
-        auto* rgbaData = new Raster<RGBAPixel>(pnmHeader.width, pnmHeader.height);
-
-        for (int j = 0; j < pnmHeader.height; ++j) {
-            for (int i = 0; i < pnmHeader.width; ++i) {
-                unsigned char r = fileData[offset + k++];
-                unsigned char g = fileData[offset + k++];
-                unsigned char b = fileData[offset + k++];
-                if (r > pnmHeader.maxGrey || g > pnmHeader.maxGrey || b > pnmHeader.maxGrey) {
-                    throw std::exception();
+            for (int y = 0; y < pnmHeader.height; ++y) {
+                for (int x = 0; x < pnmHeader.width; ++x) {
+                    unsigned char r = fileData[i++];
+                    unsigned char g = fileData[i++];
+                    unsigned char b = fileData[i++];
+                    if (r > pnmHeader.maxGray || g > pnmHeader.maxGray || b > pnmHeader.maxGray) {
+                        throw std::exception();
+                    }
+                    raster->set(x, y, {r, g, b});
                 }
-                rgbaData->set(i, j, RGBAPixel(r, g, b, 255));
             }
-        }
 
-        return rgbaData;
+            return raster;
+        }
     }
 
     throw std::exception();
@@ -165,13 +110,8 @@ PNMImage pnm::readPNMImageFromMemory(const char* data, unsigned int length) {
     PNMImage pnmImage{};
 
     int offset = pnm::parsePnmHeader(data, pnmImage.pnmHeader);
-    if (offset == -1) {
-        throw std::exception();
-    }
 
     pnmImage.pnmMeta = pnm::parseMeta(data, offset);
-
-
     pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader, length);
 
     for (const auto& item: pnmImage.pnmMeta.getMeta()) {
@@ -218,13 +158,13 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     std::string width = std::to_string(pnmImage.pnmHeader.width);
     std::string height = std::to_string(pnmImage.pnmHeader.height);
 
-    std::string maxGrey = std::to_string(pnmImage.pnmHeader.maxGrey);
+    std::string maxGrey = std::to_string(pnmImage.pnmHeader.maxGray);
 
     std::string data;
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(((Raster<GrayPixel>*) pnmImage.data)->get(j, i).grayScale);
+                data.push_back(((Raster<PixelGray8>*) pnmImage.data)->get(j, i).grayScale);
             }
         }
     }
@@ -271,7 +211,7 @@ PNMImage pnm::convertP6ToP5(const PNMImage& other) {
 
     pnmImage.pnmMeta = other.pnmMeta;
 
-    auto* grayRaster = new Raster<GrayPixel>(other.data->getWidth(), other.data->getHeight());
+    auto* grayRaster = new Raster<PixelGray8>(other.data->getWidth(), other.data->getHeight());
     for (unsigned int i = 0; i < other.data->getWidth() * other.data->getHeight(); ++i) {
         grayRaster->set(i, ((Raster<RGBAPixel>*) other.data)->get(i).toGray());
     }
