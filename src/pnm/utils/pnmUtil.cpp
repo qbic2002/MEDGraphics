@@ -168,9 +168,9 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).r);
-                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).g);
-                data.push_back(((Raster<RGBAPixel>*) pnmImage.data)->get(j, i).b);
+                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).r);
+                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).g);
+                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).b);
             }
         }
     }
@@ -210,7 +210,7 @@ PNMImage pnm::convertP6ToP5(const PNMImage& other) {
 
     auto* grayRaster = new Raster<PixelGray8>(other.data->getWidth(), other.data->getHeight());
     for (unsigned int i = 0; i < other.data->getWidth() * other.data->getHeight(); ++i) {
-        grayRaster->set(i, ((Raster<RGBAPixel>*) other.data)->get(i).toGray());
+        grayRaster->set(i, ((Raster<PixelRGBA8>*) other.data)->get(i).toGray());
     }
 
     pnmImage.data = grayRaster;

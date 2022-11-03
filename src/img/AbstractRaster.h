@@ -24,7 +24,7 @@ public:
 
     virtual PixelType getPixelType() const = 0;
 
-    virtual Raster<RGBAPixel> compress(int width, int height) const = 0;
+    virtual Raster<PixelRGBA8> compress(int width, int height) const = 0;
 
     virtual AbstractRaster* clone() const = 0;
 

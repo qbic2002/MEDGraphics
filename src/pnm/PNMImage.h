@@ -9,7 +9,7 @@
 #include "PNMHeader.h"
 #include "../img/Raster.h"
 #include "PNMMeta.h"
-#include "../img/RGBAPixel.h"
+#include "../img/PixelRGBA8.h"
 
 class PNMImage {
 public:

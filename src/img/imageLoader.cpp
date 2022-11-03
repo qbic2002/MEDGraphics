@@ -6,7 +6,7 @@
 #include "imageLoader.h"
 #include "../utils/file.h"
 #include "../stb_image.h"
-#include "RGBAPixel.h"
+#include "PixelRGBA8.h"
 #include "Raster.h"
 #include "../pnm/utils/pnmUtil.h"
 #include <cmath>
@@ -22,17 +22,17 @@ namespace img {
                                                      (const unsigned char*) "P6"
                                              });
 
-    Raster<RGBAPixel>* rgbaDataToRaster(const unsigned char* data, int width, int height, int channels) {
-        auto* raster = new Raster<RGBAPixel>(width, height);
+    Raster<PixelRGBA8>* rgbaDataToRaster(const unsigned char* data, int width, int height, int channels) {
+        auto* raster = new Raster<PixelRGBA8>(width, height);
         if (channels == 3) {
             int pixelsCount = width * height;
             for (unsigned int i = 0; i < pixelsCount; i++) {
-                raster->set(i, RGBAPixel(data[0], data[1], data[2], 255));
+                raster->set(i, PixelRGBA8(data[0], data[1], data[2], 255));
                 data += channels;
             }
         } else {
             for (unsigned int i = 0; i < width * height * 4; i += 4) {
-                raster->set(i / 4, RGBAPixel(data[i], data[i + 1], data[i + 2], data[i + 3]));
+                raster->set(i / 4, PixelRGBA8(data[i], data[i + 1], data[i + 2], data[i + 3]));
             }
         }
         return raster;

@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "Pixel.h"
-#include "RGBAPixel.h"
+#include "PixelRGBA8.h"
 #include "rgba.h"
 #include "AbstractRaster.h"
 
@@ -109,18 +109,18 @@ public:
         rgbaRaster[index] = pixel.toRGBA();
     }
 
-    Raster<RGBAPixel> compress(int newWidth, int newHeight) const override {
+    Raster<PixelRGBA8> compress(int newWidth, int newHeight) const override {
         if (newWidth > width_ || newHeight > height_) {
             throw std::exception();
         }
-        Raster<RGBAPixel> rgbaR(width_, height_);
+        Raster<PixelRGBA8> rgbaR(width_, height_);
         for (int i = 0; i < height_; ++i) {
             for (int j = 0; j < width_; ++j) {
-                rgbaR.set(j, i, RGBAPixel(this->get(j, i).toRGBA()));
+                rgbaR.set(j, i, PixelRGBA8(this->get(j, i).toRGBA()));
             }
         }
 
-        Raster<RGBAPixel> rgbaCompressed(newWidth, newHeight);
+        Raster<PixelRGBA8> rgbaCompressed(newWidth, newHeight);
         int pixelsInOneInWidth = width_ / newWidth;
         int pixelsInOneInHeight = height_ / newHeight;
 
@@ -198,7 +198,7 @@ public:
                     newA /= n;
                 }
 
-                rgbaCompressed.set(j, i, RGBAPixel(newR, newG, newB, newA));
+                rgbaCompressed.set(j, i, PixelRGBA8(newR, newG, newB, newA));
             }
         }
 

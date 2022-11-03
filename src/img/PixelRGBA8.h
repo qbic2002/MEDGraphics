@@ -2,21 +2,21 @@
 // Created by golov on 15.09.2022.
 //
 
-#ifndef MEDGRAPHICS_RGBAPIXEL_H
-#define MEDGRAPHICS_RGBAPIXEL_H
+#ifndef MEDGRAPHICS_PIXELRGBA8_H
+#define MEDGRAPHICS_PIXELRGBA8_H
 
 #include "Pixel.h"
 #include "PixelGray8.h"
 
-class RGBAPixel : public Pixel {
+class PixelRGBA8 : public Pixel {
 public:
-    RGBAPixel() : RGBAPixel(0, 0, 0, 0) {
+    PixelRGBA8() : PixelRGBA8(0, 0, 0, 0) {
     }
 
-    RGBAPixel(rgba rgba) : rgba(rgba) {
+    PixelRGBA8(rgba rgba) : rgba(rgba) {
     }
 
-    RGBAPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {
+    PixelRGBA8(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {
     }
 
     PixelGray8 toGray() const {
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif //MEDGRAPHICS_RGBAPIXEL_H
+#endif //MEDGRAPHICS_PIXELRGBA8_H

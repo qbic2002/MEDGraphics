@@ -6,7 +6,7 @@
 #define MEDGRAPHICS_PIXELTYPE_H
 
 #include <type_traits>
-#include "RGBAPixel.h"
+#include "PixelRGBA8.h"
 #include "PixelGray8.h"
 #include "PixelRGB8.h"
 
@@ -19,7 +19,7 @@ enum PixelType {
 namespace utils {
     template<class T>
     PixelType getPixelType() {
-        if (std::is_same<T, RGBAPixel>::value) {
+        if (std::is_same<T, PixelRGBA8>::value) {
             return RGBA;
         }
         if (std::is_same<T, PixelRGB8>::value) {

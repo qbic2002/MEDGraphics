@@ -8,9 +8,9 @@
 #include "utils/pnmUtil.h"
 
 int main() {
-    std::cout << sizeof(RGBAPixel) << " " << sizeof(Pixel) << "\n";
+    std::cout << sizeof(PixelRGBA8) << " " << sizeof(Pixel) << "\n";
 
-    Raster<RGBAPixel> raster(10, 10);
+    Raster<PixelRGBA8> raster(10, 10);
     PNMImage pnmImage = pnm::readPNMImage("assets/qbic.ppm");
 
     std::cout << pnmImage.pnmHeader.pnmMode << " " << pnmImage.pnmHeader.width << " " << pnmImage.pnmHeader.height
