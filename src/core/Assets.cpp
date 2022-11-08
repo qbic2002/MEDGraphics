@@ -7,9 +7,13 @@
 #include <functional>
 
 namespace assets {
+    /// Shared object repository based on shared smart pointers and unordered map
+    /// @tparam Key - key type
+    /// @tparam Value - value type
     template<class Key, class Value>
     class assets_repo {
     public:
+        /// Return value by key if exists; create, put in storage and return created otherwise
         std::shared_ptr<Value> computeIfAbsent(const Key& key, std::function<Value*(const Key& key)> provider) {
             auto iter = storage.find(key);
             if (iter != storage.end()) {
@@ -34,6 +38,7 @@ namespace assets {
     assets_repo<std::string, gl::Texture> textures;
     assets_repo<unsigned, gl::FontRenderer> fontRenderers;
 
+    /// Hash-like convert std::string to unsigned int
     std::hash<std::string> stringHasher;
 
     std::shared_ptr<gl::Texture> texture(const std::filesystem::path& file) {
