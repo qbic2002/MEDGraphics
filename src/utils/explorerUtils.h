@@ -10,13 +10,13 @@
 namespace utils {
 
     /// Call explorer to choose file to open
-    /// \param fileName
+    /// \param filename
     /// \return true if result is got, false otherwise
-    bool getOpenFileName(std::wstring& fileName);
+    bool getOpenFileName(std::wstring& filename);
 
     /// Call explorer to choose file to save into
-    /// \param fileName
+    /// \param filename
     /// \return true if result is got, false otherwise
-    bool getSaveFileName(std::wstring& fileName);
+    bool getSaveFileName(std::wstring& filename);
 }
 #endif //MEDGRAPHICS_EXPLORERUTILS_H

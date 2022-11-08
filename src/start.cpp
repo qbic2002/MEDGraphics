@@ -12,7 +12,6 @@
 #include "core/Context.h"
 #include "utils/encoding.h"
 #include "utils/logging.h"
-#include "utils/OsLock.h"
 
 using namespace std;
 using namespace utils;

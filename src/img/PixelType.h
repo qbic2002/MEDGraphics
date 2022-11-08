@@ -11,7 +11,7 @@
 #include "PixelRGB8.h"
 
 enum PixelType {
-    RGBA,
+    RGBA8,
     RGB8,
     GRAY
 };
@@ -20,7 +20,7 @@ namespace utils {
     template<class T>
     PixelType getPixelType() {
         if (std::is_same<T, PixelRGBA8>::value) {
-            return RGBA;
+            return RGBA8;
         }
         if (std::is_same<T, PixelRGB8>::value) {
             return RGB8;

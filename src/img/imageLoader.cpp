@@ -8,7 +8,7 @@
 #include "../stb_image.h"
 #include "PixelRGBA8.h"
 #include "Raster.h"
-#include "../pnm/utils/pnmUtil.h"
+#include "../pnm/pnmUtils.h"
 #include <cmath>
 
 namespace img {

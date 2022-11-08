@@ -7,7 +7,7 @@
 #include "../utils/logging.h"
 #include "../utils/explorerUtils.h"
 #include "../utils/file.h"
-#include "../pnm/utils/pnmUtil.h"
+#include "../pnm/pnmUtils.h"
 #include "../widget/MessageView.h"
 
 Context::Context(GLFWwindow* window, const fs::path& appDir) : window(window), appDir(appDir) {
@@ -129,8 +129,7 @@ void Context::saveImage() {
     if (!utils::getSaveFileName(filename))
         return;
     try {
-        auto os = utils::openFileOStream(filename);
-        pnm::writePNMImage(PNMImage(imageFileStorage.getCurImageFile()->raster), os);
+        pnm::writePNMImage(PNMImage(imageFileStorage.getCurImageFile()->raster), filename);
     } catch (std::exception&) {
         showError(L"Error with saving =(");
     }
@@ -141,10 +140,10 @@ view::ViewGroup* Context::getRootView() {
 }
 
 void Context::openImage() {
-    std::wstring fileName;
-    if (!utils::getOpenFileName(fileName))
+    std::wstring filename;
+    if (!utils::getOpenFileName(filename))
         return;
-    imageFileStorage.open(fileName);
+    imageFileStorage.open(filename);
 }
 
 void Context::showError(const String& message) {

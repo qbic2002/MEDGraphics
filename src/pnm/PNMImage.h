@@ -5,48 +5,46 @@
 #ifndef CG22_PROJECT_MEDGRAPHICS_PNMIMAGE_H
 #define CG22_PROJECT_MEDGRAPHICS_PNMIMAGE_H
 
-
-#include "PNMHeader.h"
+#include <vector>
 #include "../img/Raster.h"
-#include "PNMMeta.h"
-#include "../img/PixelRGBA8.h"
+
+enum PNMMode {
+    P5,
+    P6
+};
+
+class PNMHeader {
+public:
+    PNMMode pnmMode;
+    int width;
+    int height;
+    int maxGray;
+};
+
+class PNMMeta {
+public:
+    void addMeta(const std::string& meta, int offset);
+
+    const std::vector<std::pair<std::string, int>>& getMeta() const;
+
+private:
+    std::vector<std::pair<std::string, int>> meta_{};
+};
 
 class PNMImage {
 public:
 
     PNMImage() = default;
 
-    PNMImage(const AbstractRaster* abstractRaster) {
-        pnmHeader.height = abstractRaster->getHeight();
-        pnmHeader.width = abstractRaster->getWidth();
-        pnmHeader.maxGray = 255;
-        PixelType pixelType = abstractRaster->getPixelType();
-        switch (pixelType) {
-            case PixelType::GRAY: {
-                pnmHeader.pnmMode = PNMMode::P5;
-                break;
-            }
-            case PixelType::RGBA: {
-                pnmHeader.pnmMode = PNMMode::P6;
-                break;
-            }
-        }
-        data = abstractRaster->clone();
-    }
+    PNMImage(const AbstractRaster* abstractRaster);
 
-    PNMImage(const PNMImage& other) = delete;
+    PNMImage(const PNMImage& other);
 
-    PNMImage(PNMImage&& other) noexcept: pnmHeader(other.pnmHeader), pnmMeta(other.pnmMeta) {
-        data = other.data;
-        other.data = nullptr;
-    }
+    PNMImage(PNMImage&& other) noexcept;
+
+    ~PNMImage();
 
     PNMImage& operator=(const PNMImage& other) = delete;
-
-
-    ~PNMImage() {
-        delete data;
-    }
 
     PNMHeader pnmHeader;
     PNMMeta pnmMeta;

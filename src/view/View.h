@@ -22,11 +22,11 @@ namespace view {
 
     class View {
     public:
-        explicit View(Context* context) : context(context), style() {}
+        explicit View(Context* context);
 
-        View(Context* context, const Style& style) : context(context), style(style) {}
+        View(Context* context, const Style& style);
 
-        View(Context* context, const Style&& style) : context(context), style(style) {}
+        View(Context* context, const Style&& style);
 
         View(const View& other) = delete;
 

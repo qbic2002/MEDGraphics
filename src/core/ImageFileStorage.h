@@ -12,7 +12,7 @@
 #include <set>
 
 #define IMG_LOAD_R 2
-#define IMG_LOAD_D (IMG_LOAD_R * IMG_LOAD_R + 1)
+#define IMG_LOAD_D (IMG_LOAD_R + IMG_LOAD_R + 1)
 
 class ImageFileStorage {
 public:

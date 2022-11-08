@@ -2,11 +2,11 @@
 // Created by golov on 15.09.2022.
 //
 
-#ifndef MEDGRAPHICS_PNMUTIL_H
-#define MEDGRAPHICS_PNMUTIL_H
+#ifndef MEDGRAPHICS_PNM_UTILS_H
+#define MEDGRAPHICS_PNM_UTILS_H
 
-#include "../PNMImage.h"
-#include "../PNMMeta.h"
+#include <filesystem>
+#include "PNMImage.h"
 
 namespace pnm {
     int parsePnmHeader(const char* fileData, PNMHeader& pnmHeader);
@@ -16,11 +16,11 @@ namespace pnm {
 
     PNMMeta parseMeta(const char* fileData, int headerSize);
 
-    PNMImage readPNMImage(const char* fileName);
+    PNMImage readPnmImage(const std::filesystem::path& filename);
 
-    bool writePNMImage(const PNMImage& pnmImage, std::ofstream& os);
+    void writePNMImage(const PNMImage& pnmImage, std::ofstream& os);
 
-    bool writePNMImage(const PNMImage& pnmImage, const char* filename);
+    void writePNMImage(const PNMImage& pnmImage, const std::filesystem::path& filename);
 
     PNMImage convertP6ToP5(const PNMImage& other);
 
@@ -28,4 +28,4 @@ namespace pnm {
 }
 
 
-#endif //MEDGRAPHICS_PNMUTIL_H
+#endif //MEDGRAPHICS_PNM_UTILS_H

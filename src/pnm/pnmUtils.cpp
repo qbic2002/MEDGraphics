@@ -3,9 +3,9 @@
 //
 
 #include <string>
-#include "pnmUtil.h"
-#include "../../utils/file.h"
-#include "../../utils/logging.h"
+#include "pnmUtils.h"
+#include "../utils/file.h"
+#include "../utils/logging.h"
 
 PNMMode readPnmMode(const char* fileData) {
     if (fileData[0] == 'P') {
@@ -118,8 +118,8 @@ PNMImage pnm::readPNMImageFromMemory(const char* data, unsigned int length) {
     return std::move(pnmImage);
 }
 
-PNMImage pnm::readPNMImage(const char* fileName) {
-    std::vector<char> data = utils::readAllBytes(fileName);
+PNMImage pnm::readPnmImage(const std::filesystem::path& filename) {
+    std::vector<char> data = utils::readAllBytes(filename);
     return readPNMImageFromMemory(data.data(), data.size());
 }
 
@@ -144,7 +144,7 @@ PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
     return pnmMeta;
 }
 
-bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
+void pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     std::string mode;
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
         mode = "P5";
@@ -156,7 +156,7 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     std::string width = std::to_string(pnmImage.pnmHeader.width);
     std::string height = std::to_string(pnmImage.pnmHeader.height);
 
-    std::string maxGrey = std::to_string(pnmImage.pnmHeader.maxGray);
+    std::string maxGray = std::to_string(pnmImage.pnmHeader.maxGray);
 
     std::string data;
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
@@ -169,9 +169,9 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
         for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
             for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).r);
-                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).g);
-                data.push_back(((Raster<PixelRGBA8>*) pnmImage.data)->get(j, i).b);
+                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).r);
+                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).g);
+                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).b);
             }
         }
     }
@@ -182,7 +182,7 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
             .append("\n")
             .append(width).append(" ").append(height)
             .append("\n")
-            .append(maxGrey)
+            .append(maxGray)
             .append("\n")
             .append(data);
 
@@ -192,18 +192,17 @@ bool pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
     }
     os.write(result.c_str(), result.length());
     os.flush();
-    return true;
 }
 
-bool pnm::writePNMImage(const PNMImage& pnmImage, const char* filename) {
-    std::ofstream fileStream(filename, std::ios::binary);
-    if (!fileStream.is_open()) {
-        throw std::exception();
-    }
-    return writePNMImage(pnmImage, fileStream);
+void pnm::writePNMImage(const PNMImage& pnmImage, const std::filesystem::path& filename) {
+    std::ofstream fileStream = utils::openFileOStream(filename);
+    writePNMImage(pnmImage, fileStream);
 }
 
 PNMImage pnm::convertP6ToP5(const PNMImage& other) {
+    if (other.pnmHeader.pnmMode == P5)
+        return other;
+
     PNMImage pnmImage;
     pnmImage.pnmHeader = other.pnmHeader;
     pnmImage.pnmHeader.pnmMode = PNMMode::P5;
@@ -211,8 +210,10 @@ PNMImage pnm::convertP6ToP5(const PNMImage& other) {
     pnmImage.pnmMeta = other.pnmMeta;
 
     auto* grayRaster = new Raster<PixelGray8>(other.data->getWidth(), other.data->getHeight());
+    auto* rgbaData = (const rgba*) other.data->getRgbaData();
     for (unsigned int i = 0; i < other.data->getWidth() * other.data->getHeight(); ++i) {
-        grayRaster->set(i, ((Raster<PixelRGBA8>*) other.data)->get(i).toGray());
+        auto grayScale = (rgbaData[i].r + rgbaData[i].g + rgbaData[i].b) / 3;
+        grayRaster->set(i, PixelGray8(grayScale));
     }
 
     pnmImage.data = grayRaster;

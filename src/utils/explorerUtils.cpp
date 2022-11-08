@@ -6,7 +6,7 @@
 #include <windows.h>
 #include "logging.h"
 
-bool utils::getOpenFileName(std::wstring& fileName) {
+bool utils::getOpenFileName(std::wstring& filename) {
     OPENFILENAMEW ofn;
     wchar_t szFile[300];
 
@@ -26,11 +26,11 @@ bool utils::getOpenFileName(std::wstring& fileName) {
     info("GetOpenFileName call");
     bool status = GetOpenFileNameW(&ofn);
     info("GetOpenFileName finished");
-    fileName = ofn.lpstrFile;
+    filename = ofn.lpstrFile;
     return status;
 }
 
-bool utils::getSaveFileName(std::wstring& fileName) {
+bool utils::getSaveFileName(std::wstring& filename) {
     OPENFILENAMEW ofn;
     wchar_t szFile[300];
 
@@ -50,6 +50,6 @@ bool utils::getSaveFileName(std::wstring& fileName) {
     info("GetOpenFileName call");
     bool status = GetOpenFileNameW(&ofn);
     info("GetOpenFileName finished");
-    fileName = ofn.lpstrFile;
+    filename = ofn.lpstrFile;
     return status;
 }

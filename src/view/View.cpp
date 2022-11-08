@@ -32,6 +32,12 @@ namespace view {
         glEnd();
     }
 
+    View::View(Context* context) : context(context), style() {}
+
+    View::View(Context* context, const Style& style) : context(context), style(style) {}
+
+    View::View(Context* context, const Style&& style) : context(context), style(style) {}
+
     void View::renderBackground() {
         rgba curBgColor = styleState->background.color;
         if (curBgColor.a != 0) {
