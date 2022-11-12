@@ -13,14 +13,14 @@ namespace view {
         glVertex2f(x, y);
     }
 
-    ImageView::ImageView(Context* context, const Style& style) : View(context, style) {
+    ImageView::ImageView(MyApp* context, const Style& style) : View(context, style) {
         context->getImageFileStorage().addImageChangedListener([&]() {
             imageFitScreen();
         });
     }
 
     void ImageView::render() {
-        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageData == nullptr || imageData->textureId == 0)
             return;
         glBindTexture(GL_TEXTURE_2D, imageData->textureId);
@@ -77,7 +77,7 @@ namespace view {
     }
 
     void ImageView::imageFitScreen() {
-        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageData == nullptr || imageData->textureId == 0)
             return;
         float horRatio = calculatedPos.width / imageData->raster->getWidth();
@@ -90,7 +90,7 @@ namespace view {
     }
 
     void ImageView::validateZoom() {
-        auto* imageData = context->getImageFileStorage().getCurImageFile();
+        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageData == nullptr || imageData->textureId == 0)
             return;
         float scaledRasterWidth = imageData->raster->getWidth() * zoom;
@@ -118,7 +118,7 @@ namespace view {
     void ImageView::setZoomRatio(float ratio) {
         zoom = ratio;
         zoomOffset = logf(zoom) / logf(1.5);
-        auto* imageFile = context->getImageFileStorage().getCurImageFile();
+        auto* imageFile = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageFile == nullptr || imageFile->textureId == 0)
             return;
         float scaledRasterWidth = imageFile->raster->getWidth() * ratio;

@@ -2,20 +2,26 @@
 // Created by danil on 23.09.2022.
 //
 
-#include "ImageView.h"
 #include "WindowBar.h"
 #include "TextView.h"
 #include "DropDownView.h"
+#include "../view/LinearLayout.h"
 
 namespace view {
-    WindowBar::WindowBar(Context* context, const Style& style, ImageView* imageView) : ViewGroup(context, style) {
-        GLFWwindow* windowId = context->getWindowId();
+    WindowBar::WindowBar(MyApp* context, const Style& style, ImageView* imageView) : ViewGroup(context, style) {
+        auto* windowWrapper = context->getWindowWrapper();
 
         const unsigned iconSize = 16;
         const unsigned btnWidth = 46;
         const unsigned btnHeight = 30;
 
         const padding btnPadding = padding((float) (btnWidth - iconSize) / 2, (float) (btnHeight - iconSize) / 2);
+
+        auto viewGroup = new LinearLayout(context, Style()
+                .forEach([](StyleState& style) {
+                    style.position = {FILL_PARENT - btnWidth * 3, 0, btnWidth * 3, btnHeight};
+                }));
+        addChild(viewGroup);
 
         /// Close Icon
         auto view = new View(context, Style()
@@ -28,10 +34,10 @@ namespace view {
                     style.stateHover.background.color = {196, 43, 28, 255};
                     style.statePress.background.color = {198, 99, 99, 255};
                 }));
-        view->setOnClickListener([windowId]() {
-            glfwSetWindowShouldClose(windowId, 1);
+        view->setOnClickListener([windowWrapper]() {
+            windowWrapper->setShouldClose(1);
         });
-        addChild(view);
+        viewGroup->addChild(view);
 
         /// Minimize-Maximize Icon
         view = new View(context, Style()
@@ -44,17 +50,17 @@ namespace view {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
                     style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
                 }));
-        view->setOnClickListener([context, windowId]() {
-            (context->isMaximized() ? glfwRestoreWindow : glfwMaximizeWindow)(windowId);
+        view->setOnClickListener([windowWrapper]() {
+            windowWrapper->toggleMaximized();
         });
-        view->setOnWindowResizeListener([context](View& view, unsigned width, unsigned height) {
-            view.getStyle().forEach([&view, context](StyleState& state) {
-                state.background.setImage(view.getContext()->isMaximized()
+        view->setOnWindowResizeListener([context, windowWrapper](View& view, unsigned width, unsigned height) {
+            view.getStyle().forEach([&view, context, windowWrapper](StyleState& state) {
+                state.background.setImage(windowWrapper->isMaximized()
                                           ? context->getAppDir() / "assets/icons/ic_maximized.png"
                                           : context->getAppDir() / "assets/icons/ic_minimized.png");
             });
         });
-        addChild(view);
+        viewGroup->addChild(view);
 
         /// Iconify Icon
         view = new View(context, Style()
@@ -67,10 +73,10 @@ namespace view {
                     style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
                     style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
                 }));
-        view->setOnClickListener([windowId]() {
-            glfwIconifyWindow(windowId);
+        view->setOnClickListener([windowWrapper]() {
+            windowWrapper->iconify();
         });
-        addChild(view);
+        viewGroup->addChild(view);
 
         const unsigned controlIconSize = 32;
         const unsigned controlSize = WINDOW_BAR_HEIGHT;
@@ -147,7 +153,8 @@ namespace view {
                 L"MED Graphics");
         addChild(titleView);
 
-        context->getImageFileStorage().addImageChangedListener([titleView, context]() {
+
+        context->getImageFileStorage().addImageTitleChangedListener([titleView, context]() {
             auto* imageFile = context->getImageFileStorage().getCurImageFile();
             if (imageFile == nullptr) {
                 titleView->setText(L"MEDGraphics");

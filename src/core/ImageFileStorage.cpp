@@ -23,6 +23,8 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
             curDirImageFiles.clear();
             curIndex = -1;
             prevNotifiedIndex = -1;
+            prevImageAnnouncedIndex = -1;
+            prevImageTitleAnnouncedIndex = -1;
         } else {
             curPath = fs::canonical(file);
             setCurDir(fs::is_directory(curPath) ? curPath : curPath.parent_path());
@@ -53,11 +55,19 @@ void ImageFileStorage::update() {
         }
     }
 
-    if (curIndex != prevAnnouncedIndex && (curDirImageFiles.empty() || curDirImageFiles[curIndex].textureId != 0)) {
+    if (curIndex != prevImageTitleAnnouncedIndex) {
+        for (auto& listener: onImageTitleChangedListeners) {
+            listener();
+        }
+        prevImageTitleAnnouncedIndex = curIndex;
+    }
+
+    if (curIndex != prevImageAnnouncedIndex &&
+        (curDirImageFiles.empty() || curDirImageFiles[curIndex].textureId != 0)) {
         for (auto& listener: onImageChangedListeners) {
             listener();
         }
-        prevAnnouncedIndex = curIndex;
+        prevImageAnnouncedIndex = curIndex;
     }
 }
 
@@ -89,6 +99,10 @@ ImageFile* ImageFileStorage::getCurImageFile() {
 
 void ImageFileStorage::addImageChangedListener(const std::function<void()>& listener) {
     onImageChangedListeners.push_back(listener);
+}
+
+void ImageFileStorage::addImageTitleChangedListener(const std::function<void()>& listener) {
+    onImageTitleChangedListeners.push_back(listener);
 }
 
 void ImageFileStorage::setCurDir(const fs::path& dir) {

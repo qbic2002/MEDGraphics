@@ -32,6 +32,8 @@ public:
 
     void addImageChangedListener(const std::function<void()>& listener);
 
+    void addImageTitleChangedListener(const std::function<void()>& listener);
+
     int getCurImageIndex() const;
 
     CyclicImageFileSpan nearImageFiles();
@@ -53,8 +55,10 @@ private:
     std::mutex mutex;
     std::condition_variable notifier;
 
-    int prevAnnouncedIndex = -1;
+    int prevImageAnnouncedIndex = -1;
     std::vector<std::function<void()>> onImageChangedListeners;
+    int prevImageTitleAnnouncedIndex = -1;
+    std::vector<std::function<void()>> onImageTitleChangedListeners;
 };
 
 #endif //MEDGRAPHICS_IMAGE_FILE_STORAGE_H

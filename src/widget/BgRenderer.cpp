@@ -5,7 +5,7 @@
 #include "BgRenderer.h"
 #include <cmath>
 #include "../utils/random.h"
-#include "../utils/measureFps.h"
+#include "../core/MyApp.h"
 
 using namespace utils;
 
@@ -80,7 +80,7 @@ namespace view {
         glUniform1i(uniformHeightLoc, height);
         glBindVertexArray(rectsVaoId);
         {
-            auto& imageStorage = context->getImageFileStorage();
+            auto& imageStorage = ((MyApp*) context)->getImageFileStorage();
             int i = 0;
             for (auto& imageFile: imageStorage.nearImageFiles()) {
                 if (imageFile.textureId == 0) {

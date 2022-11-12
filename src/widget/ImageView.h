@@ -7,12 +7,13 @@
 
 #include "../gl/ShaderProgram.h"
 #include "../view/View.h"
+#include "../core/MyApp.h"
 
 namespace view {
 
     class ImageView : public View {
     public:
-        ImageView(Context* context, const Style& style);
+        ImageView(MyApp* context, const Style& style);
 
         ImageView(const ImageView& other) = delete;
 

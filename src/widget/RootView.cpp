@@ -10,7 +10,7 @@
 #include "MessageView.h"
 
 namespace view {
-    RootView::RootView(Context* context, const Style& style) : ViewGroup(context, style) {
+    RootView::RootView(MyApp* context, const Style& style) : ViewGroup(context, style) {
         addChild(new BgRenderer(context));
         auto* imageView = new ImageView(context, Style().edit([](Style& style) {
             style.isDraggable = true;
@@ -34,8 +34,8 @@ namespace view {
                                 DropDownViewElementPrototype(L"Fast exit", []() {
                                     throw std::exception();
                                 }),
-                                DropDownViewElementPrototype(L"Save to", [&]() { this->context->saveImage(); }),
-                                DropDownViewElementPrototype(L"Open...", [&]() { this->context->openImage(); })
+                                DropDownViewElementPrototype(L"Save to", [context]() { context->saveImage(); }),
+                                DropDownViewElementPrototype(L"Open...", [context]() { context->openImage(); })
                         },
                         Style().forEach([context](StyleState& state) {
                             state.position = {0, 0, FILL_PARENT, 24};

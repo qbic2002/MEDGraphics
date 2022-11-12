@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_ROOTVIEW_H
 #define MEDGRAPHICS_ROOTVIEW_H
 
-#include "../core/Context.h"
+#include "../core/MyApp.h"
 #include "../view/Style.h"
 #include "../view/ViewGroup.h"
 
@@ -13,7 +13,7 @@ namespace view {
 
     class RootView : public ViewGroup {
     public:
-        RootView(Context* context, const Style& style);
+        RootView(MyApp* context, const Style& style);
     };
 
 } // view

@@ -8,12 +8,14 @@
 #define WINDOW_BAR_HEIGHT 48
 
 #include "../view/ViewGroup.h"
+#include "../core/MyApp.h"
+#include "ImageView.h"
 
 namespace view {
 
     class WindowBar : public ViewGroup {
     public:
-        WindowBar(Context* context, const Style& style, ImageView* imageView);
+        WindowBar(MyApp* context, const Style& style, ImageView* imageView);
     };
 
 } // view

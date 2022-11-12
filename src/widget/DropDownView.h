@@ -41,6 +41,8 @@ namespace view {
 
         void toggleOpened();
 
+        bool onClick(const ClickEvent& event) override;
+
     protected:
         bool isOpened = false;
     };

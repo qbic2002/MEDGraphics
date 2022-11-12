@@ -71,4 +71,13 @@ namespace view {
     void DropDownView::toggleOpened() {
         isOpened = !isOpened;
     }
+
+    bool DropDownView::onClick(const ClickEvent& event) {
+        if (ViewGroup::onClick(event)) {
+            if (event.action == GLFW_RELEASE)
+                isOpened = false;
+            return true;
+        }
+        return false;
+    }
 } // view
