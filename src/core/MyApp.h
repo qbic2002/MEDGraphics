@@ -30,19 +30,6 @@ public:
     /// @param message Error message to be shown
     void showError(const String& message);
 
-    bool grabbing = false;
-    double prevX, prevY;
-    double grabX, grabY;
-    int grabWindowX, grabWindowY;
-
-    void onMouseMove(double x, double y) override;
-
-    void onMouseButton(ClickEvent& event) override;
-
-    void onMouseLeave() override;
-
-    void onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
-
     void onKey(int key, int scancode, int action, int mods) override;
 
 protected:

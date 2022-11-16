@@ -32,30 +32,31 @@ public:
 
     void setWindowPos(int x, int y) override;
 
+    void getWindowSize(int* width, int* height) override;
+
     void cursorPosCallback(double x, double y);
 
     void cursorEnterCallback(int entered);
 
-    void mouseButtonCallback(int button, int action, int mods);
+    void keyCallback(int key, int scancode, int action, int mods);
 
-    void windowMaximizeCallback(int maximized);
+    void mouseButtonCallback(int button, int action, int mods);
 
     void scrollCallback(double xOffset, double yOffset);
 
-    void keyCallback(int key, int scancode, int action, int mods);
-
-    void windowSizeCallback(int width, int height);
+    void windowMaximizeCallback(int maximized);
 
     void windowRefreshCallback();
 
-    void getWindowSize(int* width, int* height) override;
+    void windowSizeCallback(int width, int height);
 
 private:
     ContextCallbacks* callbacks;
     GLFWwindow* window;
     struct {
-        double x, y;
-    } cursorPos;
+        double x = 0, y = 0;
+    } cursorPos, grabPos;
+    bool isGrabbing = false;
     struct {
         int width = 0;
         int height = 0;

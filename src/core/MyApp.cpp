@@ -10,7 +10,6 @@
 #include "../widget/MessageView.h"
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
-    info() << "onCreated";
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -58,50 +57,6 @@ void MyApp::openImage() {
 void MyApp::showError(const String& message) {
     auto* msgView = (view::MessageView*) rootView->findViewById(MESSAGE_VIEW_ID);
     msgView->showMessage(message);
-}
-
-void MyApp::onMouseMove(double x, double y) {
-    double dx = x - prevX;
-    double dy = y - prevY;
-    prevX = x;
-    prevY = y;
-    rootView->onMouseMove(x, y);
-    if (grabbing) {
-        if (rootView->onDrag(x, y, dx, dy)) {
-            grabX = prevX;
-            grabY = prevY;
-            return;
-        }
-        if (!windowWrapper->isMaximized()) {
-            windowWrapper->getWindowPos(&grabWindowX, &grabWindowY);
-            windowWrapper->setWindowPos(grabWindowX + x - grabX, grabWindowY + y - grabY);
-        }
-    }
-}
-
-void MyApp::onMouseButton(ClickEvent& event) {
-    if (event.action == GLFW_RELEASE && grabbing)
-        grabbing = false;
-
-    if (rootView->onClick(event))
-        return;
-
-    if (event.action != GLFW_PRESS)
-        return;
-
-    grabbing = true;
-    grabX = prevX;
-    grabY = prevY;
-    windowWrapper->getWindowPos(&grabWindowX, &grabWindowY);
-}
-
-void MyApp::onMouseLeave() {
-    rootView->onMouseLeave();
-    grabbing = false;
-}
-
-void MyApp::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
-    rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
 }
 
 void MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {

@@ -22,8 +22,6 @@ class Context : public ContextCallbacks {
 public:
     Context() = default;
 
-    WindowWrapper* getWindowWrapper() const;
-
     Context(const Context& other) = delete;
 
     Context(const Context&& other) = delete;
@@ -46,15 +44,27 @@ public:
     /// Render current window state
     virtual void render() const;
 
-    /// @return root view of the context
-    view::ViewGroup* getRootView();
+    WindowWrapper* getWindowWrapper() const;
 
     /// @return current context's appDir - path to executable file directory
     const fs::path& getAppDir() const;
 
-    void onWindowResize(unsigned int width, unsigned int height) override;
+    /// @return root view of the context
+    view::ViewGroup* getRootView();
 
     void setRootView(view::ViewGroup* rootView);
+
+    bool onDrag(double x, double y, double dx, double dy) override;
+
+    bool onMouseButton(ClickEvent& event) override;
+
+    void onMouseLeave() override;
+
+    void onMouseMove(double x, double y) override;
+
+    void onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
+
+    void onWindowResize(unsigned int width, unsigned int height) override;
 
 protected:
     fs::path appDir;
