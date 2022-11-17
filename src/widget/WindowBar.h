@@ -7,7 +7,7 @@
 
 #define WINDOW_BAR_HEIGHT 48
 
-#include "../view/ViewGroup.h"
+#include "view/ViewGroup.h"
 #include "../core/MyApp.h"
 #include "ImageView.h"
 

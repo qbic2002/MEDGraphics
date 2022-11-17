@@ -4,9 +4,9 @@
 
 #include "MyApp.h"
 #include "../widget/RootView.h"
-#include "../utils/explorerUtils.h"
-#include "../pnm/PNMImage.h"
-#include "../pnm/pnmUtils.h"
+#include "utils/explorer_utils.h"
+#include "img/PNMImage.h"
+#include "img/pnmUtils.h"
 #include "../widget/MessageView.h"
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {

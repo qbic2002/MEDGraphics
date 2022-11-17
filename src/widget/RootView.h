@@ -6,8 +6,8 @@
 #define MEDGRAPHICS_ROOTVIEW_H
 
 #include "../core/MyApp.h"
-#include "../view/Style.h"
-#include "../view/ViewGroup.h"
+#include "view/Style.h"
+#include "view/ViewGroup.h"
 
 namespace view {
 

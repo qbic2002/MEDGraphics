@@ -6,8 +6,8 @@
 #define MEDGRAPHICS_BGRENDERER_H
 
 #include "../math/vec3.h"
-#include "../gl/ShaderProgram.h"
-#include "../view/View.h"
+#include "utils/ShaderProgram.h"
+#include "view/View.h"
 
 namespace view {
     struct rotation {

@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_TEXTVIEW_H
 #define MEDGRAPHICS_TEXTVIEW_H
 
-#include "../view/View.h"
+#include "view/View.h"
 
 namespace view {
 

@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-#include "../src/utils/encoding.h"
+#include "../view-lib/include/utils/encoding.h"
 
 using namespace std;
 

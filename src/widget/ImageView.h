@@ -5,8 +5,8 @@
 #ifndef MEDGRAPHICS_IMAGEVIEW_H
 #define MEDGRAPHICS_IMAGEVIEW_H
 
-#include "../gl/ShaderProgram.h"
-#include "../view/View.h"
+#include "utils/ShaderProgram.h"
+#include "view/View.h"
 #include "../core/MyApp.h"
 
 namespace view {

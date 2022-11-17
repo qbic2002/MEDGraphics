@@ -4,7 +4,7 @@
 
 #include "BgRenderer.h"
 #include <cmath>
-#include "../utils/random.h"
+#include "utils/random.h"
 #include "../core/MyApp.h"
 
 using namespace utils;

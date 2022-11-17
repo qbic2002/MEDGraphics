@@ -5,7 +5,7 @@
 #include "WindowBar.h"
 #include "TextView.h"
 #include "DropDownView.h"
-#include "../view/LinearLayout.h"
+#include <view/widget/LinearLayout.h>
 
 namespace view {
     WindowBar::WindowBar(MyApp* context, const Style& style, ImageView* imageView) : ViewGroup(context, style) {

@@ -5,11 +5,11 @@
 #ifndef MEDGRAPHICS_MYAPP_H
 #define MEDGRAPHICS_MYAPP_H
 
-#include "Context.h"
+#include <view/core/Context.h>
 #include "ImageFileStorage.h"
 #include <vector>
-#include <string>
-#include "../utils/R.h"
+#include <utils/String.h>
+#include "R.h"
 
 class MyApp : public Context {
 public:

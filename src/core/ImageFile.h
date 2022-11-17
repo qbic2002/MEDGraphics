@@ -7,7 +7,7 @@
 
 #include <filesystem>
 #include <GL/glew.h>
-#include "../img/AbstractRaster.h"
+#include <img/AbstractRaster.h>
 
 namespace fs = std::filesystem;
 

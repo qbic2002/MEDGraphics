@@ -8,8 +8,8 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
-#include "../src/stb_image.h"
-#include "../src/stb_image_write.h"
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 using namespace std;
 

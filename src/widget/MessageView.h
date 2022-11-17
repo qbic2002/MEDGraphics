@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_MESSAGEVIEW_H
 #define MEDGRAPHICS_MESSAGEVIEW_H
 
-#include "../view/ViewGroup.h"
+#include "view/ViewGroup.h"
 #include "TextView.h"
 
 namespace view {

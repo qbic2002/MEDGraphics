@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_DROPDOWNVIEW_H
 #define MEDGRAPHICS_DROPDOWNVIEW_H
 
-#include "../view/ViewGroup.h"
+#include "view/ViewGroup.h"
 #include "TextView.h"
 
 namespace view {

@@ -2,8 +2,8 @@
 // Created by danil on 21.10.2022.
 //
 
-#include "../src/utils/encoding.h"
-#include "../src/utils/file.h"
+#include "../view-lib/include/utils/encoding.h"
+#include "../view-lib/include/utils/file.h"
 
 int main() {
     utils::configureUtf8();

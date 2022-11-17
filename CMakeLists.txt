@@ -23,5 +23,6 @@ add_custom_target(copy_assets
 
 include_directories(include)
 
+add_subdirectory(view-lib/src)
 add_subdirectory(src)
 add_subdirectory(tools)

@@ -3,10 +3,10 @@
 //
 
 #include "ImageFileStorage.h"
-#include "../utils/logging.h"
-#include "../gl/utils.h"
-#include "../img/imageLoader.h"
-#include "../utils/measureTime.h"
+#include <utils/logging.h>
+#include <utils/gl_utils.h>
+#include <img/imageLoader.h>
+#include <utils/measureTime.h>
 #include "CyclicImageFileSpan.h"
 
 ImageFileStorage::ImageFileStorage() {
@@ -43,7 +43,9 @@ void ImageFileStorage::update() {
     for (auto& imageFile: nearImageFiles()) {
         if (imageFile.raster != nullptr && imageFile.textureId == 0) {
             info() << "load texture " << imageFile.getPath().filename().string();
-            imageFile.textureId = gl::loadTexture(imageFile.raster, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+            auto* raster = imageFile.raster;
+            imageFile.textureId = gl::loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight(),
+                                                  GL_RGBA, GL_CLAMP, GL_LINEAR, GL_NEAREST);
         }
     }
 
