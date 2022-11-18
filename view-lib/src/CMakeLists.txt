@@ -22,3 +22,4 @@ add_library(view STATIC
         utils/measureFps.cpp
         utils/measureTime.cpp
         utils/random.cpp ../include/utils/String.h)
+target_link_libraries(view ${LIBS})

@@ -13,14 +13,16 @@
 
 namespace view {
     struct Dimension {
-        float parentK;
-        float pixelK;
+        float pixel = 0;
+        float contentK = 0;
+        float parentK = 0;
+        float parentSpareK = 0;
 
         Dimension() noexcept;
 
-        Dimension(float pixelK) noexcept;
+        Dimension(float pixel) noexcept;
 
-        Dimension(float parentK, float pixelK) noexcept;
+        Dimension(float pixel, float contentK, float parentK, float parentSpareK) noexcept;
 
         float evaluate(float parentValue) const;
 
@@ -33,7 +35,9 @@ namespace view {
         Dimension operator*(const float& scalar) const;
     };
 
-    const Dimension FILL_PARENT{1, 0};
+    const Dimension FILL_PARENT{0, 0, 1, 0};
+
+    const Dimension WRAP_CONTENT{0, 1, 0, 0};
 
     struct position {
         Dimension x, y, width, height;
@@ -49,6 +53,14 @@ namespace view {
         padding(float horizontal, float vertical);
 
         padding(float left, float top, float right, float bottom);
+
+        float width() {
+            return left + right;
+        }
+
+        float height() {
+            return top + bottom;
+        }
     };
 
     struct border {
@@ -64,6 +76,14 @@ namespace view {
         border(float left, float top, float right, float bottom);
 
         border& setColor(rgba _color);
+
+        float width() {
+            return left + right;
+        }
+
+        float height() {
+            return top + bottom;
+        }
     };
 
     class Background {
@@ -87,6 +107,7 @@ namespace view {
         Background background{};
         rgba fontColor{COLOR_FONT_PRIMARY};
         std::shared_ptr<gl::FontRenderer> fontRenderer;
+        Dimension width, height;
     };
 
     struct Style {

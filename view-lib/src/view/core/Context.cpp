@@ -46,16 +46,20 @@ void Context::render() const {
     glDisable(GL_TEXTURE_2D);
 }
 
-view::ViewGroup* Context::getRootView() {
+void Context::onCreated(const std::vector<std::wstring>& args) {}
+
+void Context::update() {}
+
+view::View* Context::getRootView() {
     return rootView;
 }
 
-void Context::setRootView(view::ViewGroup* _rootView) {
+void Context::setRootView(view::View* _rootView) {
     delete rootView;
     rootView = _rootView;
     int width, height;
     windowWrapper->getWindowSize(&width, &height);
-    rootView->onMeasure({0, 0, width, height});
+    remeasureRootView(width, height);
     rootView->onWindowResize(width, height);
 }
 
@@ -92,6 +96,12 @@ void Context::onWindowResize(unsigned int width, unsigned int height) {
     glViewport(0, 0, width, height);
     glLoadIdentity();
     glOrtho(0, width, height, 0.01, -100, 100);
-    rootView->onMeasure({0, 0, (int) width, (int) height});
+    remeasureRootView(width, height);
     rootView->onWindowResize(width, height);
+}
+
+void Context::remeasureRootView(int width, int height) {
+    //    rootView->onMeasure({0, 0, (int) width, (int) height});
+    auto req = rootView->howMuchSpaceRequired();
+    rootView->useThisSpace(0, 0, req.width + req.parentPartW * width, req.height + req.parentPartH * height);
 }

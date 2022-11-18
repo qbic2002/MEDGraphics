@@ -10,25 +10,25 @@ namespace view {
         glColor4ubv((GLubyte*) &rgba);
     }
 
-    void glPositionQuad(const CalculatedPos& pos) {
+    void glPositionQuad(float x1, float y1, float x2, float y2) {
         glBegin(GL_QUADS);
-        glVertex2f(pos.x, pos.y);
-        glVertex2f(pos.x + pos.width, pos.y);
-        glVertex2f(pos.x + pos.width, pos.y + pos.height);
-        glVertex2f(pos.x, pos.y + pos.height);
+        glVertex2f(x1, y1);
+        glVertex2f(x2, y1);
+        glVertex2f(x2, y2);
+        glVertex2f(x1, y2);
         glEnd();
     }
 
-    void glTextureQuad(const CalculatedPos& pos, const padding& padding) {
+    void glTextureQuad(float x1, float y1, float x2, float y2) {
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0);
-        glVertex2f(pos.x + padding.left, pos.y + padding.bottom);
+        glVertex2f(x1, y1);
         glTexCoord2f(1, 0);
-        glVertex2f(pos.x + pos.width - padding.right, pos.y + padding.bottom);
+        glVertex2f(x2, y1);
         glTexCoord2f(1, 1);
-        glVertex2f(pos.x + pos.width - padding.right, pos.y + pos.height - padding.top);
+        glVertex2f(x2, y2);
         glTexCoord2f(0, 1);
-        glVertex2f(pos.x + padding.left, pos.y + pos.height - padding.top);
+        glVertex2f(x1, y2);
         glEnd();
     }
 
@@ -43,14 +43,14 @@ namespace view {
         if (curBgColor.a != 0) {
             glDisable(GL_TEXTURE_2D);
             glColor(curBgColor);
-            glPositionQuad(calculatedPos);
+            glPositionQuad(edges.left, edges.top, edges.right, edges.bottom);
             glEnable(GL_TEXTURE_2D);
             glColor4f(1, 1, 1, 1);
         }
         gl::Texture* bgImage = styleState->background.image.get();
         if (bgImage != nullptr) {
             bgImage->bind();
-            glTextureQuad(calculatedPos, styleState->padding);
+            glTextureQuad(edges.left, edges.top, edges.right, edges.bottom);
             bgImage->unbind();
         }
     }

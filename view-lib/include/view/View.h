@@ -49,19 +49,6 @@ namespace view {
 
         View& setOnClickListener(const std::function<void()>&& _onClickListener);
 
-        struct widthHeight {
-            int width;
-            int height;
-        };
-
-        virtual widthHeight onMeasure(int width, int height) {
-            return {0, 0};
-        }
-
-        virtual void onLayout(int left, int top, int right, int bottom) {
-
-        }
-
         virtual void onMeasure(const CalculatedPos& parentPos);
 
         virtual void onWindowResize(unsigned int width, unsigned int height);
@@ -96,6 +83,35 @@ namespace view {
 
         void setState(State _state);
 
+        struct space_requirement {
+            union {
+                struct {
+                    float width = 0;
+                    float height = 0;
+                    float parentPartW = 0;
+                    float parentPartH = 0;
+                    float parentSparePartW = 0;
+                    float parentSparePartH = 0;
+                };
+                struct {
+                    float size[2];
+                    float parentPart[2];
+                    float parentSparePart[2];
+                };
+            };
+        };
+
+        virtual space_requirement howMuchSpaceRequired() {
+            return {0, 0, 0, 0, 0, 0};
+        }
+
+        virtual void useThisSpace(float left, float top, float right, float bottom) {
+            edges.left = left;
+            edges.top = top;
+            edges.right = right;
+            edges.bottom = bottom;
+        }
+
     protected:
         Context* context;
         State state = DEFAULT;
@@ -104,7 +120,14 @@ namespace view {
         CalculatedPos calculatedPos{};
         std::function<void()> onClickListener = nullptr;
         std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
-        int id;
+        int id = 0;
+
+        struct edges {
+            float left = 0;
+            float top = 0;
+            float right = 0;
+            float bottom = 0;
+        } edges;
     };
 
 } // view

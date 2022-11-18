@@ -29,6 +29,10 @@ namespace view {
 
         const String& getText() const;
 
+        space_requirement howMuchSpaceRequired() override;
+
+        void useThisSpace(float left, float top, float right, float bottom) override;
+
     private:
         String text;
     };

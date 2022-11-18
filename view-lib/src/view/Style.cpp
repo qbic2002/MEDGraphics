@@ -5,30 +5,37 @@
 #include "view/Style.h"
 
 namespace view {
-    Dimension::Dimension() noexcept: parentK(0), pixelK(0) {}
+    Dimension::Dimension() noexcept: pixel(0), contentK(0), parentK(0), parentSpareK(0) {}
 
-    Dimension::Dimension(float pixelK) noexcept: parentK(0), pixelK(pixelK) {}
+    Dimension::Dimension(float pixel_) noexcept: pixel(pixel_), contentK(0), parentK(0), parentSpareK(0) {}
 
-    Dimension::Dimension(float parentK, float pixelK) noexcept: parentK(parentK), pixelK(pixelK) {}
+    Dimension::Dimension(float pixel_, float contentK, float parentK, float parentSpareK) noexcept
+            : pixel(pixel_), contentK(contentK), parentK(parentK), parentSpareK(parentSpareK) {}
 
     float Dimension::evaluate(float parentValue) const {
-        return parentK * parentValue + pixelK;
+        return parentK * parentValue + pixel;
     }
 
     Dimension Dimension::operator+(const Dimension& other) const {
-        return {parentK + other.parentK, pixelK + other.pixelK};
+        return {pixel + other.pixel,
+                contentK + other.contentK,
+                parentK + other.parentK,
+                parentSpareK + other.parentSpareK};
     }
 
     Dimension Dimension::operator-() const {
-        return {-parentK, -pixelK};
+        return {-pixel, -contentK, -parentK, -parentSpareK};
     }
 
     Dimension Dimension::operator-(const Dimension& other) const {
-        return {parentK - other.parentK, pixelK - other.pixelK};
+        return {pixel - other.pixel,
+                contentK - other.contentK,
+                parentK - other.parentK,
+                parentSpareK - other.parentSpareK};
     }
 
     Dimension Dimension::operator*(const float& scalar) const {
-        return {parentK * scalar, pixelK * scalar};
+        return {pixel * scalar, contentK * scalar, parentK * scalar, parentSpareK * scalar};
     }
 
     padding::padding() : padding(0) {}

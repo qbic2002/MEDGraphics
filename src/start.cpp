@@ -1,6 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "stb_image.h"
+#include <stb_image.h>
 #include "core/MyApp.h"
 
 int main([[maybe_unused]] int argc, char** argv) {

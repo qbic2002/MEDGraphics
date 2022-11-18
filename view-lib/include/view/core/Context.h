@@ -15,7 +15,7 @@
 namespace fs = std::filesystem;
 typedef unsigned int uint;
 namespace view {
-    class ViewGroup;
+    class View;
 }
 
 class Context : public ContextCallbacks {
@@ -36,10 +36,10 @@ public:
 
     void loop();
 
-    virtual void onCreated(const std::vector<std::wstring>& args) {};
+    virtual void onCreated(const std::vector<std::wstring>& args);
 
     /// Called before each render
-    virtual void update() {};
+    virtual void update();
 
     /// Render current window state
     virtual void render() const;
@@ -50,9 +50,9 @@ public:
     const fs::path& getAppDir() const;
 
     /// @return root view of the context
-    view::ViewGroup* getRootView();
+    view::View* getRootView();
 
-    void setRootView(view::ViewGroup* rootView);
+    void setRootView(view::View* _rootView);
 
     bool onDrag(double x, double y, double dx, double dy) override;
 
@@ -67,8 +67,10 @@ public:
     void onWindowResize(unsigned int width, unsigned int height) override;
 
 protected:
+    void remeasureRootView(int width, int height);
+
     fs::path appDir;
-    view::ViewGroup* rootView = nullptr;
+    view::View* rootView = nullptr;
     GLFWWindowProvider windowProvider;
     WindowWrapper* windowWrapper = nullptr;
 };
