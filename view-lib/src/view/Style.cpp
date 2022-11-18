@@ -38,6 +38,10 @@ namespace view {
         return {pixel * scalar, contentK * scalar, parentK * scalar, parentSpareK * scalar};
     }
 
+    Dimension Dimension::operator/(const float& scalar) const {
+        return *this * (1 / scalar);
+    }
+
     padding::padding() : padding(0) {}
 
     padding::padding(float value) : padding(value, value) {}

@@ -33,11 +33,13 @@ namespace view {
         Dimension operator-(const Dimension& other) const;
 
         Dimension operator*(const float& scalar) const;
+
+        Dimension operator/(const float& scalar) const;
     };
 
     const Dimension FILL_PARENT{0, 0, 1, 0};
-
     const Dimension WRAP_CONTENT{0, 1, 0, 0};
+    const Dimension FILL_SPARE{0, 0, 0, 1};
 
     struct position {
         Dimension x, y, width, height;

@@ -17,7 +17,7 @@ void ExpApp::onCreated(const std::vector<std::wstring>& args) {
             this,
             Style{{
                           .background = {127, 29, 38, 255},
-                          .width = WRAP_CONTENT,
+                          .width = FILL_PARENT,
                           .height = FILL_PARENT}},
             view::HORIZONTAL);
 
@@ -35,9 +35,10 @@ void ExpApp::onCreated(const std::vector<std::wstring>& args) {
     auto* textView2 = new TextView(
             this,
             Style{{
+                          .padding = padding(16),
                           .background = {38, 29, 127, 255},
                           .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18),
-                          .width = WRAP_CONTENT,
+                          .width = FILL_PARENT / 2,
                           .height = WRAP_CONTENT,
                   }}, L"Line 2");
     lay->addChild(textView2);

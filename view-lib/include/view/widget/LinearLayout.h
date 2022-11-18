@@ -14,12 +14,16 @@ namespace view {
         HORIZONTAL
     };
 
+    enum Gravity {
+        LEFT, TOP, RIGHT, BOTTOM, HCENTER, VCENTER, CENTER
+    };
+
     class LinearLayout : public ViewGroup {
     public:
-        LinearLayout(Context* context, const Style& style, Orientation orientation = VERTICAL) :
-                ViewGroup(context, style),
-                orientation(orientation) {
-        }
+        LinearLayout(Context* context, const Style& style, Orientation orientation = VERTICAL, Gravity gravity = CENTER)
+                : ViewGroup(context, style),
+                  orientation(orientation),
+                  gravity(gravity) {}
 
         space_requirement howMuchSpaceRequired() override {
             float childrenSize[2] = {0, 0};
@@ -59,7 +63,7 @@ namespace view {
                               bottom - styleState->padding.bottom - styleState->border.bottom};
 
             float innerSize[2] = {inner[2] - inner[0], inner[3] - inner[1]};
-            int oIndex = orientation == VERTICAL ? 1 : 0; // orientation index
+            int oIndex = orientation == HORIZONTAL ? 0 : 1; // orientation index
 
             float spareSpace = innerSize[oIndex];
             float spareWeight = 0;
@@ -68,10 +72,22 @@ namespace view {
                 spareSpace -= req.size[oIndex] + req.parentPart[oIndex] * innerSize[oIndex];
                 spareWeight += req.parentSparePart[oIndex];
             }
-            if (spareWeight == 0)
-                spareWeight = 1; // avoid division by zero
             if (spareSpace < 0)
                 spareSpace = 0;
+            if (spareWeight == 0) {
+                spareWeight = 1; // avoid division by zero
+                if (gravity == CENTER || gravity == HCENTER + oIndex) {
+                    inner[oIndex] += spareSpace / 2;
+                } else if (gravity == RIGHT + oIndex) {
+                    inner[oIndex] += spareSpace;
+                }
+            }
+            float nonOrientGravityK = 0;
+            if (gravity == CENTER || gravity == HCENTER + 1 - oIndex) {
+                nonOrientGravityK = 0.5;
+            } else if (gravity == RIGHT + 1 - oIndex) {
+                nonOrientGravityK = 1;
+            }
             for (auto* child: children) {
                 auto req = child->howMuchSpaceRequired();
 
@@ -79,19 +95,28 @@ namespace view {
                 for (int i = 0; i < 2; i++)
                     childEdges[i] = inner[i] + req.size[i] + req.parentPart[i] * innerSize[i];
 
+                float gravityShift = 0;
+
                 // add spare space on orientation line
                 childEdges[oIndex] += req.parentSparePart[oIndex] / spareWeight * spareSpace;
                 // add all spare space to non-orientation line
                 if (childEdges[1 - oIndex] >= inner[3 - oIndex] || req.parentSparePart[1 - oIndex] > 0) {
                     childEdges[1 - oIndex] = inner[3 - oIndex];
+                } else {
+                    gravityShift = nonOrientGravityK * (inner[3 - oIndex] - childEdges[1 - oIndex]);
+                    childEdges[1 - oIndex] += gravityShift;
+                    inner[1 - oIndex] += gravityShift;
                 }
 
                 child->useThisSpace(inner[0], inner[1], childEdges[0], childEdges[1]);
+                inner[1 - oIndex] -= gravityShift;
                 inner[oIndex] = childEdges[oIndex];
             }
         }
 
+    protected:
         Orientation orientation;
+        Gravity gravity;
     };
 
 } // view
