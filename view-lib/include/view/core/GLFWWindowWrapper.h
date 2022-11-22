@@ -12,13 +12,15 @@
 
 class GLFWWindowWrapper : public WindowWrapper {
 public:
-    GLFWWindowWrapper(ContextCallbacks* callbacks, GLFWwindow* window) : callbacks(callbacks), window(window) {}
+    GLFWWindowWrapper(ContextCallbacks* callbacks, GLFWwindow* window);
 
     void swapBuffers() override;
 
     bool shouldClose() override;
 
     void pollEvents() override;
+
+    void waitEvents() override;
 
     void setShouldClose(int value) override;
 

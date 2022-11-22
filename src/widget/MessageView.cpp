@@ -59,8 +59,8 @@ namespace view {
         isOpened = false;
     }
 
-    void MessageView::render() {
+    void MessageView::onDraw() {
         if (!isOpened) return;
-        ViewGroup::render();
+        ViewGroup::onDraw();
     }
 }

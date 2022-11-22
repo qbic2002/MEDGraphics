@@ -23,15 +23,13 @@ namespace view {
 
         TextView& operator=(const TextView&& other) = delete;
 
-        void render() override;
+        void onDraw() override;
 
         void setText(const String& _text);
 
         const String& getText() const;
 
-        space_requirement howMuchSpaceRequired() override;
-
-        void useThisSpace(float left, float top, float right, float bottom) override;
+        SpaceRequirement onMeasure() override;
 
     private:
         String text;

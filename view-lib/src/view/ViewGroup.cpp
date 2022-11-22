@@ -58,13 +58,16 @@ namespace view {
     }
 
     void ViewGroup::addChild(View* view) {
+        if (view == nullptr) {
+            throw std::runtime_error("view is null");
+        }
+        view->setParent(this);
         children.push_back(view);
     }
 
-    void ViewGroup::render() {
-        View::render();
+    void ViewGroup::onDraw() {
         for (auto* child: children) {
-            child->render();
+            child->draw();
         }
     }
 

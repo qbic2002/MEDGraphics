@@ -23,7 +23,7 @@ namespace view {
 
         ImageView& operator=(const ImageView&& other) = delete;
 
-        void render() override;
+        void onDraw() override;
 
         bool onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
 

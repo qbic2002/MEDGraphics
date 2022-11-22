@@ -40,7 +40,10 @@ void ExpApp::onCreated(const std::vector<std::wstring>& args) {
                           .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18),
                           .width = FILL_PARENT / 2,
                           .height = WRAP_CONTENT,
-                  }}, L"Line 2");
+                  }}.edit([](Style& style) {
+                style.stateHover.background = {127, 29, 127, 255};
+                style.statePress.background = {100, 20, 100, 255};
+            }), L"Line 2");
     lay->addChild(textView2);
 
     setRootView(lay);

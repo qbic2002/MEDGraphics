@@ -11,8 +11,7 @@ namespace view {
         setText(_text);
     }
 
-    void TextView::render() {
-        View::renderBackground();
+    void TextView::onDraw() {
 //        styleState->fontRenderer->renderText(text, calculatedPos.x + styleState->padding.left,
 //                                             calculatedPos.y + styleState->padding.top);
         styleState->fontRenderer->renderText(text, edges.left + styleState->padding.left + styleState->border.left,
@@ -21,13 +20,14 @@ namespace view {
 
     void TextView::setText(const String& _text) {
         text = _text;
+        invalidate();
     }
 
     const String& TextView::getText() const {
         return text;
     }
 
-    View::space_requirement TextView::howMuchSpaceRequired() {
+    View::SpaceRequirement TextView::onMeasure() {
         float width = styleState->padding.left + styleState->padding.right
                       + styleState->border.left + styleState->border.right
                       + styleState->width.pixel
@@ -46,7 +46,4 @@ namespace view {
                 .parentSparePartH = styleState->height.parentSpareK};
     }
 
-    void TextView::useThisSpace(float left, float top, float right, float bottom) {
-        View::useThisSpace(left, top, right, bottom);
-    }
 } // view

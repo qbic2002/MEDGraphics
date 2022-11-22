@@ -28,20 +28,22 @@ void Context::run(int argc, char** argv, uint width, uint height, const std::str
 
 void Context::loop() {
     while (!windowWrapper->shouldClose()) {
-        windowWrapper->pollEvents();
+        windowWrapper->waitEvents();
         update();
-        render();
-        windowWrapper->swapBuffers();
-        utils::updateTimer();
+        if (rootView->isDirty()) {
+            draw();
+            windowWrapper->swapBuffers();
+            utils::updateTimer();
+        }
 //        glfwWaitEvents();
     }
 }
 
-void Context::render() const {
+void Context::draw() const {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
 
-    rootView->render();
+    rootView->draw();
 
     glDisable(GL_TEXTURE_2D);
 }
@@ -83,6 +85,10 @@ void Context::onMouseLeave() {
     rootView->onMouseLeave();
 }
 
+void Context::onMouseEnter() {
+    rootView->onMouseEnter();
+}
+
 void Context::onMouseMove(double x, double y) {
     rootView->onMouseMove(x, y);
 }
@@ -101,7 +107,6 @@ void Context::onWindowResize(unsigned int width, unsigned int height) {
 }
 
 void Context::remeasureRootView(int width, int height) {
-    //    rootView->onMeasure({0, 0, (int) width, (int) height});
-    auto req = rootView->howMuchSpaceRequired();
-    rootView->useThisSpace(0, 0, req.width + req.parentPartW * width, req.height + req.parentPartH * height);
+    auto req = rootView->onMeasure();
+    rootView->setEdges(0, 0, req.width + req.parentPartW * width, req.height + req.parentPartH * height);
 }

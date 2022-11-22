@@ -24,7 +24,7 @@ namespace view {
 
         void addChild(View* view);
 
-        void render() override;
+        void onDraw() override;
 
         void onWindowResize(unsigned int width, unsigned int height) override;
 

@@ -72,7 +72,7 @@ namespace view {
         uploadVertexData();
     }
 
-    void BgRenderer::render() {
+    void BgRenderer::onDraw() {
         glEnable(GL_DEPTH_TEST);
         rectsShader.useProgram();
         glUniform1f(uniformThetaLoc, getCurrentTime());

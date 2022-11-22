@@ -37,7 +37,7 @@ namespace view {
 
         bool isInside(double x, double y) override;
 
-        void render() override;
+        void onDraw() override;
 
         void toggleOpened();
 

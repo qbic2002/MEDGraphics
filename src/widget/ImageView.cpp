@@ -19,7 +19,7 @@ namespace view {
         });
     }
 
-    void ImageView::render() {
+    void ImageView::onDraw() {
         auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageData == nullptr || imageData->textureId == 0)
             return;

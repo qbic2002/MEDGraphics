@@ -47,8 +47,6 @@ namespace view {
 
         View& setOnClickListener(const std::function<void()>& _onClickListener);
 
-        View& setOnClickListener(const std::function<void()>&& _onClickListener);
-
         virtual void onMeasure(const CalculatedPos& parentPos);
 
         virtual void onWindowResize(unsigned int width, unsigned int height);
@@ -61,11 +59,13 @@ namespace view {
 
         virtual void onMouseMove(double x, double y);
 
-        virtual bool onScroll(double xOffset, double yOffset, double d, double d1);
+        virtual bool onScroll(double xOffset, double yOffset, double x, double y);
 
-        virtual void renderBackground();
+        void drawBackground();
 
-        virtual void render();
+        void draw();
+
+        virtual void onDraw();
 
         virtual bool isInside(double x, double y);
 
@@ -83,7 +83,7 @@ namespace view {
 
         void setState(State _state);
 
-        struct space_requirement {
+        struct SpaceRequirement {
             union {
                 struct {
                     float width = 0;
@@ -101,18 +101,45 @@ namespace view {
             };
         };
 
-        virtual space_requirement howMuchSpaceRequired() {
+        SpaceRequirement measure() {
+            if (isMeasured)
+                return measuredSpaceRequirement;
+            measuredSpaceRequirement = onMeasure();
+            isMeasured = true;
+            return measuredSpaceRequirement;
+        }
+
+        virtual SpaceRequirement onMeasure() {
             return {0, 0, 0, 0, 0, 0};
         }
 
-        virtual void useThisSpace(float left, float top, float right, float bottom) {
+        virtual void setEdges(float left, float top, float right, float bottom) {
             edges.left = left;
             edges.top = top;
             edges.right = right;
             edges.bottom = bottom;
         }
 
+        void setParent(View* parent) {
+            if (this->parent != nullptr) {
+                throw std::runtime_error("View already has a parent");
+            }
+            this->parent = parent;
+        }
+
+        bool isDirty() {
+            return needRerender;
+        }
+
     protected:
+        void invalidate() {
+            isMeasured = false;
+            needRerender = true;
+            if (parent != nullptr) {
+                parent->invalidate();
+            }
+        }
+
         Context* context;
         State state = DEFAULT;
         Style style;
@@ -128,6 +155,13 @@ namespace view {
             float right = 0;
             float bottom = 0;
         } edges;
+
+        View* parent = nullptr;
+    private:
+        // Layout staff
+        SpaceRequirement measuredSpaceRequirement{};
+        bool isMeasured = false;
+        bool needRerender = true;
     };
 
 } // view

@@ -61,11 +61,11 @@ namespace view {
         return View::isInside(x, y);
     }
 
-    void DropDownView::render() {
+    void DropDownView::onDraw() {
         if (!isOpened)
             return;
 
-        ViewGroup::render();
+        ViewGroup::onDraw();
     }
 
     void DropDownView::toggleOpened() {

@@ -25,12 +25,12 @@ namespace view {
                   orientation(orientation),
                   gravity(gravity) {}
 
-        space_requirement howMuchSpaceRequired() override {
+        SpaceRequirement onMeasure() override {
             float childrenSize[2] = {0, 0};
             int oIndex = orientation == VERTICAL ? 1 : 0; // orientation index
             float max_size = 0;
             for (auto* child: children) {
-                auto req = child->howMuchSpaceRequired();
+                auto req = child->measure();
                 if (max_size < req.size[1 - oIndex])
                     max_size = req.size[1 - oIndex];
                 childrenSize[oIndex] += req.size[oIndex];
@@ -54,8 +54,8 @@ namespace view {
                     .parentSparePartH = styleState->height.parentSpareK};
         }
 
-        void useThisSpace(float left, float top, float right, float bottom) override {
-            View::useThisSpace(left, top, right, bottom);
+        void setEdges(float left, float top, float right, float bottom) override {
+            View::setEdges(left, top, right, bottom);
 
             float inner[4] = {left + styleState->padding.left + styleState->border.left,
                               top + styleState->padding.top + styleState->border.top,
@@ -68,7 +68,7 @@ namespace view {
             float spareSpace = innerSize[oIndex];
             float spareWeight = 0;
             for (auto* child: children) {
-                auto req = child->howMuchSpaceRequired();
+                auto req = child->measure();
                 spareSpace -= req.size[oIndex] + req.parentPart[oIndex] * innerSize[oIndex];
                 spareWeight += req.parentSparePart[oIndex];
             }
@@ -89,7 +89,7 @@ namespace view {
                 nonOrientGravityK = 1;
             }
             for (auto* child: children) {
-                auto req = child->howMuchSpaceRequired();
+                auto req = child->measure();
 
                 float childEdges[2];
                 for (int i = 0; i < 2; i++)
@@ -108,7 +108,7 @@ namespace view {
                     inner[1 - oIndex] += gravityShift;
                 }
 
-                child->useThisSpace(inner[0], inner[1], childEdges[0], childEdges[1]);
+                child->setEdges(inner[0], inner[1], childEdges[0], childEdges[1]);
                 inner[1 - oIndex] -= gravityShift;
                 inner[oIndex] = childEdges[oIndex];
             }

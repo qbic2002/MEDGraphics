@@ -17,7 +17,7 @@ namespace view {
 
         void close();
 
-        void render() override;
+        void onDraw() override;
 
     private:
         String title = L"Error";

@@ -38,11 +38,11 @@ public:
 
     virtual void onCreated(const std::vector<std::wstring>& args);
 
-    /// Called before each render
+    /// Called before each onDraw
     virtual void update();
 
     /// Render current window state
-    virtual void render() const;
+    virtual void draw() const;
 
     WindowWrapper* getWindowWrapper() const;
 
@@ -59,6 +59,8 @@ public:
     bool onMouseButton(ClickEvent& event) override;
 
     void onMouseLeave() override;
+
+    void onMouseEnter() override;
 
     void onMouseMove(double x, double y) override;
 

@@ -54,7 +54,7 @@ namespace view {
             windowWrapper->toggleMaximized();
         });
         view->setOnWindowResizeListener([context, windowWrapper](View& view, unsigned width, unsigned height) {
-            view.getStyle().forEach([&view, context, windowWrapper](StyleState& state) {
+            view.getStyle().forEach([context, windowWrapper](StyleState& state) {
                 state.background.setImage(windowWrapper->isMaximized()
                                           ? context->getAppDir() / "assets/icons/ic_maximized.png"
                                           : context->getAppDir() / "assets/icons/ic_minimized.png");

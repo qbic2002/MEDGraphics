@@ -4,6 +4,9 @@
 
 #include "view/core/GLFWWindowWrapper.h"
 
+GLFWWindowWrapper::GLFWWindowWrapper(ContextCallbacks* callbacks, GLFWwindow* window) : callbacks(callbacks),
+                                                                                        window(window) {}
+
 void GLFWWindowWrapper::swapBuffers() {
     glfwSwapBuffers(window);
 }
@@ -14,6 +17,10 @@ bool GLFWWindowWrapper::shouldClose() {
 
 void GLFWWindowWrapper::pollEvents() {
     glfwPollEvents();
+}
+
+void GLFWWindowWrapper::waitEvents() {
+    glfwWaitEvents();
 }
 
 void GLFWWindowWrapper::setShouldClose(int value) {
@@ -52,6 +59,8 @@ void GLFWWindowWrapper::getWindowSize(int* width, int* height) {
 void GLFWWindowWrapper::cursorEnterCallback(int entered) {
     if (entered == 0)
         callbacks->onMouseLeave();
+    else
+        callbacks->onMouseEnter();
 }
 
 void GLFWWindowWrapper::cursorPosCallback(double x, double y) {

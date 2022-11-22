@@ -13,6 +13,8 @@ public:
 
     virtual void pollEvents() = 0;
 
+    virtual void waitEvents() = 0;
+
     virtual void setShouldClose(int value) = 0;
 
     virtual void toggleMaximized() = 0;

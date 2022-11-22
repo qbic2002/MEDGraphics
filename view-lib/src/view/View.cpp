@@ -38,7 +38,7 @@ namespace view {
 
     View::View(Context* context, const Style&& style) : context(context), style(style) {}
 
-    void View::renderBackground() {
+    void View::drawBackground() {
         rgba curBgColor = styleState->background.color;
         if (curBgColor.a != 0) {
             glDisable(GL_TEXTURE_2D);
@@ -55,9 +55,13 @@ namespace view {
         }
     }
 
-    void View::render() {
-        renderBackground();
+    void View::draw() {
+        drawBackground();
+        onDraw();
+        needRerender = false;
     }
+
+    void View::onDraw() {}
 
     Style& View::getStyle() {
         return style;
@@ -78,8 +82,8 @@ namespace view {
         return *this;
     }
 
-    View& View::setOnClickListener(const std::function<void()>&& _onClickListener) {
-        onClickListener = _onClickListener;
+    View& View::setOnWindowResizeListener(std::function<void(View& v, unsigned int w, unsigned int h)>&& listener) {
+        onWindowResizeListener = listener;
         return *this;
     }
 
@@ -88,14 +92,8 @@ namespace view {
             onWindowResizeListener(*this, width, height);
     }
 
-    View& View::setOnWindowResizeListener(std::function<void(View& v, unsigned int w, unsigned int h)>&& listener) {
-        onWindowResizeListener = listener;
-        return *this;
-    }
-
     bool View::isInside(double x, double y) {
-        return calculatedPos.x <= x && x < calculatedPos.x + calculatedPos.width
-               && calculatedPos.y <= y && y < calculatedPos.y + calculatedPos.height;
+        return edges.left <= x && x < edges.right && edges.top <= y && y < edges.bottom;
     }
 
     void View::onMouseEnter() {
@@ -108,7 +106,7 @@ namespace view {
 
     void View::onMouseMove(double x, double y) {}
 
-    bool View::onScroll(double xOffset, double yOffset, double d, double d1) {
+    bool View::onScroll(double xOffset, double yOffset, double x, double y) {
         return false;
     }
 
@@ -161,5 +159,6 @@ namespace view {
                 styleState = &style.statePress;
                 break;
         }
+        invalidate();
     }
 } // view
