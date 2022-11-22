@@ -20,7 +20,7 @@ bool ContextCallbacks::onMouseButton(ClickEvent& event) {
 
 void ContextCallbacks::onMouseLeave() {}
 
-void ContextCallbacks::onMouseEnter() {}
+void ContextCallbacks::onMouseEnter(double x, double y) {}
 
 void ContextCallbacks::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {}
 

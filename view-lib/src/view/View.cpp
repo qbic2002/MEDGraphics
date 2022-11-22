@@ -50,12 +50,13 @@ namespace view {
         gl::Texture* bgImage = styleState->background.image.get();
         if (bgImage != nullptr) {
             bgImage->bind();
-            glTextureQuad(edges.left, edges.top, edges.right, edges.bottom);
+            glTextureQuad(innerEdges.left, innerEdges.top, innerEdges.right, innerEdges.bottom);
             bgImage->unbind();
         }
     }
 
     void View::draw() {
+        context->clipArea(edges.left, edges.top, edges.right, edges.bottom);
         drawBackground();
         onDraw();
         needRerender = false;

@@ -39,7 +39,7 @@ public:
     virtual void onMouseLeave();
 
     /// Pointer window enter event interface
-    virtual void onMouseEnter();
+    virtual void onMouseEnter(double x, double y);
 
     /// Mouse scroll event interface
     /// @param xOffset scroll x distance

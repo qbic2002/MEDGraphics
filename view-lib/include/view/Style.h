@@ -26,6 +26,8 @@ namespace view {
 
         float evaluate(float parentValue) const;
 
+        float evaluate(float parentValue, float parentSpare) const;
+
         Dimension operator+(const Dimension& other) const;
 
         Dimension operator-() const;
@@ -103,13 +105,13 @@ namespace view {
     };
 
     struct StyleState {
+        Dimension width, height;
         position position{};
         padding padding{};
         border border{};
         Background background{};
         rgba fontColor{COLOR_FONT_PRIMARY};
         std::shared_ptr<gl::FontRenderer> fontRenderer;
-        Dimension width, height;
     };
 
     struct Style {
@@ -120,7 +122,8 @@ namespace view {
 
         Style();
 
-        explicit Style(const StyleState& style) : stateDefault(style), stateHover(style), statePress(style) {}
+        Style(const StyleState& style) : stateDefault(style), stateHover(style),
+                                         statePress(style) {} // NOLINT(google-explicit-constructor)
 
         Style& set(const StyleState& style);
 

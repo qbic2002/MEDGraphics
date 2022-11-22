@@ -6,12 +6,12 @@
 #define MEDGRAPHICS_ROOTVIEW_H
 
 #include "../core/MyApp.h"
-#include "view/Style.h"
-#include "view/ViewGroup.h"
+#include <view/Style.h>
+#include <view/widget/LinearLayout.h>
 
 namespace view {
 
-    class RootView : public ViewGroup {
+    class RootView : public LinearLayout {
     public:
         RootView(MyApp* context, const Style& style);
     };

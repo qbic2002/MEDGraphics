@@ -54,9 +54,7 @@ namespace view {
                     .parentSparePartH = styleState->height.parentSpareK};
         }
 
-        void setEdges(float left, float top, float right, float bottom) override {
-            View::setEdges(left, top, right, bottom);
-
+        void onLayout(float left, float top, float right, float bottom) override {
             float inner[4] = {left + styleState->padding.left + styleState->border.left,
                               top + styleState->padding.top + styleState->border.top,
                               right - styleState->padding.right - styleState->border.right,
@@ -108,7 +106,7 @@ namespace view {
                     inner[1 - oIndex] += gravityShift;
                 }
 
-                child->setEdges(inner[0], inner[1], childEdges[0], childEdges[1]);
+                child->layout(inner[0], inner[1], childEdges[0], childEdges[1]);
                 inner[1 - oIndex] -= gravityShift;
                 inner[oIndex] = childEdges[oIndex];
             }

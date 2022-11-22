@@ -20,6 +20,7 @@ add_dependencies(MEDGraphics copy_assets)
 
 add_executable(Experiment
         exp/experiment.cpp
+        exp/ExpApp.cpp exp/ExpApp.h
         core/ImageFile.cpp
         core/ImageFileStorage.cpp
         core/CyclicImageFileSpan.cpp
@@ -32,5 +33,5 @@ add_executable(Experiment
         widget/WindowBar.cpp widget/WindowBar.h
         widget/TextView.cpp widget/TextView.h
         widget/DropDownView.cpp widget/DropDownView.h
-        widget/MessageView.cpp widget/MessageView.h exp/ExpApp.cpp exp/ExpApp.h)
+        widget/MessageView.cpp widget/MessageView.h)
 target_link_libraries(Experiment view)

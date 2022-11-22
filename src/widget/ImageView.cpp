@@ -16,6 +16,7 @@ namespace view {
     ImageView::ImageView(MyApp* context, const Style& style) : View(context, style) {
         context->getImageFileStorage().addImageChangedListener([&]() {
             imageFitScreen();
+            invalidate();
         });
     }
 
@@ -26,7 +27,7 @@ namespace view {
         glBindTexture(GL_TEXTURE_2D, imageData->textureId);
         glPushMatrix();
         {
-            glTranslatef(calculatedPos.x, calculatedPos.y, 0);
+            glTranslatef(edges.left, edges.top, 0);
 
             glTranslatef(translateX, translateY, 0);
             glScalef(zoom, zoom, 1);
@@ -44,8 +45,8 @@ namespace view {
     }
 
     bool ImageView::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
-        cursorX -= calculatedPos.x;
-        cursorY -= calculatedPos.y;
+        cursorX -= edges.left;
+        cursorY -= edges.top;
         translateX -= cursorX;
         translateY -= cursorY;
 
@@ -61,6 +62,7 @@ namespace view {
         translateX += cursorX;
         translateY += cursorY;
         validateZoom();
+        invalidate();
         return true;
     }
 
@@ -68,11 +70,11 @@ namespace view {
         translateX += dx;
         translateY += dy;
         validateZoom();
+        invalidate();
         return true;
     }
 
-    void ImageView::onMeasure(const CalculatedPos& parentPos) {
-        View::onMeasure(parentPos);
+    void ImageView::onLayout(float left, float top, float right, float bottom) {
         imageFitScreen();
     }
 
@@ -80,8 +82,8 @@ namespace view {
         auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
         if (imageData == nullptr || imageData->textureId == 0)
             return;
-        float horRatio = calculatedPos.width / imageData->raster->getWidth();
-        float vertRatio = calculatedPos.height / imageData->raster->getHeight();
+        float horRatio = edges.width() / imageData->raster->getWidth();
+        float vertRatio = edges.height() / imageData->raster->getHeight();
         setZoomRatio((vertRatio < horRatio) ? vertRatio : horRatio);
     }
 
@@ -95,27 +97,29 @@ namespace view {
             return;
         float scaledRasterWidth = imageData->raster->getWidth() * zoom;
         float scaledRasterHeight = imageData->raster->getHeight() * zoom;
-        if (scaledRasterWidth <= calculatedPos.width) {
-            translateX = (calculatedPos.width - scaledRasterWidth) / 2;
+        if (scaledRasterWidth <= edges.width()) {
+            translateX = (edges.width() - scaledRasterWidth) / 2;
         }
-        if (scaledRasterHeight <= calculatedPos.height) {
-            translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+        if (scaledRasterHeight <= edges.height()) {
+            translateY = (edges.height() - scaledRasterHeight) / 2;
         }
-        if (translateX > calculatedPos.width / 2) {
-            translateX = calculatedPos.width / 2;
+        if (translateX > edges.width() / 2) {
+            translateX = edges.width() / 2;
         }
-        if (translateY > calculatedPos.height / 2) {
-            translateY = calculatedPos.height / 2;
+        if (translateY > edges.height() / 2) {
+            translateY = edges.height() / 2;
         }
-        if (translateX + scaledRasterWidth < calculatedPos.width / 2) {
-            translateX = calculatedPos.width / 2 - scaledRasterWidth;
+        if (translateX + scaledRasterWidth < edges.width() / 2) {
+            translateX = edges.width() / 2 - scaledRasterWidth;
         }
-        if (translateY + scaledRasterHeight < calculatedPos.height / 2) {
-            translateY = calculatedPos.height / 2 - scaledRasterHeight;
+        if (translateY + scaledRasterHeight < edges.height() / 2) {
+            translateY = edges.height() / 2 - scaledRasterHeight;
         }
     }
 
     void ImageView::setZoomRatio(float ratio) {
+        if (zoom == ratio)
+            return;
         zoom = ratio;
         zoomOffset = logf(zoom) / logf(1.5);
         auto* imageFile = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
@@ -123,8 +127,9 @@ namespace view {
             return;
         float scaledRasterWidth = imageFile->raster->getWidth() * ratio;
         float scaledRasterHeight = imageFile->raster->getHeight() * ratio;
-        translateX = (calculatedPos.width - scaledRasterWidth) / 2;
-        translateY = (calculatedPos.height - scaledRasterHeight) / 2;
+        translateX = (edges.width() - scaledRasterWidth) / 2;
+        translateY = (edges.height() - scaledRasterHeight) / 2;
+        invalidate();
     }
 
 } // view

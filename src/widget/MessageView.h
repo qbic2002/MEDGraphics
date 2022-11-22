@@ -15,6 +15,8 @@ namespace view {
 
         void showMessage(const String& _msg);
 
+        void setMessage(const String& _msg);
+
         void close();
 
         void onDraw() override;

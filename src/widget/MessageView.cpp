@@ -55,6 +55,10 @@ namespace view {
         isOpened = true;
     }
 
+    void MessageView::setMessage(const String& _msg) {
+        msgView->setText(_msg);
+    }
+
     void MessageView::close() {
         isOpened = false;
     }

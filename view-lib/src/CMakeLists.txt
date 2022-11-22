@@ -7,6 +7,7 @@ add_library(view STATIC
         view/core/Context.cpp view/core/ContextCallbacks.cpp
         view/core/GLFWWindowWrapper.cpp
         view/core/GLFWWindowProvider.cpp
+        view/core/RootViewManager.cpp
         view/View.cpp
         view/ViewGroup.cpp
         view/Style.cpp
@@ -21,5 +22,5 @@ add_library(view STATIC
         utils/ft_error_check.cpp
         utils/measureFps.cpp
         utils/measureTime.cpp
-        utils/random.cpp ../include/utils/String.h)
+        utils/random.cpp)
 target_link_libraries(view ${LIBS})

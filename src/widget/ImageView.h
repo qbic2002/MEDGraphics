@@ -29,7 +29,7 @@ namespace view {
 
         bool onDrag(double x, double y, double dx, double dy) override;
 
-        void onMeasure(const CalculatedPos& parentPos) override;
+        void onLayout(float left, float top, float right, float bottom) override;
 
         void imageFitScreen();
 

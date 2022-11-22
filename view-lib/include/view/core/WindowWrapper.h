@@ -15,6 +15,8 @@ public:
 
     virtual void waitEvents() = 0;
 
+    virtual void waitEvents(double timeout) = 0;
+
     virtual void setShouldClose(int value) = 0;
 
     virtual void toggleMaximized() = 0;
@@ -28,6 +30,8 @@ public:
     virtual void setWindowPos(int x, int y) = 0;
 
     virtual void getWindowSize(int* width, int* height) = 0;
+
+    virtual void getPointerPos(double& x, double& y) = 0;
 };
 
 #endif //MEDGRAPHICS_WINDOW_WRAPPER_H

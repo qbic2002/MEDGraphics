@@ -16,30 +16,30 @@ void ExpApp::onCreated(const std::vector<std::wstring>& args) {
     auto* lay = new LinearLayout(
             this,
             Style{{
-                          .background = {127, 29, 38, 255},
                           .width = FILL_PARENT,
-                          .height = FILL_PARENT}},
+                          .height = FILL_PARENT,
+                          .background = {127, 29, 38, 255}}},
             view::HORIZONTAL);
 
     auto* textView = new TextView(
             this,
             Style{{
+                          .width = WRAP_CONTENT,
+                          .height = WRAP_CONTENT,
                           .padding = padding(8),
                           .background = {29, 127, 38, 255},
-                          .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18),
-                          .width = WRAP_CONTENT,
-                          .height = WRAP_CONTENT}},
+                          .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18)}},
             L"Hello world");
     lay->addChild(textView);
 
     auto* textView2 = new TextView(
             this,
             Style{{
-                          .padding = padding(16),
-                          .background = {38, 29, 127, 255},
-                          .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18),
                           .width = FILL_PARENT / 2,
                           .height = WRAP_CONTENT,
+                          .padding = padding(16),
+                          .background = {38, 29, 127, 255},
+                          .fontRenderer = assets::fontRenderer("assets/fonts/MinecraftRegular.otf", 18)
                   }}.edit([](Style& style) {
                 style.stateHover.background = {127, 29, 127, 255};
                 style.statePress.background = {100, 20, 100, 255};

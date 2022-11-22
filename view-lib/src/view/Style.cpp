@@ -16,6 +16,10 @@ namespace view {
         return parentK * parentValue + pixel;
     }
 
+    float Dimension::evaluate(float parentValue, float parentSpare) const {
+        return pixel + parentK * parentValue + parentSpareK * parentSpare;
+    }
+
     Dimension Dimension::operator+(const Dimension& other) const {
         return {pixel + other.pixel,
                 contentK + other.contentK,

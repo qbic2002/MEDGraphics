@@ -23,6 +23,10 @@ void GLFWWindowWrapper::waitEvents() {
     glfwWaitEvents();
 }
 
+void GLFWWindowWrapper::waitEvents(double timeout) {
+    glfwWaitEventsTimeout(timeout);
+}
+
 void GLFWWindowWrapper::setShouldClose(int value) {
     glfwSetWindowShouldClose(window, value);
 }
@@ -52,6 +56,11 @@ void GLFWWindowWrapper::getWindowSize(int* width, int* height) {
     *height = windowSize.height;
 }
 
+void GLFWWindowWrapper::getPointerPos(double& x, double& y) {
+    x = cursorPos.x;
+    y = cursorPos.y;
+}
+
 /* ======================================== *
  * =              Callbacks               = *
  * ======================================== */
@@ -60,7 +69,7 @@ void GLFWWindowWrapper::cursorEnterCallback(int entered) {
     if (entered == 0)
         callbacks->onMouseLeave();
     else
-        callbacks->onMouseEnter();
+        callbacks->onMouseEnter(0, 0);
 }
 
 void GLFWWindowWrapper::cursorPosCallback(double x, double y) {

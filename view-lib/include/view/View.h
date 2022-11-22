@@ -110,15 +110,27 @@ namespace view {
         }
 
         virtual SpaceRequirement onMeasure() {
-            return {0, 0, 0, 0, 0, 0};
+            return {styleState->width.pixel,
+                    styleState->height.pixel,
+                    styleState->width.parentK,
+                    styleState->height.parentK,
+                    styleState->width.parentSpareK,
+                    styleState->height.parentSpareK};
         }
 
-        virtual void setEdges(float left, float top, float right, float bottom) {
+        void layout(float left, float top, float right, float bottom) {
             edges.left = left;
             edges.top = top;
             edges.right = right;
             edges.bottom = bottom;
+            innerEdges.left = left + styleState->padding.left + styleState->border.left;
+            innerEdges.top = top + styleState->padding.top + styleState->border.top;
+            innerEdges.right = right - styleState->padding.right - styleState->border.right;
+            innerEdges.bottom = bottom - styleState->padding.bottom - styleState->border.bottom;
+            onLayout(left, top, right, bottom);
         }
+
+        virtual void onLayout(float left, float top, float right, float bottom) {}
 
         void setParent(View* parent) {
             if (this->parent != nullptr) {
@@ -131,7 +143,6 @@ namespace view {
             return needRerender;
         }
 
-    protected:
         void invalidate() {
             isMeasured = false;
             needRerender = true;
@@ -139,6 +150,8 @@ namespace view {
                 parent->invalidate();
             }
         }
+
+    protected:
 
         Context* context;
         State state = DEFAULT;
@@ -154,7 +167,15 @@ namespace view {
             float top = 0;
             float right = 0;
             float bottom = 0;
-        } edges;
+
+            float width() {
+                return right - left;
+            }
+
+            float height() {
+                return bottom - top;
+            }
+        } edges, innerEdges;
 
         View* parent = nullptr;
     private:

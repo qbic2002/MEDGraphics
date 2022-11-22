@@ -11,14 +11,12 @@
 #include "utils/encoding.h"
 #include "utils/measureFps.h"
 #include "../../../../src/core/R.h"
+#include "RootViewManager.h"
 
 namespace fs = std::filesystem;
 typedef unsigned int uint;
-namespace view {
-    class View;
-}
 
-class Context : public ContextCallbacks {
+class Context : public RootViewManager {
 public:
     Context() = default;
 
@@ -49,30 +47,14 @@ public:
     /// @return current context's appDir - path to executable file directory
     const fs::path& getAppDir() const;
 
-    /// @return root view of the context
-    view::View* getRootView();
-
     void setRootView(view::View* _rootView);
-
-    bool onDrag(double x, double y, double dx, double dy) override;
-
-    bool onMouseButton(ClickEvent& event) override;
-
-    void onMouseLeave() override;
-
-    void onMouseEnter() override;
-
-    void onMouseMove(double x, double y) override;
-
-    void onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
 
     void onWindowResize(unsigned int width, unsigned int height) override;
 
-protected:
-    void remeasureRootView(int width, int height);
+    void clipArea(float left, float top, float right, float bottom);
 
+protected:
     fs::path appDir;
-    view::View* rootView = nullptr;
     GLFWWindowProvider windowProvider;
     WindowWrapper* windowWrapper = nullptr;
 };

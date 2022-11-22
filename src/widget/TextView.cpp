@@ -12,10 +12,7 @@ namespace view {
     }
 
     void TextView::onDraw() {
-//        styleState->fontRenderer->renderText(text, calculatedPos.x + styleState->padding.left,
-//                                             calculatedPos.y + styleState->padding.top);
-        styleState->fontRenderer->renderText(text, edges.left + styleState->padding.left + styleState->border.left,
-                                             edges.top + styleState->padding.top + styleState->border.top);
+        styleState->fontRenderer->renderText(text, innerEdges.left, innerEdges.top);
     }
 
     void TextView::setText(const String& _text) {

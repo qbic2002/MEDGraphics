@@ -22,6 +22,9 @@ public:
 
     void waitEvents() override;
 
+    /// @timeout time in seconds
+    void waitEvents(double timeout) override;
+
     void setShouldClose(int value) override;
 
     void toggleMaximized() override;
@@ -51,6 +54,8 @@ public:
     void windowRefreshCallback();
 
     void windowSizeCallback(int width, int height);
+
+    void getPointerPos(double& x, double& y) override;
 
 private:
     ContextCallbacks* callbacks;

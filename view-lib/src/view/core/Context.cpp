@@ -7,9 +7,7 @@
 #include <utils/explorer_utils.h>
 #include <utils/file.h>
 
-Context::~Context() {
-    delete rootView;
-}
+Context::~Context() = default;
 
 void Context::run(int argc, char** argv, uint width, uint height, const std::string& title, bool vsync) {
     utils::configureUtf8();
@@ -28,23 +26,24 @@ void Context::run(int argc, char** argv, uint width, uint height, const std::str
 
 void Context::loop() {
     while (!windowWrapper->shouldClose()) {
-        windowWrapper->waitEvents();
+        windowWrapper->waitEvents(0.1);
         update();
-        if (rootView->isDirty()) {
+        if (isDrawRequired()) {
             draw();
             windowWrapper->swapBuffers();
             utils::updateTimer();
         }
-//        glfwWaitEvents();
     }
 }
 
 void Context::draw() const {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_SCISSOR_TEST);
 
-    rootView->draw();
+    drawViews();
 
+    glDisable(GL_SCISSOR_TEST);
     glDisable(GL_TEXTURE_2D);
 }
 
@@ -52,17 +51,10 @@ void Context::onCreated(const std::vector<std::wstring>& args) {}
 
 void Context::update() {}
 
-view::View* Context::getRootView() {
-    return rootView;
-}
-
-void Context::setRootView(view::View* _rootView) {
-    delete rootView;
-    rootView = _rootView;
+void Context::setRootView(view::View* rootView) {
     int width, height;
     windowWrapper->getWindowSize(&width, &height);
-    remeasureRootView(width, height);
-    rootView->onWindowResize(width, height);
+    RootViewManager::setRootView(rootView, width, height);
 }
 
 const fs::path& Context::getAppDir() const {
@@ -73,40 +65,16 @@ WindowWrapper* Context::getWindowWrapper() const {
     return windowWrapper;
 }
 
-bool Context::onDrag(double x, double y, double dx, double dy) {
-    return rootView->onDrag(x, y, dx, dy);
-}
-
-bool Context::onMouseButton(ClickEvent& event) {
-    return rootView->onClick(event);
-}
-
-void Context::onMouseLeave() {
-    rootView->onMouseLeave();
-}
-
-void Context::onMouseEnter() {
-    rootView->onMouseEnter();
-}
-
-void Context::onMouseMove(double x, double y) {
-    rootView->onMouseMove(x, y);
-}
-
-void Context::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
-    rootView->onScroll(xOffset, yOffset, cursorX, cursorY);
-}
-
 void Context::onWindowResize(unsigned int width, unsigned int height) {
     info() << "context on Window Resize: " << width << " " << height;
     glViewport(0, 0, width, height);
     glLoadIdentity();
     glOrtho(0, width, height, 0.01, -100, 100);
-    remeasureRootView(width, height);
-    rootView->onWindowResize(width, height);
+    RootViewManager::onWindowResize(width, height);
 }
 
-void Context::remeasureRootView(int width, int height) {
-    auto req = rootView->onMeasure();
-    rootView->setEdges(0, 0, req.width + req.parentPartW * width, req.height + req.parentPartH * height);
+void Context::clipArea(float left, float top, float right, float bottom) {
+    int width, height;
+    windowWrapper->getWindowSize(&width, &height);
+    glScissor(left, height - bottom, right - left, bottom - top);
 }

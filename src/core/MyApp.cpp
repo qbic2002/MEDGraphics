@@ -8,14 +8,31 @@
 #include "img/PNMImage.h"
 #include "img/pnmUtils.h"
 #include "../widget/MessageView.h"
+#include <view/Dialog.h>
+
+view::Dialog* messageDialog = nullptr;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     using namespace view;
-    setRootView(new RootView(this, Style{{.position = {0, 0, FILL_PARENT, FILL_PARENT}}}));
+
+    setRootView(new RootView(this, Style{{.width = FILL_PARENT, .height = FILL_PARENT}}));
+
+    auto* messageView = new MessageView(
+            this,
+            StyleState{
+                    .width = FILL_PARENT * 0.5,
+                    .height = FILL_PARENT * 0.5,
+                    .padding = padding(12),
+                    .background = {
+                            .color = rgba{COLOR_PRIMARY_LIGHT}
+                    }
+            }
+    );
+    messageView->setId(MESSAGE_VIEW_ID);
+    messageDialog = createDialog(messageView, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
 
     imageFileStorage.open(args[1]);
 }
@@ -55,8 +72,9 @@ void MyApp::openImage() {
 }
 
 void MyApp::showError(const String& message) {
-    auto* msgView = (view::MessageView*) rootView->findViewById(MESSAGE_VIEW_ID);
-    msgView->showMessage(message);
+    auto* msgView = (view::MessageView*) findViewById(MESSAGE_VIEW_ID);
+    msgView->setMessage(message);
+    messageDialog->show();
 }
 
 void MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {

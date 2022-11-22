@@ -10,10 +10,11 @@
 #include "view/ViewGroup.h"
 #include "../core/MyApp.h"
 #include "ImageView.h"
+#include "view/widget/LinearLayout.h"
 
 namespace view {
 
-    class WindowBar : public ViewGroup {
+    class WindowBar : public LinearLayout {
     public:
         WindowBar(MyApp* context, const Style& style, ImageView* imageView);
     };
