@@ -21,4 +21,4 @@ add_library(view STATIC
         utils/ft_error_check.cpp
         utils/measureFps.cpp
         utils/measureTime.cpp
-        utils/random.cpp ../include/utils/String.h utils/ImageFormats.cpp utils/ImageFormats.h)
+        utils/random.cpp ../include/utils/String.h utils/ImageFormats.cpp ../include/utils/ImageFormats.h)

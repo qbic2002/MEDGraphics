@@ -125,7 +125,7 @@ std::wstring utils::fixFileName(const std::wstring& filename, int filterIndex) {
         return filename;
     }
 
-    newFilename = filename.substr(0, filename.length() - extension.length());
+//    newFilename = filename.substr(0, filename.length() - extension.length());
     newFilename.append(currentExtension);
 
     return newFilename;
