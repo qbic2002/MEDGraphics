@@ -1,0 +1,33 @@
+//
+// Created by golov on 23.11.2022.
+//
+
+#ifndef MEDGRAPHICS_PIXELTYPEMETHODS_H
+#define MEDGRAPHICS_PIXELTYPEMETHODS_H
+
+#include "img/PixelHSL8.h"
+#include "img/PixelRGB8.h"
+#include "img/PixelGray8.h"
+#include "img/PixelRGBA8.h"
+#include "img/PixelType.h"
+#include <type_traits>
+
+namespace utils {
+    template<class T>
+    PixelType getPixelType() {
+        if (std::is_same<T, PixelRGBA8>::value) {
+            return RGBA8;
+        }
+        if (std::is_same<T, PixelRGB8>::value) {
+            return RGB8;
+        }
+        if (std::is_same<T, PixelGray8>::value) {
+            return GRAY;
+        }
+        if (std::is_same<T, PixelHSL8>::value) {
+            return HSL8;
+        }
+    }
+}
+
+#endif //MEDGRAPHICS_PIXELTYPEMETHODS_H

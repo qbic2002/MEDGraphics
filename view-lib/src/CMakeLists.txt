@@ -21,4 +21,8 @@ add_library(view STATIC
         utils/ft_error_check.cpp
         utils/measureFps.cpp
         utils/measureTime.cpp
-        utils/random.cpp ../include/utils/String.h utils/ImageFormats.cpp ../include/utils/ImageFormats.h)
+        utils/random.cpp
+        ../include/utils/String.h
+        utils/ImageFormats.cpp ../include/utils/ImageFormats.h
+        img/colorModelConverter.cpp ../include/img/colorModelConverter.h
+        ../include/img/PixelHSL8.h utils/pixelTypeMethods.cpp ../include/utils/pixelTypeMethods.h)

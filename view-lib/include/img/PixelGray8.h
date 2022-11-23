@@ -12,10 +12,18 @@ class PixelGray8 : public Pixel {
 public:
     PixelGray8() = default;
 
-    PixelGray8(int gray) : grayScale(gray) {}
+    PixelGray8(const PixelGray8& other) = default;
+
+    PixelGray8(int gray)
+            :
+            grayScale(gray) {}
 
     rgba toRGBA() const override {
         return {grayScale, grayScale, grayScale, 255};
+    }
+
+    PixelType getPixelType() const override {
+        return GRAY;
     }
 
 public:
