@@ -121,7 +121,7 @@ std::wstring utils::fixFileName(const std::wstring& filename, int filterIndex) {
             break;
     }
 
-    if (extension == parentExtension) {
+    if (extension == parentExtension || extension == currentExtension) {
         return filename;
     }
 
