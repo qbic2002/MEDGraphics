@@ -7,10 +7,12 @@
 #include "utils/explorer_utils.h"
 #include "img/PNMImage.h"
 #include "img/pnmUtils.h"
-#include "../widget/MessageView.h"
+#include "../widget/IconView.h"
+#include "../widget/TextView.h"
 #include <view/Dialog.h>
 
 view::Dialog* messageDialog = nullptr;
+view::TextView* messageDialogTxt = nullptr;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
     glClearColor(0, 0, 0, 1);
@@ -18,21 +20,50 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     using namespace view;
 
-    setRootView(new RootView(this, Style{{.width = FILL_PARENT, .height = FILL_PARENT}}));
+    setRootView(new RootView(this, {.width = FILL_PARENT, .height = FILL_PARENT}));
 
-    auto* messageView = new MessageView(
-            this,
-            StyleState{
-                    .width = FILL_PARENT * 0.5,
-                    .height = FILL_PARENT * 0.5,
-                    .padding = padding(12),
-                    .background = {
-                            .color = rgba{COLOR_PRIMARY_LIGHT}
-                    }
-            }
-    );
-    messageView->setId(MESSAGE_VIEW_ID);
-    messageDialog = createDialog(messageView, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
+    auto* messageLay = new LinearLayout(this, {
+            .width = FILL_PARENT / 2,
+            .height = FILL_PARENT / 2,
+            .background = ColorBackground{rgba{COLOR_PRIMARY_LIGHT}}
+    });
+
+    messageLay->addChild(new LinearLayout(this, {
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .children = {
+                    new TextView(this, {
+                            .width = FILL_SPARE,
+                            .height = WRAP_CONTENT,
+                            .padding = Padding(12),
+                            .text = L"Error",
+                            .fontSize = 18}),
+                    &((new IconView(this, {
+                            .width = 32,
+                            .height = 32,
+                            .background = StateBackground{
+                                    Background{},
+                                    ColorBackground{rgba{COLOR_PRIMARY}},
+                                    ColorBackground{rgba{COLOR_PRIMARY_DARK}}},
+                            .imageFile = getAppDir() / "assets/icons/ic_close.png",
+                            .imageWidth = 16,
+                            .imageHeight = 16
+                    }))->setOnClickListener([&]() {
+                        messageDialog->hide();
+                    }))},
+            .orientation = HORIZONTAL,
+            .gravity = RIGHT}));
+
+    messageDialogTxt = new TextView(this, {
+            .width = FILL_SPARE,
+            .height = FILL_SPARE,
+            .padding = Padding(12),
+            .text = L"{message text}",
+            .fontSize = 14
+    });
+    messageLay->addChild(messageDialogTxt);
+
+    messageDialog = createDialog(messageLay, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
 
     imageFileStorage.open(args[1]);
 }
@@ -72,8 +103,7 @@ void MyApp::openImage() {
 }
 
 void MyApp::showError(const String& message) {
-    auto* msgView = (view::MessageView*) findViewById(MESSAGE_VIEW_ID);
-    msgView->setMessage(message);
+    messageDialogTxt->setText(message);
     messageDialog->show();
 }
 

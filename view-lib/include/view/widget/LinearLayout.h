@@ -18,12 +18,18 @@ namespace view {
         LEFT, TOP, RIGHT, BOTTOM, HCENTER, VCENTER, CENTER
     };
 
+    struct LinearLayoutAttributes {
+        VIEW_ATTRS
+        VIEW_GROUP_ATTRS
+        LINEAR_LAYOUT_ATTRS
+    };
+
     class LinearLayout : public ViewGroup {
     public:
-        LinearLayout(Context* context, const Style& style, Orientation orientation = VERTICAL, Gravity gravity = CENTER)
-                : ViewGroup(context, style),
-                  orientation(orientation),
-                  gravity(gravity) {}
+        LinearLayout(Context* context, const LinearLayoutAttributes& attr)
+                : ViewGroup(context, (const ViewGroupAttributes&) attr) {
+            LINEAR_LAYOUT_ATTRS_SET(attr)
+        }
 
         SpaceRequirement onMeasure() override {
             float childrenSize[2] = {0, 0};
@@ -37,28 +43,17 @@ namespace view {
             }
             childrenSize[1 - oIndex] = max_size;
 
-            float width = styleState->padding.width() + styleState->border.width()
-                          + styleState->width.pixel
-                          + styleState->width.contentK * childrenSize[0];
-            float height = styleState->padding.top + styleState->padding.bottom
-                           + styleState->border.top + styleState->border.bottom
-                           + styleState->height.pixel
-                           + styleState->height.contentK * childrenSize[1];
-
             return {
-                    .width = width,
-                    .height = height,
-                    .parentPartW = styleState->width.parentK,
-                    .parentPartH = styleState->height.parentK,
-                    .parentSparePartW = styleState->width.parentSpareK,
-                    .parentSparePartH = styleState->height.parentSpareK};
+                    .width = width.evaluateContent(childrenSize[0]),
+                    .height = height.evaluateContent(childrenSize[1]),
+                    .parentPartW = width.parentK,
+                    .parentPartH = height.parentK,
+                    .parentSparePartW = width.parentSpareK,
+                    .parentSparePartH = height.parentSpareK};
         }
 
         void onLayout(float left, float top, float right, float bottom) override {
-            float inner[4] = {left + styleState->padding.left + styleState->border.left,
-                              top + styleState->padding.top + styleState->border.top,
-                              right - styleState->padding.right - styleState->border.right,
-                              bottom - styleState->padding.bottom - styleState->border.bottom};
+            float inner[4] = {innerEdges.left, innerEdges.top, innerEdges.right, innerEdges.bottom};
 
             float innerSize[2] = {inner[2] - inner[0], inner[3] - inner[1]};
             int oIndex = orientation == HORIZONTAL ? 0 : 1; // orientation index
@@ -113,8 +108,7 @@ namespace view {
         }
 
     protected:
-        Orientation orientation;
-        Gravity gravity;
+        LINEAR_LAYOUT_ATTRS
     };
 
 } // view

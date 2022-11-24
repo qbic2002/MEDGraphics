@@ -21,10 +21,16 @@ namespace gl {
 
         void unbind() const;
 
+        GLuint getWidth() const;
+
+        GLuint getHeight() const;
+
         ~Texture();
 
     private:
-        GLuint textureId;
+        GLuint textureId = 0;
+        GLuint width = 0;
+        GLuint height = 0;
     };
 }
 

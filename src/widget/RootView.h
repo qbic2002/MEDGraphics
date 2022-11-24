@@ -13,7 +13,7 @@ namespace view {
 
     class RootView : public LinearLayout {
     public:
-        RootView(MyApp* context, const Style& style);
+        RootView(MyApp* context, const LinearLayoutAttributes& attr);
     };
 
 } // view

@@ -32,7 +32,10 @@ bool RootViewManager::isDrawRequired() {
 }
 
 void RootViewManager::drawViews() const {
+    rootView->draw();
     std::for_each(activeViews.begin(), activeViews.end(), [&](const auto& view) {
+        if (view == rootView)
+            return;
         view->draw();
     });
 }
@@ -58,8 +61,9 @@ bool RootViewManager::onDrag(double x, double y, double dx, double dy) {
 
 bool RootViewManager::onMouseButton(ClickEvent& event) {
     for (const auto& view: activeViews) {
-        if (view->isInside(event.x, event.y) && view->onClick(event))
+        if (view->isInside(event.x, event.y) && view->onClick(event)) {
             return true;
+        }
     }
 
     return false;
@@ -94,19 +98,14 @@ void RootViewManager::onScroll(double xOffset, double yOffset, double cursorX, d
 }
 
 void RootViewManager::onWindowResize(unsigned int width, unsigned int height) {
+    windowWidth = width;
+    windowHeight = height;
     rootView->invalidate();
     remeasureView(rootView, width, height);
     rootView->onWindowResize(width, height);
 
     for (auto& dialog: dialogs) {
-        dialog->getView()->invalidate();
-        auto req = dialog->getView()->measure();
-        dialog->getView()->layout(
-                dialog->getX().evaluate(width, 0),
-                dialog->getX().evaluate(height, 0),
-                req.width + req.parentPartW * width,
-                req.height + req.parentPartH * height);
-        dialog->getView()->onWindowResize(width, height);
+        dialog->onWindowResize(width, height);
     }
 }
 
@@ -122,12 +121,20 @@ RootViewManager::createDialog(view::View* view, view::Dimension x, view::Dimensi
     return dialog;
 }
 
-void RootViewManager::onDialogShow(view::Dialog* dialog) {
-    activeViews.insert(dialog->getView());
+void RootViewManager::onDialogShownChanged(view::Dialog* dialog, bool isShown) {
+    if (isShown) {
+        activeViews.insert(dialog->getView());
+    } else {
+        activeViews.erase(dialog->getView());
+    }
 }
 
-void RootViewManager::onDialogHide(view::Dialog* dialog) {
-    activeViews.erase(dialog->getView());
+int RootViewManager::getWindowWidth() const {
+    return windowWidth;
+}
+
+int RootViewManager::getWindowHeight() const {
+    return windowHeight;
 }
 
 

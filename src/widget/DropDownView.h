@@ -1,52 +1,50 @@
 //
-// Created by danil on 10.10.2022.
+// Created by danil on 23.11.2022.
 //
 
-#ifndef MEDGRAPHICS_DROPDOWNVIEW_H
-#define MEDGRAPHICS_DROPDOWNVIEW_H
+#ifndef MEDGRAPHICS_DROP_DOWN_VIEW_H
+#define MEDGRAPHICS_DROP_DOWN_VIEW_H
 
-#include "view/ViewGroup.h"
+#include <view/View.h>
 #include "TextView.h"
+#include <view/widget/LinearLayout.h>
+#include <view/Dialog.h>
 
 namespace view {
 
-    class DropDownViewElementPrototype {
+    class DropDownViewOption {
     public:
-        explicit DropDownViewElementPrototype(const String& text,
-                                              const std::function<void()>& onClickListener = nullptr);
+        DropDownViewOption(const String& text, const std::function<void()>& onClickListener = nullptr);
 
         String text;
         std::function<void()> onClickListener;
     };
 
-    class DropDownViewElement : public TextView {
-    public:
-        DropDownViewElement(Context* context,
-                            const Style& style,
-                            const String& text);
-    };
-
     class DropDownView : public ViewGroup {
     public:
-        DropDownView(Context* context,
-                     const Style& style,
-                     const std::vector<DropDownViewElementPrototype>& prototypes,
-                     const Style& elementsStyle);
+        DropDownView(Context* context, const ViewGroupAttributes& attr, View* presenter,
+                     const std::vector<DropDownViewOption>& items, const TextViewAttributes& itemAttr);
 
-        void onMeasure(const view::CalculatedPos& parentPos) override;
+        ~DropDownView() override;
 
-        bool isInside(double x, double y) override;
+        void onLayout(float left, float top, float right, float bottom) override;
+
+        float getContentWidth() override;
+
+        float getContentHeight() override;
 
         void onDraw() override;
 
-        void toggleOpened();
+        SpaceRequirement onMeasure() override;
 
         bool onClick(const ClickEvent& event) override;
 
-    protected:
-        bool isOpened = false;
+        bool isInside(double x, double y) override;
+
+    private:
+        Dialog* dialog = nullptr;
+        View& presenter;
     };
+}
 
-} // view
-
-#endif //MEDGRAPHICS_DROPDOWNVIEW_H
+#endif //MEDGRAPHICS_DROP_DOWN_VIEW_H

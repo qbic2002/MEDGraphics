@@ -3,6 +3,8 @@
 //
 
 #include "view/Style.h"
+#include "view/View.h"
+#include "utils/gl_utils.h"
 
 namespace view {
     Dimension::Dimension() noexcept: pixel(0), contentK(0), parentK(0), parentSpareK(0) {}
@@ -18,6 +20,21 @@ namespace view {
 
     float Dimension::evaluate(float parentValue, float parentSpare) const {
         return pixel + parentK * parentValue + parentSpareK * parentSpare;
+    }
+
+    float Dimension::evaluateContent(float contentSize) const {
+        return pixel + contentK * contentSize;
+    }
+
+    bool Dimension::operator==(const Dimension& other) const {
+        return pixel == other.pixel
+               && contentK == other.contentK
+               && parentK == other.parentK
+               && parentSpareK == other.parentSpareK;
+    }
+
+    bool Dimension::operator!=(const Dimension& other) const {
+        return !this->operator==(other);
     }
 
     Dimension Dimension::operator+(const Dimension& other) const {
@@ -46,77 +63,45 @@ namespace view {
         return *this * (1 / scalar);
     }
 
-    padding::padding() : padding(0) {}
+    Padding::Padding() : Padding(0) {}
 
-    padding::padding(float value) : padding(value, value) {}
+    Padding::Padding(float value) : Padding(value, value) {}
 
-    padding::padding(float horizontal, float vertical) : left(horizontal), top(vertical), right(horizontal),
-                                                         bottom(vertical) {
-    }
+    Padding::Padding(float horizontal, float vertical) : left(horizontal), top(vertical), right(horizontal),
+                                                         bottom(vertical) {}
 
-    padding::padding(float left, float top, float right, float bottom) : left(left), top(top), right(right),
+    Padding::Padding(float left, float top, float right, float bottom) : left(left), top(top), right(right),
                                                                          bottom(bottom) {}
 
-    border::border() : border(0) {}
+    BackgroundWrapper::BackgroundWrapper() : background(new Background()) {}
 
-    border::border(float value) : border(value, value) {}
+    void Background::draw(const View* view, float left, float top, float right, float bottom) {}
 
-    border::border(float horizontal, float vertical) : left(horizontal), top(vertical), right(horizontal),
-                                                       bottom(vertical) {
+    void ColorBackground::draw(const View* view, float left, float top, float right, float bottom) {
+        if (color.a != 0) {
+            glDisable(GL_TEXTURE_2D);
+            glColor(color);
+            glPositionQuad(left, top, right, bottom);
+            glEnable(GL_TEXTURE_2D);
+            glColor4f(1, 1, 1, 1);
+        }
     }
 
-    border::border(float left, float top, float right, float bottom) : left(left), top(top), right(right),
-                                                                       bottom(bottom) {}
+    StateBackground::StateBackground(const BackgroundWrapper& bgDefault, const BackgroundWrapper& bgHovered,
+                                     const BackgroundWrapper& bgPressed)
+            : bgDefault(bgDefault), bgHovered(bgHovered), bgPressed(bgPressed) {}
 
-    border& border::setColor(rgba _color) {
-        color = _color;
-        return *this;
+    void StateBackground::draw(const View* view, float left, float top, float right, float bottom) {
+        switch (view->getState()) {
+            case DEFAULT:
+                bgDefault.get().draw(view, left, top, right, bottom);
+                break;
+            case HOVERED:
+                bgHovered.get().draw(view, left, top, right, bottom);
+                break;
+            case PRESSED:
+                bgPressed.get().draw(view, left, top, right, bottom);
+                break;
+        }
     }
-
-    Background& Background::setImage(const std::filesystem::path& fileName) {
-        image = assets::texture(fileName);
-        return *this;
-    }
-
-    Background& Background::setColor(const rgba& _color) {
-        color = _color;
-        return *this;
-    }
-
-    Background& Background::setFontColor(const rgba& _color) {
-        color = _color;
-        return *this;
-    }
-
-    Background& Background::edit(const std::function<void(Background&)>& editor) {
-        editor(*this);
-        return *this;
-    }
-
-    Style::Style() : stateDefault(), stateHover(), statePress() {}
-
-    Style& Style::set(const StyleState& style) {
-        stateDefault = stateHover = statePress = style;
-        return *this;
-    }
-
-    Style& Style::forEach(const std::function<void(StyleState&)>& editor) {
-        editor(stateDefault);
-        editor(stateHover);
-        editor(statePress);
-        return *this;
-    }
-
-    Style& Style::edit(const std::function<void(Style&)>& editor) {
-        editor(*this);
-        return *this;
-    }
-
-    CalculatedPos::CalculatedPos(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {}
-
-    CalculatedPos::CalculatedPos(const CalculatedPos& parentPos, const position& pos) :
-            x(parentPos.x + pos.x.evaluate(parentPos.width)),
-            y(parentPos.y + pos.y.evaluate(parentPos.height)),
-            width(pos.width.evaluate(parentPos.width)),
-            height(pos.height.evaluate(parentPos.height)) {}
 }

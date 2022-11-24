@@ -13,8 +13,7 @@ add_executable(MEDGraphics
         widget/RootView.cpp widget/RootView.h
         widget/WindowBar.cpp widget/WindowBar.h
         widget/TextView.cpp widget/TextView.h
-        widget/DropDownView.cpp widget/DropDownView.h
-        widget/MessageView.cpp widget/MessageView.h)
+        widget/DropDownView.cpp widget/DropDownView.h widget/IconView.cpp widget/IconView.h)
 target_link_libraries(MEDGraphics view)
 add_dependencies(MEDGraphics copy_assets)
 
@@ -28,10 +27,11 @@ add_executable(Experiment
         math/vec3.cpp math/vec3.h
         core/R.h
         widget/BgRenderer.cpp widget/BgRenderer.h
+        widget/IconView.cpp widget/IconView.h
         widget/ImageView.cpp widget/ImageView.h
         widget/RootView.cpp widget/RootView.h
         widget/WindowBar.cpp widget/WindowBar.h
         widget/TextView.cpp widget/TextView.h
         widget/DropDownView.cpp widget/DropDownView.h
-        widget/MessageView.cpp widget/MessageView.h)
+        widget/WidgetAttributes.h)
 target_link_libraries(Experiment view)

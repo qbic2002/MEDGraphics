@@ -11,6 +11,7 @@
 #include <img/rgba.h>
 #include <view/Style.h>
 #include "ClickEvent.h"
+#include "../../../src/widget/WidgetAttributes.h"
 
 namespace view {
 
@@ -20,13 +21,15 @@ namespace view {
         PRESSED
     };
 
+    struct ViewAttributes {
+        VIEW_ATTRS
+    };
+
     class View {
     public:
-        explicit View(Context* context);
-
-        View(Context* context, const Style& style);
-
-        View(Context* context, const Style&& style);
+        View(Context* context, const ViewAttributes& attr) : context(context) {
+            VIEW_ATTRS_SET(attr)
+        }
 
         View(const View& other) = delete;
 
@@ -38,7 +41,9 @@ namespace view {
 
         virtual ~View() = default;
 
-        Style& getStyle();
+        Style& getStyle() {
+            return style;
+        }
 
         /// @return whether event was consumed
         virtual bool onClick(const ClickEvent& event);
@@ -46,8 +51,6 @@ namespace view {
         virtual bool onDrag(double x, double y, double dx, double dy);
 
         View& setOnClickListener(const std::function<void()>& _onClickListener);
-
-        virtual void onMeasure(const CalculatedPos& parentPos);
 
         virtual void onWindowResize(unsigned int width, unsigned int height);
 
@@ -60,8 +63,6 @@ namespace view {
         virtual void onMouseMove(double x, double y);
 
         virtual bool onScroll(double xOffset, double yOffset, double x, double y);
-
-        void drawBackground();
 
         void draw();
 
@@ -76,8 +77,6 @@ namespace view {
         View* setId(int _id);
 
         virtual View* findViewById(int _id);
-
-        const StyleState* getStyleState() const;
 
         State getState() const;
 
@@ -109,13 +108,21 @@ namespace view {
             return measuredSpaceRequirement;
         }
 
+        virtual float getContentWidth() {
+            return 0;
+        }
+
+        virtual float getContentHeight() {
+            return 0;
+        }
+
         virtual SpaceRequirement onMeasure() {
-            return {styleState->width.pixel,
-                    styleState->height.pixel,
-                    styleState->width.parentK,
-                    styleState->height.parentK,
-                    styleState->width.parentSpareK,
-                    styleState->height.parentSpareK};
+            return {width.evaluateContent(getContentWidth()) + padding.width(),
+                    height.evaluateContent(getContentHeight()) + padding.height(),
+                    width.parentK,
+                    height.parentK,
+                    width.parentSpareK,
+                    height.parentSpareK};
         }
 
         void layout(float left, float top, float right, float bottom) {
@@ -123,10 +130,13 @@ namespace view {
             edges.top = top;
             edges.right = right;
             edges.bottom = bottom;
-            innerEdges.left = left + styleState->padding.left + styleState->border.left;
-            innerEdges.top = top + styleState->padding.top + styleState->border.top;
-            innerEdges.right = right - styleState->padding.right - styleState->border.right;
-            innerEdges.bottom = bottom - styleState->padding.bottom - styleState->border.bottom;
+            innerEdges.left = left + padding.left;
+            innerEdges.top = top + padding.top;
+            if (innerEdges.top == 153) {
+                info() << "oh";
+            }
+            innerEdges.right = right - padding.right;
+            innerEdges.bottom = bottom - padding.bottom;
             onLayout(left, top, right, bottom);
         }
 
@@ -139,7 +149,7 @@ namespace view {
             this->parent = parent;
         }
 
-        bool isDirty() {
+        bool isDirty() const {
             return needRerender;
         }
 
@@ -152,15 +162,12 @@ namespace view {
         }
 
     protected:
-
         Context* context;
         State state = DEFAULT;
-        Style style;
-        StyleState* styleState = &style.stateDefault;
-        CalculatedPos calculatedPos{};
         std::function<void()> onClickListener = nullptr;
         std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
-        int id = 0;
+
+        VIEW_ATTRS
 
         struct edges {
             float left = 0;
@@ -168,11 +175,11 @@ namespace view {
             float right = 0;
             float bottom = 0;
 
-            float width() {
+            float width() const {
                 return right - left;
             }
 
-            float height() {
+            float height() const {
                 return bottom - top;
             }
         } edges, innerEdges;

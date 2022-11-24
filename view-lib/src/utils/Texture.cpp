@@ -9,8 +9,9 @@
 namespace gl {
     Texture::Texture(const std::filesystem::path& fileName) {
         AbstractRaster* raster = img::loadImageData(fileName);
-        textureId = loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight(), GL_RGBA, GL_CLAMP,
-                                GL_LINEAR, GL_NEAREST);
+        width = raster->getWidth();
+        height = raster->getHeight();
+        textureId = loadTexture(raster->getRgbaData(), width, height, GL_RGBA, GL_CLAMP, GL_LINEAR, GL_NEAREST);
         delete raster;
     }
 
@@ -30,5 +31,13 @@ namespace gl {
 
     void Texture::unbind() const {
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    GLuint Texture::getWidth() const {
+        return width;
+    }
+
+    GLuint Texture::getHeight() const {
+        return height;
     }
 }

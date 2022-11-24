@@ -32,3 +32,29 @@ namespace gl {
         return textureId;
     }
 }
+
+void glColor(const rgba& rgba) {
+    glColor4ubv((GLubyte*) &rgba);
+}
+
+void glPositionQuad(float x1, float y1, float x2, float y2) {
+    glBegin(GL_QUADS);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y1);
+    glVertex2f(x2, y2);
+    glVertex2f(x1, y2);
+    glEnd();
+}
+
+void glTextureQuad(float x1, float y1, float x2, float y2) {
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2f(x1, y1);
+    glTexCoord2f(1, 0);
+    glVertex2f(x2, y1);
+    glTexCoord2f(1, 1);
+    glVertex2f(x2, y2);
+    glTexCoord2f(0, 1);
+    glVertex2f(x1, y2);
+    glEnd();
+}

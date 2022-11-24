@@ -28,6 +28,12 @@ namespace view {
 
         float evaluate(float parentValue, float parentSpare) const;
 
+        float evaluateContent(float contentSize) const;
+
+        bool operator==(const Dimension& other) const;
+
+        bool operator!=(const Dimension& other) const;
+
         Dimension operator+(const Dimension& other) const;
 
         Dimension operator-() const;
@@ -43,103 +49,76 @@ namespace view {
     const Dimension WRAP_CONTENT{0, 1, 0, 0};
     const Dimension FILL_SPARE{0, 0, 0, 1};
 
-    struct position {
-        Dimension x, y, width, height;
-    };
-
-    struct padding {
+    struct Padding {
         float left, top, right, bottom;
 
-        padding();
+        Padding();
 
-        explicit padding(float value);
+        explicit Padding(float value);
 
-        padding(float horizontal, float vertical);
+        Padding(float horizontal, float vertical);
 
-        padding(float left, float top, float right, float bottom);
+        Padding(float left, float top, float right, float bottom);
 
-        float width() {
+        float width() const {
             return left + right;
         }
 
-        float height() {
+        float height() const {
             return top + bottom;
         }
     };
 
-    struct border {
-        float left, top, right, bottom;
-        rgba color{};
-
-        border();
-
-        explicit border(float value);
-
-        border(float horizontal, float vertical);
-
-        border(float left, float top, float right, float bottom);
-
-        border& setColor(rgba _color);
-
-        float width() {
-            return left + right;
-        }
-
-        float height() {
-            return top + bottom;
-        }
-    };
+    class View;
 
     class Background {
     public:
-        rgba color{};
-        std::shared_ptr<gl::Texture> image;
-
-        Background& setImage(const std::filesystem::path& fileName);
-
-        Background& setColor(const rgba& _color);
-
-        Background& setFontColor(const rgba& _color);
-
-        Background& edit(const std::function<void(Background&)>& editor);
+        virtual void draw(const View* view, float left, float top, float right, float bottom);
     };
 
-    struct StyleState {
-        Dimension width, height;
-        position position{};
-        padding padding{};
-        border border{};
-        Background background{};
-        rgba fontColor{COLOR_FONT_PRIMARY};
-        std::shared_ptr<gl::FontRenderer> fontRenderer;
+    class BackgroundWrapper {
+    public:
+        template<typename BackgroundType>
+        BackgroundWrapper(const BackgroundType& bg);
+
+        BackgroundWrapper();
+
+        Background& get() {
+            return *background;
+        }
+
+    private:
+        std::shared_ptr<Background> background;
+    };
+
+    template<typename BackgroundType>
+    BackgroundWrapper::BackgroundWrapper(const BackgroundType& bg) : background(new BackgroundType(bg)) {}
+
+    class ColorBackground : public Background {
+    public:
+        ColorBackground(rgba color) : Background(), color(color) {}
+
+        void draw(const View* view, float left, float top, float right, float bottom) override;
+
+    protected:
+        rgba color;
+    };
+
+    class StateBackground : public Background {
+    public:
+        StateBackground(const BackgroundWrapper& bgDefault, const BackgroundWrapper& bgHovered,
+                        const BackgroundWrapper& bgPressed);
+
+        void draw(const View* view, float left, float top, float right, float bottom) override;
+
+    protected:
+        BackgroundWrapper bgDefault;
+        BackgroundWrapper bgHovered;
+        BackgroundWrapper bgPressed;
     };
 
     struct Style {
-        StyleState stateDefault;
-        StyleState stateHover;
-        StyleState statePress;
-        bool isDraggable{};
-
-        Style();
-
-        Style(const StyleState& style) : stateDefault(style), stateHover(style),
-                                         statePress(style) {} // NOLINT(google-explicit-constructor)
-
-        Style& set(const StyleState& style);
-
-        Style& forEach(const std::function<void(StyleState&)>& editor);
-
-        Style& edit(const std::function<void(Style&)>& editor);
-    };
-
-    struct CalculatedPos {
-        float x, y, width, height;
-
-        CalculatedPos() = default;
-
-        CalculatedPos(int x, int y, int width, int height);
-
-        CalculatedPos(const CalculatedPos& parentPos, const position& pos);
+        bool isDraggable = false;
     };
 }
 

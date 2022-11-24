@@ -8,31 +8,30 @@
 #include "view/View.h"
 
 namespace view {
+    struct TextViewAttributes {
+        VIEW_ATTRS
+        TEXT_VIEW_ATTRS
+    };
 
     class TextView : public View {
     public:
-        TextView(Context* context, const Style& style);
-
-        TextView(Context* context, const Style& style, const String& _text);
-
-        TextView(const TextView& other) = delete;
-
-        TextView(const TextView&& other) = delete;
-
-        TextView& operator=(const TextView& other) = delete;
-
-        TextView& operator=(const TextView&& other) = delete;
+        TextView(Context* context, const TextViewAttributes& attr);
 
         void onDraw() override;
 
-        void setText(const String& _text);
+        void setText(const String& text);
 
-        const String& getText() const;
+        const String& getText();
 
-        SpaceRequirement onMeasure() override;
+        void setFontSize(int fontSize);
+
+        float getContentWidth() override;
+
+        float getContentHeight() override;
 
     private:
-        String text;
+        TEXT_VIEW_ATTRS
+        std::shared_ptr<gl::FontRenderer> fontRenderer;
     };
 
 } // view

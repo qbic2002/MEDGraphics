@@ -7,6 +7,7 @@
 
 #define APP_ICON_MENU_ID 1
 #define MESSAGE_VIEW_ID 2
+#define IMAGE_VIEW_ID 3
 
 #define COLOR_PRIMARY 33, 33, 33, 255
 #define COLOR_PRIMARY_DARK 0, 0, 0, 255

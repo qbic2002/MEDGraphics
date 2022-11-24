@@ -13,7 +13,7 @@ namespace view {
         glVertex2f(x, y);
     }
 
-    ImageView::ImageView(MyApp* context, const Style& style) : View(context, style) {
+    ImageView::ImageView(MyApp* context, const ViewAttributes& attr) : View(context, attr) {
         context->getImageFileStorage().addImageChangedListener([&]() {
             imageFitScreen();
             invalidate();

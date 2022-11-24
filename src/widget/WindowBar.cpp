@@ -4,51 +4,54 @@
 
 #include "WindowBar.h"
 #include "TextView.h"
+#include "IconView.h"
 #include "DropDownView.h"
-#include <view/widget/LinearLayout.h>
 
 namespace view {
-    WindowBar::WindowBar(MyApp* context, const Style& style, ImageView* imageView)
-            : LinearLayout(context, style, HORIZONTAL) {
-        gravity = TOP;
+    WindowBar::WindowBar(MyApp* context, const LinearLayoutAttributes& attr)
+            : LinearLayout(context, attr) {
         auto* windowWrapper = context->getWindowWrapper();
+        View* view;
 
-        /// Application Icon
-        const unsigned appIconSize = 32;
-
-        auto* view = new View(context, Style{}
-                .forEach([context](StyleState& style) {
-                    style.width = WINDOW_BAR_HEIGHT;
-                    style.height = WINDOW_BAR_HEIGHT;
-//                    style.position = {0, 0, WINDOW_BAR_HEIGHT, WINDOW_BAR_HEIGHT};
-                    style.padding = padding((float) (WINDOW_BAR_HEIGHT - appIconSize) / 2);
-                    style.background.setImage(context->getAppDir() / "assets/icons/ic_launcher.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
-                    style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
-                }));
-//        view->setOnClickListener([context]() {
-//            auto* appMenu = (DropDownView*) context->findViewById(APP_ICON_MENU_ID);
-//            appMenu->toggleOpened();
-//        });
+        /// Application Icon is a DropDownView
+        view = new DropDownView(
+                context,
+                {},
+                new IconView(context, {
+                        .width = WINDOW_BAR_HEIGHT,
+                        .height = WINDOW_BAR_HEIGHT,
+                        .background = StateBackground{
+                                Background{},
+                                ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
+                                ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}
+                        },
+                        .imageFile = context->getAppDir() / "assets/icons/ic_launcher.png",
+                        .imageWidth = 32,
+                        .imageHeight = 32}),
+                {
+                        {L"Fast exit", []() { throw std::exception(); }},
+                        {L"Save to",   [context]() { context->saveImage(); }},
+                        {L"Open...",   [context]() { context->openImage(); }}
+                }, {
+                        .width = WRAP_CONTENT + FILL_SPARE,
+                        .height = WRAP_CONTENT,
+                        .padding = Padding(8),
+                        .background = StateBackground{
+                                ColorBackground{rgba{COLOR_PRIMARY}},
+                                ColorBackground{rgba{75, 110, 175, 255}},
+                                ColorBackground{rgba{66, 98, 155, 255}}
+                        }
+                });
         addChild(view);
 
         /// Title Text View
-        const unsigned titleBarFontSize = 14;
-        auto* titleView = new TextView(
-                context,
-                Style{}
-                        .forEach([context](StyleState& style) {
-                            style.width = FILL_SPARE;
-                            style.height = FILL_PARENT;
-//                            state.position = {WINDOW_BAR_HEIGHT, 0, FILL_PARENT * 0.5, WINDOW_BAR_HEIGHT};
-                            style.padding = padding((WINDOW_BAR_HEIGHT - (int) titleBarFontSize) / 2.0);
-                            style.fontRenderer = assets::fontRenderer(
-                                    context->getAppDir() / "assets/fonts/segoe-ui/Segoe UI.ttf",
-                                    titleBarFontSize);
-                        }),
-                L"MED Graphics");
+        auto* titleView = new TextView(context, {
+                .width = FILL_SPARE,
+                .height = WRAP_CONTENT,
+                .text = L"MED Graphics",
+                .font = context->getAppDir() / "assets/fonts/segoe-ui/Segoe UI.ttf",
+                .fontSize = 14
+        });
         addChild(titleView);
 
         context->getImageFileStorage().addImageTitleChangedListener([titleView, context]() {
@@ -62,39 +65,52 @@ namespace view {
 
         const unsigned controlIconSize = 32;
         const unsigned controlSize = WINDOW_BAR_HEIGHT;
-        const padding controlPadding = padding((float) (controlSize - controlIconSize) / 2);
+        const Padding controlPadding = Padding((float) (controlSize - controlIconSize) / 2);
+
+        /// Show Error
+        view = new IconView(context, {
+                .width = controlSize,
+                .height = controlSize,
+                .padding = controlPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
+                .imageFile = context->getAppDir() / "assets/icons/ic_show_error.png"});
+        view->setOnClickListener([context]() {
+            context->showError(L"Test error");
+        });
+        addChild(view);
 
         /// Fit Content Button
-        view = new View(context, Style{}
-                .forEach([controlPadding, context](StyleState& style) {
-                    style.width = controlSize;
-                    style.height = controlSize;
-                    style.padding = controlPadding;
-                    style.background.setImage(context->getAppDir() / "assets/icons/ic_fit_screen.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
-                    style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
-                }));
-        view->setOnClickListener([imageView]() {
-            imageView->imageFitScreen();
+        view = new IconView(context, {
+                .width = controlSize,
+                .height = controlSize,
+                .padding = controlPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
+                .imageFile = context->getAppDir() / "assets/icons/ic_fit_screen.png"});
+        view->setOnClickListener([context]() {
+            static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
+            view->imageFitScreen();
         });
         addChild(view);
 
         /// Original Scale Button
-        view = new View(context, Style{}
-                .forEach([controlPadding, context](StyleState& style) {
-                    style.width = controlSize;
-                    style.height = controlSize;
-                    style.padding = controlPadding;
-                    style.background.setImage(context->getAppDir() / "assets/icons/ic_original_scale.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
-                    style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
-                }));
-        view->setOnClickListener([imageView]() {
-            imageView->imageOriginalScale();
+        view = new IconView(context, {
+                .width = controlSize,
+                .height = controlSize,
+                .padding = controlPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
+                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
+                .imageFile = context->getAppDir() / "assets/icons/ic_original_scale.png"});
+        view->setOnClickListener([context]() {
+            static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
+            view->imageOriginalScale();
         });
         addChild(view);
 
@@ -102,75 +118,69 @@ namespace view {
         const unsigned btnWidth = 46;
         const unsigned btnHeight = 30;
 
-        const padding btnPadding = padding((float) (btnWidth - iconSize) / 2, (float) (btnHeight - iconSize) / 2);
+        const Padding btnPadding = Padding((float) (btnWidth - iconSize) / 2, (float) (btnHeight - iconSize) / 2);
 
-        auto viewGroup = new LinearLayout(context, Style()
-                                                  .forEach([](StyleState& style) {
-                                                      style.width = btnWidth * 3;
-                                                      style.height = btnHeight;
-                                                  }),
-                                          HORIZONTAL);
-        addChild(viewGroup);
+        auto windowControlLay = new LinearLayout(context, {
+                .width = btnWidth * 3,
+                .height = FILL_PARENT,
+                .padding = Padding(0, 0, 0, WINDOW_BAR_HEIGHT - btnHeight),
+                .orientation = HORIZONTAL,
+                .gravity = TOP});
+        addChild(windowControlLay);
 
         /// Iconify Icon
-        view = new View(context, Style()
-                .forEach([context, btnPadding](StyleState& style) {
-                    style.width = FILL_SPARE;
-                    style.height = FILL_SPARE;
-//                    style.position = {FILL_PARENT - btnWidth * 3, 0, btnWidth, btnHeight};
-                    style.padding = btnPadding;
-                    style.background.setImage(context->getAppDir() / "assets/icons/ic_iconify.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
-                    style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
-                }));
+        view = new IconView(context, {
+                .width = FILL_SPARE,
+                .height = FILL_SPARE,
+                .padding = btnPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
+                        ColorBackground{rgba{COLOR_WINDOW_BAR_BG_PRESS}}
+                },
+                .imageFile = context->getAppDir() / "assets/icons/ic_iconify.png"});
         view->setOnClickListener([windowWrapper]() {
             windowWrapper->iconify();
         });
-        viewGroup->addChild(view);
+        windowControlLay->addChild(view);
 
         /// Minimize-Maximize Icon
-        view = new View(context, Style()
-                .forEach([btnPadding](StyleState& style) {
-                    style.width = FILL_SPARE;
-                    style.height = FILL_SPARE;
-//                    style.position = {FILL_PARENT - btnWidth * 2, 0, btnWidth, btnHeight};
-                    style.padding = btnPadding;
-                    style.background.setImage("assets/icons/ic_minimized.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {COLOR_WINDOW_BAR_BG_HOVER};
-                    style.statePress.background.color = {COLOR_WINDOW_BAR_BG_PRESS};
-                }));
+        view = new IconView(context, {
+                .width = FILL_SPARE,
+                .height = FILL_SPARE,
+                .padding = btnPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
+                        ColorBackground{rgba{COLOR_WINDOW_BAR_BG_PRESS}}
+                },
+                .imageFile = context->getAppDir() / "assets/icons/ic_minimized.png"
+        });
         view->setOnClickListener([windowWrapper]() {
             windowWrapper->toggleMaximized();
         });
         view->setOnWindowResizeListener([context, windowWrapper](View& view, unsigned width, unsigned height) {
-            view.getStyle().forEach([context, windowWrapper](StyleState& state) {
-                state.background.setImage(windowWrapper->isMaximized()
+            ((IconView*) &view)->setImage(windowWrapper->isMaximized()
                                           ? context->getAppDir() / "assets/icons/ic_maximized.png"
                                           : context->getAppDir() / "assets/icons/ic_minimized.png");
-            });
         });
-        viewGroup->addChild(view);
+        windowControlLay->addChild(view);
 
         /// Close Icon
-        view = new View(context, Style()
-                .forEach([&btnPadding, context](StyleState& style) {
-                    style.width = FILL_SPARE;
-                    style.height = FILL_SPARE;
-//                    style.position = {FILL_PARENT - btnWidth, 0, btnWidth, btnHeight};
-                    style.padding = btnPadding;
-                    style.background.setImage(context->getAppDir() / "assets/icons/ic_close.png");
-                })
-                .edit([](Style& style) {
-                    style.stateHover.background.color = {196, 43, 28, 255};
-                    style.statePress.background.color = {198, 99, 99, 255};
-                }));
+        view = new IconView(context, {
+                .width = FILL_SPARE,
+                .height = FILL_SPARE,
+                .padding = btnPadding,
+                .background = StateBackground{
+                        Background{},
+                        ColorBackground{rgba{196, 43, 28, 255}},
+                        ColorBackground{rgba{198, 99, 99, 255}}
+                },
+                .imageFile = context->getAppDir() / "assets/icons/ic_close.png"
+        });
         view->setOnClickListener([windowWrapper]() {
             windowWrapper->setShouldClose(1);
         });
-        viewGroup->addChild(view);
+        windowControlLay->addChild(view);
     }
 } // view

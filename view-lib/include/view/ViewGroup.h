@@ -12,9 +12,14 @@
 
 namespace view {
 
+    struct ViewGroupAttributes {
+        VIEW_ATTRS
+        VIEW_GROUP_ATTRS
+    };
+
     class ViewGroup : public View {
     public:
-        ViewGroup(Context* context, const Style& style);
+        ViewGroup(Context* context, const ViewGroupAttributes& attr);
 
         ~ViewGroup() override;
 
@@ -34,12 +39,10 @@ namespace view {
 
         bool onScroll(double xOffset, double yOffset, double cursorX, double cursorY) override;
 
-        void onMeasure(const CalculatedPos& parentPos) override;
-
         View* findViewById(int id) override;
 
     protected:
-        std::vector<View*> children;
+        VIEW_GROUP_ATTRS
     };
 
 } // view

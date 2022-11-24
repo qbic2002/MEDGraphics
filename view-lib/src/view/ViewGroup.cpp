@@ -5,12 +5,16 @@
 #include "view/ViewGroup.h"
 
 namespace view {
-    ViewGroup::ViewGroup(Context* context, const Style& style) : View(context, style) {}
+    ViewGroup::ViewGroup(Context* context, const ViewGroupAttributes& attr)
+            : View(context, (const ViewAttributes&) attr) {
+        VIEW_GROUP_ATTRS_SET(attr)
+    }
 
     ViewGroup::~ViewGroup() {
         for (auto* child: children) {
             delete child;
         }
+        View::~View();
     }
 
     bool ViewGroup::onClick(const ClickEvent& event) {
@@ -81,13 +85,6 @@ namespace view {
         }
 
         return View::onScroll(xOffset, yOffset, cursorX, cursorY);
-    }
-
-    void ViewGroup::onMeasure(const CalculatedPos& parentPos) {
-        View::onMeasure(parentPos);
-        for (auto* child: children) {
-            child->onMeasure(calculatedPos);
-        }
     }
 
     bool ViewGroup::onDrag(double x, double y, double dx, double dy) {

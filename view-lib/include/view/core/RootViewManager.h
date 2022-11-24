@@ -43,14 +43,18 @@ public:
 
     view::Dialog* createDialog(view::View* view, view::Dimension x, view::Dimension y);
 
-    void onDialogShow(view::Dialog* view);
+    void onDialogShownChanged(view::Dialog* dialog, bool isShown);
 
-    void onDialogHide(view::Dialog* dialog);
+    int getWindowWidth() const;
+
+    int getWindowHeight() const;
 
 protected:
     void onWindowResize(unsigned int width, unsigned int height) override;
 
 private:
+    int windowWidth = 0;
+    int windowHeight = 0;
     view::View* rootView = nullptr;
     std::vector<view::Dialog*> dialogs;
     std::set<view::View*> activeViews;

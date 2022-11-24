@@ -5,14 +5,24 @@
 #include "TextView.h"
 
 namespace view {
-    TextView::TextView(Context* context, const Style& style) : View(context, style) {}
-
-    TextView::TextView(Context* context, const Style& style, const String& _text) : View(context, style) {
-        setText(_text);
+    TextView::TextView(Context* context, const TextViewAttributes& attr) : View(context, (const ViewAttributes&) attr) {
+        TEXT_VIEW_ATTRS_SET(attr)
+        if (font.string().empty()) {
+            font = context->getAppDir() / "assets/fonts/segoe-ui/Segoe UI.ttf";
+        }
+        setFontSize(attr.fontSize);
     }
 
     void TextView::onDraw() {
-        styleState->fontRenderer->renderText(text, innerEdges.left, innerEdges.top);
+        fontRenderer->renderText(text, innerEdges.left, innerEdges.top);
+    }
+
+    float TextView::getContentWidth() {
+        return fontRenderer->getTextWidth(text);
+    }
+
+    float TextView::getContentHeight() {
+        return fontRenderer->getLineHeight();
     }
 
     void TextView::setText(const String& _text) {
@@ -20,27 +30,13 @@ namespace view {
         invalidate();
     }
 
-    const String& TextView::getText() const {
+    const String& TextView::getText() {
         return text;
     }
 
-    View::SpaceRequirement TextView::onMeasure() {
-        float width = styleState->padding.left + styleState->padding.right
-                      + styleState->border.left + styleState->border.right
-                      + styleState->width.pixel
-                      + styleState->width.contentK * styleState->fontRenderer->getTextWidth(text);
-        float height = styleState->padding.top + styleState->padding.bottom
-                       + styleState->border.top + styleState->border.bottom
-                       + styleState->height.pixel
-                       + styleState->height.contentK * styleState->fontRenderer->getLineHeight();
-
-        return {
-                .width = width,
-                .height = height,
-                .parentPartW = styleState->width.parentK,
-                .parentPartH = styleState->height.parentK,
-                .parentSparePartW = styleState->width.parentSpareK,
-                .parentSparePartH = styleState->height.parentSpareK};
+    void TextView::setFontSize(int fontSize) {
+        fontRenderer = assets::fontRenderer(font, fontSize);
+        invalidate();
     }
 
 } // view
