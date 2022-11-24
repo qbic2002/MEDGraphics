@@ -8,7 +8,7 @@
 enum PixelType {
     RGBA8,
     RGB8,
-    GRAY,
+    GRAY8,
     HSL8
 };
 

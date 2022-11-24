@@ -18,13 +18,9 @@ public:
             :
             grayScale(gray) {}
 
-    rgba toRGBA() const override {
-        return {grayScale, grayScale, grayScale, 255};
-    }
+    rgba toRGBA() const override;
 
-    PixelType getPixelType() const override {
-        return GRAY;
-    }
+    PixelType getPixelType() const override;
 
 public:
     unsigned char grayScale{};

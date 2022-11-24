@@ -17,13 +17,9 @@ public:
             :
             r(r), g(g), b(b) {}
 
-    rgba toRGBA() const override {
-        return {r, g, b, 255};
-    }
+    rgba toRGBA() const override;
 
-    PixelType getPixelType() const override {
-        return RGB8;
-    }
+    PixelType getPixelType() const override;
 
 public:
     unsigned char r{};

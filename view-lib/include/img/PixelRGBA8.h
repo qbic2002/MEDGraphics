@@ -26,13 +26,9 @@ public:
             r(r), g(g), b(b), a(a) {
     }
 
-    rgba toRGBA() const override {
-        return rgba;
-    }
+    rgba toRGBA() const override;
 
-    PixelType getPixelType() const override {
-        return RGBA8;
-    }
+    PixelType getPixelType() const override;
 
 public:
     union {

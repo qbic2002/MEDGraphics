@@ -22,7 +22,7 @@ namespace utils {
             return RGB8;
         }
         if (std::is_same<T, PixelGray8>::value) {
-            return GRAY;
+            return GRAY8;
         }
         if (std::is_same<T, PixelHSL8>::value) {
             return HSL8;
