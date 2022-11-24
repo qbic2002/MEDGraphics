@@ -130,6 +130,20 @@ PixelYCbCr601 toYCbCr601(const Pixel* pixel) {
 
 }
 
+PixelYCbCr709 toYCbCr709(const Pixel* pixel) {
+    if (pixel->getPixelType() == YCbCr709) {
+        return *(PixelYCbCr709*) pixel;
+    }
+
+    rgba rgba = pixel->toRGBA();
+    double y = (0 + (0.299 * rgba.r) + (0.587 * rgba.g) + (0.114 * rgba.b));
+    double cb = (128 - (0.168736 * rgba.r) - (0.331264 * rgba.g) + (0.5 * rgba.b));
+    double cr = (128 + (0.5 * rgba.r) - (0.418688 * rgba.g) - (0.081312 * rgba.b));
+
+    return {y, cb, cr};
+
+}
+
 
 PixelRGBA8 toRGBA8(const Pixel* pixel) {
     switch (pixel->getPixelType()) {
@@ -219,10 +233,25 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
         }
         case YCbCr601: {
             PixelYCbCr601 pix = *(PixelYCbCr601*) pixel;
-            int r = ((298.082 * pix.y) / 256.0 + (408.583 * pix.cr) / 256.0 - 222.921);
-            int g = ((298.082 * pix.y) / 256.0 - (100.291 * pix.cb) / 256.0 - (208.120 * pix.cr) / 256.0 +
-                     135.576);
-            int b = ((298.082 * pix.y) / 256.0 + (516.412 * pix.cb) / 256.0 - 276.836);
+            int r = round((298.082 * pix.y) / 256.0 + (408.583 * pix.cr) / 256.0 - 222.921);
+            int g = round((298.082 * pix.y) / 256.0 - (100.291 * pix.cb) / 256.0 - (208.120 * pix.cr) / 256.0 +
+                          135.576);
+            int b = round((298.082 * pix.y) / 256.0 + (516.412 * pix.cb) / 256.0 - 276.836);
+
+            if (r < 0) r = 0;
+            if (r > 255) r = 255;
+            if (g < 0) g = 0;
+            if (g > 255) g = 255;
+            if (b < 0) b = 0;
+            if (b > 255) b = 255;
+
+            return {(unsigned char) r, (unsigned char) g, (unsigned char) b, 255};
+        }
+        case YCbCr709: {
+            PixelYCbCr709 pix = *(PixelYCbCr709*) pixel;
+            int r = round((pix.y) + 1.402 * (pix.cr - 128));
+            int g = round((pix.y) - 0.344136 * (pix.cb - 128) - 0.714136 * (pix.cr - 128));
+            int b = round(pix.y) + 1.772 * (pix.cb - 128);
 
             if (r < 0) r = 0;
             if (r > 255) r = 255;

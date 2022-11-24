@@ -25,4 +25,11 @@ add_library(view STATIC
         ../include/utils/String.h
         utils/ImageFormats.cpp ../include/utils/ImageFormats.h
         img/colorModelConverter.cpp ../include/img/colorModelConverter.h
-        utils/pixelTypeMethods.cpp ../include/utils/pixelTypeMethods.h img/PixelGray8.cpp img/PixelHSL.cpp img/PixelRGB8.cpp img/PixelRGBA8.cpp img/PixelHSV.cpp ../include/img/PixelHSV.h img/PixelYCbCr601.cpp img/PixelYCbCr601.h)
+        utils/pixelTypeMethods.cpp ../include/utils/pixelTypeMethods.h
+        img/PixelGray8.cpp
+        img/PixelHSL.cpp
+        img/PixelRGB8.cpp
+        img/PixelRGBA8.cpp
+        img/PixelHSV.cpp ../include/img/PixelHSV.h
+        ../include/img/PixelYCbCr601.h img/PixelYCbCr601.cpp
+        img/PixelYCbCr709.cpp ../include/img/PixelYCbCr709.h)
