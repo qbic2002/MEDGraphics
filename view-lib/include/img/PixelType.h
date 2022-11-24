@@ -13,7 +13,8 @@ enum PixelType {
     HSV,
     YCbCr601,
     YCbCr709,
-    YCoCg
+    YCoCg,
+    CMY8
 };
 
 #endif //MEDGRAPHICS_PIXELTYPE_H

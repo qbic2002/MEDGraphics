@@ -14,6 +14,7 @@
 #include "img/PixelYCbCr601.h"
 #include "img/PixelYCbCr709.h"
 #include "img/PixelYCoCg.h"
+#include "img/PixelCMY8.h"
 #include <type_traits>
 
 namespace utils {
@@ -42,6 +43,9 @@ namespace utils {
         }
         if (std::is_same<T, PixelYCoCg>::value) {
             return YCoCg;
+        }
+        if (std::is_same<T, PixelCMY8>::value) {
+            return CMY8;
         }
     }
 }

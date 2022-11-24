@@ -157,6 +157,19 @@ PixelYCoCg toYCoCg(const Pixel* pixel) {
     return {y, co, cg};
 }
 
+PixelCMY8 toCMY8(const Pixel* pixel) {
+    if (pixel->getPixelType() == CMY8) {
+        return *(PixelCMY8*) pixel;
+    }
+
+    rgba rgba = pixel->toRGBA();
+
+    unsigned char c = (255 - rgba.r);
+    unsigned char m = (255 - rgba.g);
+    unsigned char y = (255 - rgba.b);
+    return {c, m, y};
+}
+
 PixelRGBA8 toRGBA8(const Pixel* pixel) {
     switch (pixel->getPixelType()) {
         case GRAY8: {
@@ -289,6 +302,14 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
             if (b > 255) b = 255;
 
             return {(unsigned char) r, (unsigned char) g, (unsigned char) b, 255};
+        }
+        case CMY8: {
+            PixelCMY8 pix = *(PixelCMY8*) pixel;
+            unsigned char r = (255 - pix.c);
+            unsigned char g = (255 - pix.m);
+            unsigned char b = (255 - pix.y);
+
+            return {r, g, b, 255};
         }
         default:
             throw std::exception();

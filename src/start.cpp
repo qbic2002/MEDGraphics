@@ -7,9 +7,9 @@
 
 int main([[maybe_unused]] int argc, char** argv) {
 //    PixelRGB8 p(2, 173, 9);
-//    PixelYCoCg p1 = toYCoCg(&p);
+//    PixelCMY8 p1 = toCMY8(&p);
 //
-//    std::cout << p1.y << " " << p1.co << " " << p1.cg << "\n";
+//    std::cout << p1.c << " " << p1.m << " " << p1.y << "\n";
 //
 //    rgba rgba = p1.toRGBA();
 //
