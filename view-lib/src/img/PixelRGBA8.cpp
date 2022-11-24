@@ -11,5 +11,19 @@ PixelType PixelRGBA8::getPixelType() const {
 }
 
 rgba PixelRGBA8::toRGBA() const {
-    return toRGB8(this).toRGBA();
+    return rgba;
 }
+
+PixelRGBA8::PixelRGBA8(struct rgba rgba)
+        :
+        rgba(rgba) {
+}
+
+PixelRGBA8::PixelRGBA8(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+        :
+        r(r), g(g), b(b), a(a) {
+}
+
+PixelRGBA8::PixelRGBA8()
+        :
+        PixelRGBA8(0, 0, 0, 0) {}

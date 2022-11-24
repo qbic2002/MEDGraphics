@@ -14,9 +14,7 @@ public:
 
     PixelGray8(const PixelGray8& other) = default;
 
-    PixelGray8(int gray)
-            :
-            grayScale(gray) {}
+    PixelGray8(int gray);
 
     rgba toRGBA() const override;
 

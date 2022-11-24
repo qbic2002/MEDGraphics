@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <cmath>
 #include "img/colorModelConverter.h"
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
@@ -28,9 +29,9 @@ T min(T a, T b, Arguments... args) {
     return min(std::min(a, b), args...);
 }
 
-PixelHSL8 toHSL8(const Pixel* pixel) {
-    if (pixel->getPixelType() == HSL8) {
-        return *(PixelHSL8*) pixel;
+PixelHSL toHSL8(const Pixel* pixel) {
+    if (pixel->getPixelType() == HSL) {
+        return *(PixelHSL*) pixel;
     }
 
     rgba rgba = pixel->toRGBA();
@@ -71,22 +72,22 @@ PixelHSL8 toHSL8(const Pixel* pixel) {
     return {h, s, l};
 }
 
-PixelRGB8 toRGB8(const Pixel* pixel) {
+PixelRGBA8 toRGBA8(const Pixel* pixel) {
     switch (pixel->getPixelType()) {
         case GRAY8: {
             PixelGray8 p = *(PixelGray8*) pixel;
-            return {p.grayScale, p.grayScale, p.grayScale};
+            return {p.grayScale, p.grayScale, p.grayScale, 255};
         }
         case RGBA8: {
             PixelRGBA8 p = *(PixelRGBA8*) pixel;
-            return {p.r, p.g, p.b};
+            return p;
         }
         case RGB8: {
             PixelRGB8 p = *(PixelRGB8*) pixel;
-            return p;
+            return {p.r, p.g, p.b, 255};
         }
-        case HSL8: {
-            PixelHSL8 pix = *(PixelHSL8*) pixel;
+        case HSL: {
+            PixelHSL pix = *(PixelHSL*) pixel;
             double l = pix.l;
             double h = pix.h;
             double s = pix.s;
@@ -126,7 +127,7 @@ PixelRGB8 toRGB8(const Pixel* pixel) {
             }
 
             return {(unsigned char) round(rgb[0] * 255), (unsigned char) round(rgb[1] * 255),
-                    (unsigned char) round(rgb[2] * 255)};
+                    (unsigned char) round(rgb[2] * 255), 255};
         }
         default:
             throw std::exception();

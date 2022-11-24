@@ -5,11 +5,12 @@
 #ifndef MEDGRAPHICS_COLORMODELCONVERTER_H
 #define MEDGRAPHICS_COLORMODELCONVERTER_H
 
-#include "PixelHSL8.h"
+#include "PixelHSL.h"
 #include "PixelRGB8.h"
+#include "PixelRGBA8.h"
 
-PixelHSL8 toHSL8(const Pixel* pixel);
+PixelHSL toHSL8(const Pixel* pixel);
 
-PixelRGB8 toRGB8(const Pixel* pixel);
+PixelRGBA8 toRGBA8(const Pixel* pixel);
 
 #endif //MEDGRAPHICS_COLORMODELCONVERTER_H

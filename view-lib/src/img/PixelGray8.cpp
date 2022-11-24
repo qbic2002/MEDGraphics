@@ -11,5 +11,9 @@ PixelType PixelGray8::getPixelType() const {
 }
 
 rgba PixelGray8::toRGBA() const {
-    return toRGB8(this).toRGBA();
+    return toRGBA8(this).toRGBA();
 }
+
+PixelGray8::PixelGray8(int gray)
+        :
+        grayScale(gray) {}

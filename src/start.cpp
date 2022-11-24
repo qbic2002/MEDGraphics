@@ -3,12 +3,12 @@
 #include "stb_image.h"
 #include "core/MyApp.h"
 #include "img/PixelRGB8.h"
-#include "img/PixelHSL8.h"
+#include "img/PixelHSL.h"
 #include "img/colorModelConverter.h"
 
 int main([[maybe_unused]] int argc, char** argv) {
 //    PixelRGB8 p(179, 99, 17);
-//    PixelHSL8 p1 = toHSL8(&p);
+//    PixelHSL p1 = toHSL8(&p);
 //
 //    std::cout << p1.h << " " << p1.s << " " << p1.l << "\n";
 //

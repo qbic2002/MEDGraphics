@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_PIXELTYPEMETHODS_H
 #define MEDGRAPHICS_PIXELTYPEMETHODS_H
 
-#include "img/PixelHSL8.h"
+#include "img/PixelHSL.h"
 #include "img/PixelRGB8.h"
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
@@ -24,8 +24,8 @@ namespace utils {
         if (std::is_same<T, PixelGray8>::value) {
             return GRAY8;
         }
-        if (std::is_same<T, PixelHSL8>::value) {
-            return HSL8;
+        if (std::is_same<T, PixelHSL>::value) {
+            return HSL;
         }
     }
 }
