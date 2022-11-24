@@ -10,6 +10,7 @@
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
 #include "img/PixelType.h"
+#include "img/PixelHSV.h"
 #include <type_traits>
 
 namespace utils {
@@ -26,6 +27,9 @@ namespace utils {
         }
         if (std::is_same<T, PixelHSL>::value) {
             return HSL;
+        }
+        if (std::is_same<T, PixelHSV>::value) {
+            return HSV;
         }
     }
 }

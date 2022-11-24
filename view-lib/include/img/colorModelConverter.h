@@ -8,8 +8,11 @@
 #include "PixelHSL.h"
 #include "PixelRGB8.h"
 #include "PixelRGBA8.h"
+#include "PixelHSV.h"
 
-PixelHSL toHSL8(const Pixel* pixel);
+PixelHSL toHSL(const Pixel* pixel);
+
+PixelHSV toHSV(const Pixel* pixel);
 
 PixelRGBA8 toRGBA8(const Pixel* pixel);
 

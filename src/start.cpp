@@ -5,12 +5,13 @@
 #include "img/PixelRGB8.h"
 #include "img/PixelHSL.h"
 #include "img/colorModelConverter.h"
+#include "img/PixelHSV.h"
 
 int main([[maybe_unused]] int argc, char** argv) {
-//    PixelRGB8 p(179, 99, 17);
-//    PixelHSL p1 = toHSL8(&p);
+//    PixelRGB8 p(255, 173, 255);
+//    PixelHSV p1 = toHSV(&p);
 //
-//    std::cout << p1.h << " " << p1.s << " " << p1.l << "\n";
+//    std::cout << p1.h << " " << p1.s << " " << p1.v << "\n";
 //
 //    rgba rgba = p1.toRGBA();
 //

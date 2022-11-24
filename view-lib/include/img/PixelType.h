@@ -9,7 +9,8 @@ enum PixelType {
     RGBA8,
     RGB8,
     GRAY8,
-    HSL
+    HSL,
+    HSV
 };
 
 #endif //MEDGRAPHICS_PIXELTYPE_H

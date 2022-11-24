@@ -7,6 +7,7 @@
 #include "img/colorModelConverter.h"
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
+#include "img/PixelHSV.h"
 
 template<class T>
 T max(T a, T b) {
@@ -29,7 +30,7 @@ T min(T a, T b, Arguments... args) {
     return min(std::min(a, b), args...);
 }
 
-PixelHSL toHSL8(const Pixel* pixel) {
+PixelHSL toHSL(const Pixel* pixel) {
     if (pixel->getPixelType() == HSL) {
         return *(PixelHSL*) pixel;
     }
@@ -70,6 +71,48 @@ PixelHSL toHSL8(const Pixel* pixel) {
     }
 
     return {h, s, l};
+}
+
+PixelHSV toHSV(const Pixel* pixel) {
+    if (pixel->getPixelType() == HSV) {
+        return *(PixelHSV*) pixel;
+    }
+
+    rgba rgba = pixel->toRGBA();
+
+    int r = rgba.r;
+    int g = rgba.g;
+    int b = rgba.b;
+
+
+    unsigned char cMax = max(rgba.r, rgba.g, rgba.b);
+    unsigned char cMin = min(rgba.r, rgba.g, rgba.b);
+
+    double delta = cMax - cMin;
+
+    double h = 0;
+    if (delta == 0) {
+        h = 0;
+    } else if (cMax == rgba.r) {
+        h = 60 * (((g - b) / delta));
+        if (g < b) {
+            h += 360;
+        }
+    } else if (cMax == rgba.g) {
+        h = 60.0 * (((b - r) / delta) + 2.0);
+    } else if (cMax == rgba.b) {
+        h = 60 * (((r - g) / delta) + 4.0);
+    }
+
+    double s = 0;
+    if (cMax == 0) {
+        s = 0;
+    } else {
+        s = 1 - (double) cMin / cMax;
+    }
+
+    double v = cMax / 255.0;
+    return {h, s, v};
 }
 
 PixelRGBA8 toRGBA8(const Pixel* pixel) {
@@ -128,6 +171,36 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
 
             return {(unsigned char) round(rgb[0] * 255), (unsigned char) round(rgb[1] * 255),
                     (unsigned char) round(rgb[2] * 255), 255};
+        }
+        case HSV: {
+            PixelHSV pix = *(PixelHSV*) pixel;
+            char h1 = ((int) pix.h / 60) % 6;
+            double vMin = (1 - pix.s) * pix.v;
+
+            double a = (pix.v - vMin) * ((int) pix.h % 60) / 60.0;
+            double vInc = vMin + a;
+            double vDec = pix.v - a;
+            switch (h1) {
+                case 0:
+                    return {(unsigned char) round(pix.v * 255), (unsigned char) round(vInc * 255),
+                            (unsigned char) round(vMin * 255), 255};
+                case 1:
+                    return {(unsigned char) round(vDec * 255), (unsigned char) round(pix.v * 255),
+                            (unsigned char) round(vMin * 255), 255};
+                case 2:
+                    return {(unsigned char) round(vMin * 255), (unsigned char) round(pix.v * 255),
+                            (unsigned char) round(vInc * 255), 255};
+                case 3:
+                    return {(unsigned char) round(vMin * 255), (unsigned char) round(vDec * 255),
+                            (unsigned char) round(pix.v * 255), 255};
+                case 4:
+                    return {(unsigned char) round(vInc * 255), (unsigned char) round(vMin * 255),
+                            (unsigned char) round(pix.v * 255), 255};
+                case 5:
+                    return {(unsigned char) round(pix.v * 255), (unsigned char) round(vMin * 255),
+                            (unsigned char) round(vDec * 255), 255};
+            }
+
         }
         default:
             throw std::exception();
