@@ -5,7 +5,7 @@
 #include "img/PixelYCbCr601.h"
 #include "img/colorModelConverter.h"
 
-PixelYCbCr601::PixelYCbCr601(unsigned char y, unsigned char cb, unsigned char cr)
+PixelYCbCr601::PixelYCbCr601(double y, double cb, double cr)
         :
         y(y), cb(cb), cr(cr) {}
 

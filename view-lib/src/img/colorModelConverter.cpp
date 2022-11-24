@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include "img/colorModelConverter.h"
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
@@ -121,9 +122,9 @@ PixelYCbCr601 toYCbCr601(const Pixel* pixel) {
     }
 
     rgba rgba = pixel->toRGBA();
-    unsigned char y = round(16 + (65.481 * rgba.r / 255.0) + (128.553 * rgba.g / 255.0) + (24.966 * rgba.b / 255.0));
-    unsigned char cb = round(128 - (37.797 * rgba.r / 255.0) - (74.203 * rgba.g / 255.0) + (112.0 * rgba.b / 255.0));
-    unsigned char cr = round(128 + (112.0 * rgba.r / 255.0) - (93.786 * rgba.g / 255.0) - (18.214 * rgba.b / 255.0));
+    double y = (16 + (65.481 * rgba.r / 255.0) + (128.553 * rgba.g / 255.0) + (24.966 * rgba.b / 255.0));
+    double cb = (128 - (37.797 * rgba.r / 255.0) - (74.203 * rgba.g / 255.0) + (112.0 * rgba.b / 255.0));
+    double cr = (128 + (112.0 * rgba.r / 255.0) - (93.786 * rgba.g / 255.0) - (18.214 * rgba.b / 255.0));
 
     return {y, cb, cr};
 
@@ -218,12 +219,19 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
         }
         case YCbCr601: {
             PixelYCbCr601 pix = *(PixelYCbCr601*) pixel;
-            unsigned char r = ((298.082 * pix.y) / 256.0 + (408.583 * pix.cr) / 256.0 - 222.921);
-            unsigned char g = ((298.082 * pix.y) / 256.0 - (100.291 * pix.cb) / 256.0 - (208.120 * pix.cr) / 256.0 +
-                               135.576);
-            unsigned char b = ((298.082 * pix.y) / 256.0 + (516.412 * pix.cb) / 256.0 - 276.836);
+            int r = ((298.082 * pix.y) / 256.0 + (408.583 * pix.cr) / 256.0 - 222.921);
+            int g = ((298.082 * pix.y) / 256.0 - (100.291 * pix.cb) / 256.0 - (208.120 * pix.cr) / 256.0 +
+                     135.576);
+            int b = ((298.082 * pix.y) / 256.0 + (516.412 * pix.cb) / 256.0 - 276.836);
 
-            return {r, g, b, 255};
+            if (r < 0) r = 0;
+            if (r > 255) r = 255;
+            if (g < 0) g = 0;
+            if (g > 255) g = 255;
+            if (b < 0) b = 0;
+            if (b > 255) b = 255;
+
+            return {(unsigned char) r, (unsigned char) g, (unsigned char) b, 255};
         }
         default:
             throw std::exception();

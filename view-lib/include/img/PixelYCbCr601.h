@@ -14,16 +14,16 @@ public:
 
     PixelYCbCr601(const PixelYCbCr601& other) = default;
 
-    PixelYCbCr601(unsigned char y, unsigned char cb, unsigned char cr);
+    PixelYCbCr601(double y, double cb, double cr);
 
     rgba toRGBA() const override;
 
     PixelType getPixelType() const override;
 
 public:
-    unsigned char y{};
-    unsigned char cb{};
-    unsigned char cr{};
+    double y{};
+    double cb{};
+    double cr{};
 };
 
 
