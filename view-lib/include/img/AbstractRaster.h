@@ -7,6 +7,7 @@
 
 
 #include "PixelType.h"
+#include "Pixel.h"
 
 template<class T>
 concept CheckPixelType = std::is_base_of<Pixel, T>::value;

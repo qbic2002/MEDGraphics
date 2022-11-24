@@ -85,9 +85,12 @@ void MyApp::saveImage() {
         showError(L"Image has not been load yet");
         return;
     }
-    std::wstring filename;
-    if (!utils::getSaveFileName(filename))
+    utils::OpenFileInfo openFileInfo = utils::getSaveFileName();
+    if (openFileInfo.isCancelled)
         return;
+
+    std::wstring filename = utils::fixFileName(openFileInfo.filename, openFileInfo.filterIndex);
+
     try {
         pnm::writePNMImage(PNMImage(imageFileStorage.getCurImageFile()->raster), filename);
     } catch (std::exception&) {

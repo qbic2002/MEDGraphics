@@ -9,7 +9,7 @@ PNMImage::PNMImage(const AbstractRaster* abstractRaster) {
     pnmHeader.width = abstractRaster->getWidth();
     pnmHeader.maxGray = 255;
     switch (abstractRaster->getPixelType()) {
-        case PixelType::GRAY: {
+        case PixelType::GRAY8: {
             pnmHeader.pnmMode = PNMMode::P5;
             break;
         }

@@ -11,11 +11,13 @@ class PixelRGB8 : public Pixel {
 public:
     PixelRGB8() = default;
 
-    PixelRGB8(unsigned char r, unsigned char g, unsigned char b) : r(r), g(g), b(b) {}
+    PixelRGB8(const PixelRGB8& other) = default;
 
-    rgba toRGBA() const override {
-        return {r, g, b, 255};
-    }
+    PixelRGB8(unsigned char r, unsigned char g, unsigned char b);
+
+    rgba toRGBA() const override;
+
+    PixelType getPixelType() const override;
 
 public:
     unsigned char r{};

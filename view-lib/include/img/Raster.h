@@ -10,6 +10,7 @@
 #include "PixelRGBA8.h"
 #include "rgba.h"
 #include "AbstractRaster.h"
+#include "utils/pixelTypeMethods.h"
 
 template<class T> requires CheckPixelType<T>
 class Raster : public AbstractRaster {

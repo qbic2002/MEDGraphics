@@ -22,5 +22,17 @@ add_library(view STATIC
         utils/ft_error_check.cpp
         utils/measureFps.cpp
         utils/measureTime.cpp
-        utils/random.cpp)
+        utils/random.cpp
+        utils/ImageFormats.cpp
+        img/colorModelConverter.cpp
+        utils/pixelTypeMethods.cpp
+        img/PixelGray8.cpp
+        img/PixelHSL.cpp
+        img/PixelRGB8.cpp
+        img/PixelRGBA8.cpp
+        img/PixelHSV.cpp
+        img/PixelYCbCr601.cpp
+        img/PixelYCbCr709.cpp
+        img/PixelYCoCg.cpp
+        img/PixelCMY8.cpp)
 target_link_libraries(view ${LIBS})

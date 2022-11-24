@@ -10,18 +10,17 @@
 
 class PixelRGBA8 : public Pixel {
 public:
-    PixelRGBA8() : PixelRGBA8(0, 0, 0, 0) {
-    }
+    PixelRGBA8();
 
-    PixelRGBA8(rgba rgba) : rgba(rgba) {
-    }
+    PixelRGBA8(const PixelRGBA8& other) = default;
 
-    PixelRGBA8(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {
-    }
+    PixelRGBA8(rgba rgba);
 
-    rgba toRGBA() const override {
-        return rgba;
-    }
+    PixelRGBA8(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+
+    rgba toRGBA() const override;
+
+    PixelType getPixelType() const override;
 
 public:
     union {
