@@ -9,9 +9,9 @@
 
 int main([[maybe_unused]] int argc, char** argv) {
 //    PixelRGB8 p(255, 173, 255);
-//    PixelHSV p1 = toHSV(&p);
+//    PixelYCbCr601 p1 = toYCbCr601(&p);
 //
-//    std::cout << p1.h << " " << p1.s << " " << p1.v << "\n";
+//    std::cout << (int)p1.y << " " << (int)p1.cb << " " << (int)p1.cr << "\n";
 //
 //    rgba rgba = p1.toRGBA();
 //

@@ -115,6 +115,21 @@ PixelHSV toHSV(const Pixel* pixel) {
     return {h, s, v};
 }
 
+PixelYCbCr601 toYCbCr601(const Pixel* pixel) {
+    if (pixel->getPixelType() == YCbCr601) {
+        return *(PixelYCbCr601*) pixel;
+    }
+
+    rgba rgba = pixel->toRGBA();
+    unsigned char y = round(16 + (65.481 * rgba.r / 255.0) + (128.553 * rgba.g / 255.0) + (24.966 * rgba.b / 255.0));
+    unsigned char cb = round(128 - (37.797 * rgba.r / 255.0) - (74.203 * rgba.g / 255.0) + (112.0 * rgba.b / 255.0));
+    unsigned char cr = round(128 + (112.0 * rgba.r / 255.0) - (93.786 * rgba.g / 255.0) - (18.214 * rgba.b / 255.0));
+
+    return {y, cb, cr};
+
+}
+
+
 PixelRGBA8 toRGBA8(const Pixel* pixel) {
     switch (pixel->getPixelType()) {
         case GRAY8: {
@@ -200,7 +215,15 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
                     return {(unsigned char) round(pix.v * 255), (unsigned char) round(vMin * 255),
                             (unsigned char) round(vDec * 255), 255};
             }
+        }
+        case YCbCr601: {
+            PixelYCbCr601 pix = *(PixelYCbCr601*) pixel;
+            unsigned char r = ((298.082 * pix.y) / 256.0 + (408.583 * pix.cr) / 256.0 - 222.921);
+            unsigned char g = ((298.082 * pix.y) / 256.0 - (100.291 * pix.cb) / 256.0 - (208.120 * pix.cr) / 256.0 +
+                               135.576);
+            unsigned char b = ((298.082 * pix.y) / 256.0 + (516.412 * pix.cb) / 256.0 - 276.836);
 
+            return {r, g, b, 255};
         }
         default:
             throw std::exception();
