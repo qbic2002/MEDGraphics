@@ -6,10 +6,10 @@
 #include "img/colorModelConverter.h"
 
 int main([[maybe_unused]] int argc, char** argv) {
-//    PixelRGB8 p(255, 173, 9);
-//    PixelYCbCr709 p1 = toYCbCr709(&p);
+//    PixelRGB8 p(2, 173, 9);
+//    PixelYCoCg p1 = toYCoCg(&p);
 //
-//    std::cout << p1.y << " " << p1.cb << " " << p1.cr << "\n";
+//    std::cout << p1.y << " " << p1.co << " " << p1.cg << "\n";
 //
 //    rgba rgba = p1.toRGBA();
 //

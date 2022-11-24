@@ -32,4 +32,4 @@ add_library(view STATIC
         img/PixelRGBA8.cpp
         img/PixelHSV.cpp ../include/img/PixelHSV.h
         ../include/img/PixelYCbCr601.h img/PixelYCbCr601.cpp
-        img/PixelYCbCr709.cpp ../include/img/PixelYCbCr709.h)
+        img/PixelYCbCr709.cpp ../include/img/PixelYCbCr709.h img/PixelYCoCg.cpp ../include/img/PixelYCoCg.h)

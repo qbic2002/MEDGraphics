@@ -144,6 +144,18 @@ PixelYCbCr709 toYCbCr709(const Pixel* pixel) {
 
 }
 
+PixelYCoCg toYCoCg(const Pixel* pixel) {
+    if (pixel->getPixelType() == YCoCg) {
+        return *(PixelYCoCg*) pixel;
+    }
+
+    rgba rgba = pixel->toRGBA();
+    double y = ((0.25 * rgba.r) + (0.5 * rgba.g) + (0.25 * rgba.b));
+    double co = ((0.5 * rgba.r) - (0.5 * rgba.b));
+    double cg = (-(0.25 * rgba.r) + (0.5 * rgba.g) - (0.25 * rgba.b));
+
+    return {y, co, cg};
+}
 
 PixelRGBA8 toRGBA8(const Pixel* pixel) {
     switch (pixel->getPixelType()) {
@@ -252,6 +264,22 @@ PixelRGBA8 toRGBA8(const Pixel* pixel) {
             int r = round((pix.y) + 1.402 * (pix.cr - 128));
             int g = round((pix.y) - 0.344136 * (pix.cb - 128) - 0.714136 * (pix.cr - 128));
             int b = round(pix.y) + 1.772 * (pix.cb - 128);
+
+            if (r < 0) r = 0;
+            if (r > 255) r = 255;
+            if (g < 0) g = 0;
+            if (g > 255) g = 255;
+            if (b < 0) b = 0;
+            if (b > 255) b = 255;
+
+            return {(unsigned char) r, (unsigned char) g, (unsigned char) b, 255};
+        }
+        case YCoCg: {
+            PixelYCoCg pix = *(PixelYCoCg*) pixel;
+            int g = pix.y + pix.cg;
+            double tmp = pix.y - pix.cg;
+            int r = tmp + pix.co;
+            int b = tmp - pix.co;
 
             if (r < 0) r = 0;
             if (r > 255) r = 255;

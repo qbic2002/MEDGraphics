@@ -11,6 +11,7 @@
 #include "PixelHSV.h"
 #include "PixelYCbCr601.h"
 #include "PixelYCbCr709.h"
+#include "PixelYCoCg.h"
 
 PixelHSL toHSL(const Pixel* pixel);
 
@@ -19,6 +20,8 @@ PixelHSV toHSV(const Pixel* pixel);
 PixelYCbCr601 toYCbCr601(const Pixel* pixel);
 
 PixelYCbCr709 toYCbCr709(const Pixel* pixel);
+
+PixelYCoCg toYCoCg(const Pixel* pixel);
 
 PixelRGBA8 toRGBA8(const Pixel* pixel);
 
