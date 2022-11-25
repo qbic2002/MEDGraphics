@@ -125,8 +125,14 @@ namespace view {
                         },
                         .gravity = VCENTER
                 }), {
-                        {L"RGB", [context]() { context->setColorModel(COLOR_MODEL_RGB); }},
-                        {L"HSL", [context]() { context->setColorModel(COLOR_MODEL_HSL); }},
+                        {L"RGB",      [context]() { context->setColorModel(COLOR_MODEL_RGB); }},
+                        {L"HSL",      [context]() { context->setColorModel(COLOR_MODEL_HSL); }},
+                        {L"HSV",      [context]() { context->setColorModel(COLOR_MODEL_HSV); }},
+                        {L"YCbCr601", [context]() { context->setColorModel(COLOR_MODEL_YCbCr601); }},
+                        {L"YCbCr709", [context]() { context->setColorModel(COLOR_MODEL_YCbCr709); }},
+                        {L"YCoCg",    [context]() { context->setColorModel(COLOR_MODEL_YCoCg); }},
+                        {L"CMY",      [context]() { context->setColorModel(COLOR_MODEL_CMY); }}
+                        
                 }, {
                         .width = WRAP_CONTENT + FILL_SPARE,
                         .height = WRAP_CONTENT,

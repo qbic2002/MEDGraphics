@@ -34,5 +34,6 @@ add_library(view STATIC
         img/PixelYCbCr601.cpp
         img/PixelYCbCr709.cpp
         img/PixelYCoCg.cpp
-        img/PixelCMY8.cpp ../include/img/ColorModels.cpp ../include/img/ColorModels.h)
+        img/PixelCMY8.cpp
+        img/ColorModels.cpp)
 target_link_libraries(view ${LIBS})

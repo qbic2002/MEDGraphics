@@ -185,6 +185,21 @@ void MyApp::setColorModel(ColorModelEnum colorModelEnum) {
         case COLOR_MODEL_HSL:
             setModeTexts(L"HSL", L"H", L"S", L"L");
             break;
+        case COLOR_MODEL_HSV:
+            setModeTexts(L"HSV", L"H", L"S", L"V");
+            break;
+        case COLOR_MODEL_YCbCr601:
+            setModeTexts(L"YCbCr601", L"Y", L"Cb", L"Cr");
+            break;
+        case COLOR_MODEL_YCbCr709:
+            setModeTexts(L"YCbCr709", L"Y", L"Cb", L"Cr");
+            break;
+        case COLOR_MODEL_YCoCg:
+            setModeTexts(L"YCoCg", L"Y", L"Co", L"Cg");
+            break;
+        case COLOR_MODEL_CMY:
+            setModeTexts(L"CMY", L"C", L"M", L"Y");
+            break;
     }
 
     if (isEditing) {
@@ -236,8 +251,8 @@ void MyApp::toggleEdit() {
         auto imageFile = imageFileStorage.getCurImageFile();
         imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
 
-        for (int i = 0; i < 3; i++)
-            componentToggles[i]->getParent()->setBackground({});
+        for (auto& componentToggle: componentToggles)
+            componentToggle->getParent()->setBackground({});
 
         isEditing = false;
         viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));

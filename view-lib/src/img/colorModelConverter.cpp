@@ -11,26 +11,6 @@
 #include "img/PixelHSV.h"
 #include "img/ModernColorModel.h"
 
-template<class T>
-T max(T a, T b) {
-    return std::max(a, b);
-}
-
-template<class T, class... Arguments>
-T max(T a, T b, Arguments... args) {
-    return max(std::max(a, b), args...);
-}
-
-template<class T>
-T min(T a, T b) {
-    return std::min(a, b);
-}
-
-template<class T, class... Arguments>
-T min(T a, T b, Arguments... args) {
-    return min(std::min(a, b), args...);
-}
-
 PixelHSL toHSL(const Pixel* pixel) {
     if (pixel->getPixelType() == HSL) {
         return *(PixelHSL*) pixel;

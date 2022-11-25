@@ -8,19 +8,43 @@
 #include "rgba.h"
 #include "algorithm"
 
+template<class T>
+T max(T a, T b) {
+    return std::max(a, b);
+}
+
+template<class T, class... Arguments>
+T max(T a, T b, Arguments... args) {
+    return max(std::max(a, b), args...);
+}
+
+template<class T>
+T min(T a, T b) {
+    return std::min(a, b);
+}
+
+template<class T, class... Arguments>
+T min(T a, T b, Arguments... args) {
+    return min(std::min(a, b), args...);
+}
+
 struct rgbaF {
     float r, g, b, a;
 
-    rgba toRgba() const {
-        return to255rgba(r, g, b, a);
-    }
+    rgba toRgba() const;
 };
 
 enum ColorModelEnum {
     COLOR_MODEL_RGB = 0,
     COLOR_MODEL_RGBA = 1,
     COLOR_MODEL_GRAY = 2,
-    COLOR_MODEL_HSL = 3
+    COLOR_MODEL_HSL = 3,
+    COLOR_MODEL_HSV = 4,
+    COLOR_MODEL_YCbCr601 = 5,
+    COLOR_MODEL_YCbCr709 = 6,
+    COLOR_MODEL_YCoCg = 7,
+    COLOR_MODEL_CMY = 8
+
 };
 
 class ColorModel {
@@ -44,154 +68,101 @@ const ColorModel* findColorModel(ColorModelEnum colorModelEnum);
 
 class ColorModelGray : public ColorModel {
 public:
-    rgbaF toRgba(const float* data) const override {
-        return {data[0], data[0], data[0], 1};
-    }
+    rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override {
-        dest[0] = (r + g + b) / 3;
-    }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-    int getComponentsCount() const override {
-        return 1;
-    }
+    int getComponentsCount() const override;
 
-    ColorModelEnum getEnum() const override {
-        return COLOR_MODEL_GRAY;
-    }
+    ColorModelEnum getEnum() const override;
 };
 
 class ColorModelRGB : public ColorModel {
 public:
-    rgbaF toRgba(const float* data) const override {
-        return {data[0], data[1], data[2], 1};
-    }
+    rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override {
-        dest[0] = r;
-        dest[1] = g;
-        dest[2] = b;
-    }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-    int getComponentsCount() const override {
-        return 3;
-    }
+    int getComponentsCount() const override;
 
-    ColorModelEnum getEnum() const override {
-        return COLOR_MODEL_RGB;
-    }
+    ColorModelEnum getEnum() const override;
 };
 
 class ColorModelRGBA : public ColorModel {
 public:
-    rgbaF toRgba(const float* data) const override {
-        return {data[0], data[1], data[2], data[3]};
-    }
+    rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override {
-        dest[0] = r;
-        dest[1] = g;
-        dest[2] = b;
-        dest[3] = 1;
-    }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-    int getComponentsCount() const override {
-        return 4;
-    }
+    int getComponentsCount() const override;
 
-    ColorModelEnum getEnum() const override {
-        return COLOR_MODEL_RGBA;
-    }
+    ColorModelEnum getEnum() const override;
 };
 
 class ColorModelHSL : public ColorModel {
 public:
-    rgbaF toRgba(const float* data) const override {
-        float h = data[0] * 360;
-        float s = data[1];
-        float l = data[2];
+    rgbaF toRgba(const float* data) const override;
 
-        float q;
-        if (l < 0.5) {
-            q = l * (1 + s);
-        } else {
-            q = l + s - (l * s);
-        }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-        float p = 2 * l - q;
-        float h1 = h / 360;
+    int getComponentsCount() const override;
 
-        float tC[3];
-        tC[0] = h1 + 1.0 / 3;
-        tC[1] = h1;
-        tC[2] = h1 - 1.0 / 3;
+    ColorModelEnum getEnum() const override;
+};
 
-        for (auto& color: tC) {
-            if (color < 0) color += 1;
-            if (color > 1) color -= 1;
-        }
+class ColorModelHSV : public ColorModel {
+public:
+    rgbaF toRgba(const float* data) const override;
 
-        float rgb[3];
-        for (int i = 0; i < 3; ++i) {
-            if (tC[i] < 1.0 / 6) {
-                rgb[i] = p + ((q - p) * 6 * tC[i]);
-            } else if (tC[i] < 1.0 / 2) {
-                rgb[i] = q;
-            } else if (tC[i] < 2.0 / 3) {
-                rgb[i] = p + ((q - p) * (2.0 / 3 - tC[i]) * 6);
-            } else {
-                rgb[i] = p;
-            }
-        }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-        return {rgb[0], rgb[1], rgb[2], 1};
-    }
+    int getComponentsCount() const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override {
-        r *= 255;
-        g *= 255;
-        b *= 255;
+    ColorModelEnum getEnum() const override;
+};
 
-        float cMax = std::max(std::max(r, g), b);
-        float cMin = std::min(std::min(r, g), b);
+class ColorModelYCbCr601 : public ColorModel {
+public:
+    rgbaF toRgba(const float* data) const override;
 
-        float delta = cMax - cMin;
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-        float h = 0;
-        if (delta == 0) {
-            h = 0;
-        } else if (cMax == r) {
-            h = 60 * (((g - b) / delta));
-            if (g < b) {
-                h += 360;
-            }
-        } else if (cMax == g) {
-            h = 60.0 * (((b - r) / delta) + 2.0);
-        } else if (cMax == b) {
-            h = 60 * (((r - g) / delta) + 4.0);
-        }
+    int getComponentsCount() const override;
 
-        float l = (cMax + cMin) / 255.0 / 2.0;
-        float s = 0;
-        if (delta == 0) {
-            s = 0;
-        }
-        if (delta != 0) {
-            s = delta / 255.0 / (1 - std::abs(2 * l - 1));
-        }
+    ColorModelEnum getEnum() const override;
+};
 
-        dest[0] = h / 360;
-        dest[1] = s;
-        dest[2] = l;
-    }
+class ColorModelYCbCr709 : public ColorModel {
+public:
+    rgbaF toRgba(const float* data) const override;
 
-    int getComponentsCount() const override {
-        return 3;
-    }
+    void fromRgb(float r, float g, float b, float* dest) const override;
 
-    ColorModelEnum getEnum() const override {
-        return COLOR_MODEL_HSL;
-    }
+    int getComponentsCount() const override;
+
+    ColorModelEnum getEnum() const override;
+};
+
+class ColorModelYCoCg : public ColorModel {
+public:
+    rgbaF toRgba(const float* data) const override;
+
+    void fromRgb(float r, float g, float b, float* dest) const override;
+
+    int getComponentsCount() const override;
+
+    ColorModelEnum getEnum() const override;
+};
+
+class ColorModelCMY : public ColorModel {
+public:
+    rgbaF toRgba(const float* data) const override;
+
+    void fromRgb(float r, float g, float b, float* dest) const override;
+
+    int getComponentsCount() const override;
+
+    ColorModelEnum getEnum() const override;
 };
 
 #endif //MEDGRAPHICS_COLOR_MODELS_H
