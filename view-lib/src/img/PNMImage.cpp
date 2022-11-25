@@ -11,7 +11,12 @@ PNMImage::PNMImage(const ModernRaster& raster) : raster(raster) {
     header.height = raster.getHeight();
     header.width = raster.getWidth();
     header.maxValue = 255;
-    switch (raster.getColorModel()->getComponentsCount()) {
+
+    int activeComponents = 0;
+    for (int i = 0; i < raster.getColorModel()->getComponentsCount(); i++) {
+        activeComponents += raster.getFilter(i);
+    }
+    switch (std::min(raster.getColorModel()->getComponentsCount(), activeComponents)) {
         case 1:
             header.mode = P5;
             break;

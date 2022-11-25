@@ -146,7 +146,7 @@ public:
         fillRgbaData();
     }
 
-    bool getFilter(int index) {
+    bool getFilter(int index) const {
         return filter[index];
     }
 

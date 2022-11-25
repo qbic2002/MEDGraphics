@@ -138,11 +138,35 @@ namespace pnm {
         std::string data;
 
         auto& raster = pnmImage.raster;
-        int length = raster.getWidth() * raster.getHeight()
-                     * raster.getColorModel()->getComponentsCount();
-        const float* dataF = raster.getData();
-        for (int i = 0; i < length; i++) {
-            data.push_back((unsigned char) (dataF[i] * pnmImage.header.maxValue));
+
+        if (pnmImage.header.mode == PNMMode::P6) {
+            int length = raster.getWidth() * raster.getHeight()
+                         * raster.getColorModel()->getComponentsCount();
+            const float* dataF = raster.getData();
+            int filerIndex = 0;
+            for (int i = 0; i < length; i++) {
+
+                data.push_back(
+                        (unsigned char) ((raster.getFilter(filerIndex) ? (dataF[i] * pnmImage.header.maxValue) : 0)));
+                ++filerIndex;
+                filerIndex %= raster.getColorModel()->getComponentsCount();
+            }
+        }
+        if (pnmImage.header.mode == PNMMode::P5) {
+            int length = raster.getWidth() * raster.getHeight();
+            const float* dataF = raster.getData();
+            int startIndex = 0;
+            for (int i = 0; i < raster.getColorModel()->getComponentsCount(); i++) {
+                if (raster.getFilter(i)) {
+                    startIndex = i;
+                    break;
+                }
+            }
+            int index = startIndex;
+            for (int i = 0; i < length; i++) {
+                data.push_back((unsigned char) (dataF[index] * pnmImage.header.maxValue));
+                index += raster.getColorModel()->getComponentsCount();
+            }
         }
 
         std::string result;

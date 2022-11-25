@@ -90,6 +90,18 @@ utils::OpenFileInfo utils::getSaveFileName() {
     return {.isCancelled = !status, .filename = ofn.lpstrFile, .filterIndex = (int) ofn.nFilterIndex};
 }
 
+std::vector<std::wstring> getChildExtensions(const std::wstring& parentExtension) {
+    std::vector<std::wstring> result;
+    for (const auto& saveFormat: utils::saveFormats) {
+        if (saveFormat.extension == parentExtension) {
+            for (const auto& subformat: saveFormat.subformats) {
+                result.push_back(subformat.second);
+            }
+        }
+        return result;
+    }
+}
+
 std::wstring utils::fixFileName(const std::wstring& filename, int filterIndex) {
     std::filesystem::path fn(filename);
     std::wstring extension = fn.extension().wstring();
@@ -121,9 +133,15 @@ std::wstring utils::fixFileName(const std::wstring& filename, int filterIndex) {
             break;
     }
 
-    if (extension == parentExtension || extension == currentExtension) {
+    std::vector<std::wstring> childExtensions = getChildExtensions(parentExtension);
+    if (extension == parentExtension || extension == currentExtension ||
+        (currentExtension == parentExtension && std::any_of(childExtensions.begin(), childExtensions.end(),
+                                                            [extension](const std::wstring& ext) {
+                                                                return ext == extension;
+                                                            }))) {
         return filename;
     }
+
 
 //    newFilename = filename.substr(0, filename.length() - extension.length());
     newFilename.append(currentExtension);
