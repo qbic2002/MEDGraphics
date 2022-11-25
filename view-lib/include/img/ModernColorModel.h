@@ -111,11 +111,11 @@ public:
     void reinterpretColorModel(const ColorModelEnum colorModelEnum) {
         if (this->colorModel->getEnum() == colorModelEnum)
             return;
-        auto colorModel = findColorModel(colorModelEnum);
-        if (this->colorModel->getComponentsCount() != colorModel->getComponentsCount())
+        auto newColorModel = findColorModel(colorModelEnum);
+        if (this->colorModel->getComponentsCount() != newColorModel->getComponentsCount())
             throw std::runtime_error("color model components count must be the same");
 
-        this->colorModel = colorModel;
+        this->colorModel = newColorModel;
         fillRgbaData();
     }
 
