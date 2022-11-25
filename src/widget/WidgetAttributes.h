@@ -24,7 +24,7 @@ style = src.style;
 #define TEXT_VIEW_ATTRS                         \
 String text;                                    \
 std::filesystem::path font;                     \
-rgba fontColor{COLOR_FONT_PRIMARY};             \
+rgba fontColor = rgba{255, 255, 255, 255};      \
 int fontSize = 14;
 
 #define TEXT_VIEW_ATTRS_SET(src)    \

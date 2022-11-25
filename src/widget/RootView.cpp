@@ -20,6 +20,6 @@ namespace view {
                 .id = IMAGE_VIEW_ID,
                 .width = FILL_PARENT,
                 .height = FILL_SPARE,
-                .style= Style(true)}));
+                .style= Style{true}}));
     }
 } // view

@@ -13,18 +13,12 @@ namespace view {
         glVertex2f(x, y);
     }
 
-    ImageView::ImageView(MyApp* context, const ViewAttributes& attr) : View(context, attr) {
-        context->getImageFileStorage().addImageChangedListener([&]() {
-            imageFitScreen();
-            invalidate();
-        });
-    }
+    ImageView::ImageView(MyApp* context, const ViewAttributes& attr) : View(context, attr) {}
 
     void ImageView::onDraw() {
-        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
-        if (imageData == nullptr || imageData->textureId == 0)
+        if (textureId == 0)
             return;
-        glBindTexture(GL_TEXTURE_2D, imageData->textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
         glPushMatrix();
         {
             glTranslatef(edges.left, edges.top, 0);
@@ -35,9 +29,9 @@ namespace view {
             glBegin(GL_QUADS);
 
             glVertexUV(0, 0, 0, 0);
-            glVertexUV(0, imageData->raster->getHeight(), 0, 1);
-            glVertexUV(imageData->raster->getWidth(), imageData->raster->getHeight(), 1, 1);
-            glVertexUV(imageData->raster->getWidth(), 0, 1, 0);
+            glVertexUV(0, textureHeight, 0, 1);
+            glVertexUV(textureWidth, textureHeight, 1, 1);
+            glVertexUV(textureWidth, 0, 1, 0);
 
             glEnd();
         }
@@ -79,11 +73,10 @@ namespace view {
     }
 
     void ImageView::imageFitScreen() {
-        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
-        if (imageData == nullptr || imageData->textureId == 0)
+        if (textureId == 0)
             return;
-        float horRatio = edges.width() / imageData->raster->getWidth();
-        float vertRatio = edges.height() / imageData->raster->getHeight();
+        float horRatio = edges.width() / textureWidth;
+        float vertRatio = edges.height() / textureHeight;
         setZoomRatio((vertRatio < horRatio) ? vertRatio : horRatio);
     }
 
@@ -92,11 +85,10 @@ namespace view {
     }
 
     void ImageView::validateZoom() {
-        auto* imageData = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
-        if (imageData == nullptr || imageData->textureId == 0)
+        if (textureId == 0)
             return;
-        float scaledRasterWidth = imageData->raster->getWidth() * zoom;
-        float scaledRasterHeight = imageData->raster->getHeight() * zoom;
+        float scaledRasterWidth = textureWidth * zoom;
+        float scaledRasterHeight = textureHeight * zoom;
         if (scaledRasterWidth <= edges.width()) {
             translateX = (edges.width() - scaledRasterWidth) / 2;
         }
@@ -122,13 +114,22 @@ namespace view {
             return;
         zoom = ratio;
         zoomOffset = logf(zoom) / logf(1.5);
-        auto* imageFile = ((MyApp*) context)->getImageFileStorage().getCurImageFile();
-        if (imageFile == nullptr || imageFile->textureId == 0)
+        if (textureId == 0)
             return;
-        float scaledRasterWidth = imageFile->raster->getWidth() * ratio;
-        float scaledRasterHeight = imageFile->raster->getHeight() * ratio;
+        float scaledRasterWidth = textureWidth * ratio;
+        float scaledRasterHeight = textureHeight * ratio;
         translateX = (edges.width() - scaledRasterWidth) / 2;
         translateY = (edges.height() - scaledRasterHeight) / 2;
+        invalidate();
+    }
+
+    void ImageView::setTexture(int textureId, int textureWidth, int textureHeight) {
+        if (this->textureId == textureId && this->textureWidth == textureWidth && this->textureHeight == textureHeight)
+            return;
+        this->textureId = textureId;
+        this->textureWidth = textureWidth;
+        this->textureHeight = textureHeight;
+        imageFitScreen();
         invalidate();
     }
 

@@ -16,6 +16,6 @@ int main([[maybe_unused]] int argc, char** argv) {
 //    std::cout << (int)rgba.r << " " << (int)rgba.g << " " << (int)rgba.b << "\n";
 //    return 0;
     MyApp app;
-    app.run(argc, argv, 640, 480, "Hello World", true);
+    app.run(argc, argv, 1280, 720, "Hello World", true);
     return 0;
 }

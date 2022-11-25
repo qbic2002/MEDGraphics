@@ -5,6 +5,7 @@
 #include <view/core/Assets.h>
 #include <unordered_map>
 #include <functional>
+#include "img/imageLoader.h"
 
 namespace assets {
     /// Shared object repository based on shared smart pointers and unordered map
@@ -43,7 +44,10 @@ namespace assets {
 
     std::shared_ptr<gl::Texture> texture(const std::filesystem::path& file) {
         return textures.computeIfAbsent(file.string(), [](const std::string& key) {
-            return new gl::Texture(key);
+            auto* raster = img::loadImageData(key);
+            auto* result = new gl::Texture(*raster);
+            delete raster;
+            return result;
         });
     }
 

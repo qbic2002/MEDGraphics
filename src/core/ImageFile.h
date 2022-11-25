@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <GL/glew.h>
 #include <img/AbstractRaster.h>
+#include "img/ModernColorModel.h"
 
 namespace fs = std::filesystem;
 
@@ -31,8 +32,8 @@ public:
 
     const fs::path& getPath() const;
 
-    AbstractRaster* raster = nullptr;
-    AbstractRaster* compRaster = nullptr;
+    ModernRaster* raster = nullptr;
+    ModernRaster* compRaster = nullptr;
     GLuint textureId = 0;
     GLuint compTextureId = 0;
 

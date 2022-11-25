@@ -9,7 +9,6 @@
 #include <img/rgba.h>
 #include <utils/Texture.h>
 #include <view/core/Assets.h>
-#include "../../../src/core/R.h"
 
 namespace view {
     struct Dimension {

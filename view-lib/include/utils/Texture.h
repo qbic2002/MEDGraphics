@@ -7,11 +7,12 @@
 
 #include <filesystem>
 #include <GL/glew.h>
+#include "img/ModernColorModel.h"
 
 namespace gl {
     class Texture {
     public:
-        explicit Texture(const std::filesystem::path& fileName);
+        explicit Texture(const ModernRaster& raster);
 
         Texture(const Texture& other) = delete;
 
@@ -21,9 +22,13 @@ namespace gl {
 
         void unbind() const;
 
+        GLuint getTextureId() const;
+
         GLuint getWidth() const;
 
         GLuint getHeight() const;
+
+        void update(const ModernRaster& raster);
 
         ~Texture();
 

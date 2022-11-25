@@ -5,15 +5,7 @@
 #ifndef MEDGRAPHICS_ABSTRACTRASTER_H
 #define MEDGRAPHICS_ABSTRACTRASTER_H
 
-
 #include "PixelType.h"
-#include "Pixel.h"
-
-template<class T>
-concept CheckPixelType = std::is_base_of<Pixel, T>::value;
-
-template<class T> requires CheckPixelType<T>
-class Raster;
 
 class AbstractRaster {
 public:

@@ -22,27 +22,33 @@ namespace img {
                                                      (const unsigned char*) "P6"
                                              });
 
-    Raster<PixelRGBA8>* rgbaDataToRaster(const unsigned char* data, int width, int height, int channels) {
-        auto* raster = new Raster<PixelRGBA8>(width, height);
-        if (channels == 3) {
-            int pixelsCount = width * height;
-            for (unsigned int i = 0; i < pixelsCount; i++) {
-                raster->set(i, PixelRGBA8(data[0], data[1], data[2], 255));
-                data += channels;
-            }
-        } else {
-            for (unsigned int i = 0; i < width * height * 4; i += 4) {
-                raster->set(i / 4, PixelRGBA8(data[i], data[i + 1], data[i + 2], data[i + 3]));
-            }
+    ModernRaster* stbDataToRaster(const unsigned char* data, int width, int height, int channels) {
+        ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
+        switch (channels) {
+            case 3:
+                colorModelEnum = COLOR_MODEL_RGB;
+                break;
+            case 4:
+                colorModelEnum = COLOR_MODEL_RGBA;
+                break;
+            default:
+                throw std::runtime_error("unexpected channels count: " + std::to_string(channels));
+                break;
         }
-        return raster;
+
+        int values = width * height * channels;
+        auto pixels = std::shared_ptr<float[]>(new float[values]);
+        for (int i = 0; i < values; i++)
+            pixels[i] = data[i] / 255.0f;
+
+        return new ModernRaster(width, height, pixels, colorModelEnum);
     }
 
     bool isPNMSignature(const std::vector<char>& bytes) {
         return bytes.size() >= 2 && bytes[0] == 'P' && (bytes[1] == '5' || bytes[1] == '6');
     }
 
-    AbstractRaster* loadImageData(const std::filesystem::path& file) {
+    ModernRaster* loadImageData(const std::filesystem::path& file) {
         if (isImage(file)) {
             return loadImageData(utils::readAllBytes(file));
         }
@@ -50,11 +56,11 @@ namespace img {
         return nullptr;
     }
 
-    AbstractRaster* loadImageData(const std::vector<char>& bytes) {
+    ModernRaster* loadImageData(const std::vector<char>& bytes) {
         try {
             if (isPNMSignature(bytes)) {
                 auto pnmImage = pnm::readPNMImageFromMemory(bytes.data(), bytes.size());
-                return pnmImage.data->clone();
+                return new ModernRaster(pnmImage.raster);
             } else {
                 int width, height, channels;
                 unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,
@@ -64,7 +70,7 @@ namespace img {
                 if (data == nullptr)
                     return nullptr;
 
-                auto* raster = rgbaDataToRaster(data, width, height, channels);
+                auto* raster = stbDataToRaster(data, width, height, channels);
                 stbi_image_free(data);
 
                 return raster;

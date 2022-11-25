@@ -20,11 +20,7 @@ namespace view {
                 new IconView(context, {
                         .width = WINDOW_BAR_HEIGHT,
                         .height = WINDOW_BAR_HEIGHT,
-                        .background = StateBackground{
-                                Background{},
-                                ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
-                                ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}
-                        },
+                        .background = theme.hoverBackground,
                         .imageFile = context->getAppDir() / "assets/icons/ic_launcher.png",
                         .imageWidth = 32,
                         .imageHeight = 32}),
@@ -32,16 +28,7 @@ namespace view {
                         {L"Fast exit", []() { throw std::exception(); }},
                         {L"Save to",   [context]() { context->saveImage(); }},
                         {L"Open...",   [context]() { context->openImage(); }}
-                }, {
-                        .width = WRAP_CONTENT + FILL_SPARE,
-                        .height = WRAP_CONTENT,
-                        .padding = Padding(8),
-                        .background = StateBackground{
-                                ColorBackground{rgba{COLOR_PRIMARY}},
-                                ColorBackground{rgba{75, 110, 175, 255}},
-                                ColorBackground{rgba{66, 98, 155, 255}}
-                        }
-                });
+                }, theme.dropDownViewAttr);
         addChild(view);
 
         /// Title Text View
@@ -63,35 +50,112 @@ namespace view {
             }
         });
 
-        const unsigned controlIconSize = 32;
-        const unsigned controlSize = WINDOW_BAR_HEIGHT;
-        const Padding controlPadding = Padding((float) (controlSize - controlIconSize) / 2);
+        view = new LinearLayout(context, {
+                .width = WRAP_CONTENT,
+                .height = FILL_PARENT,
+                .padding = Padding(8),
+                .children = {
+                        new TextView(context, {
+                                .id = COMPONENT_1_TEXT_VIEW_ID,
+                                .width = WRAP_CONTENT,
+                                .height = WRAP_CONTENT,
+                                .text = L"1",
+                                .fontSize = 16})
+                },
+                .gravity = VCENTER
+        });
+        view->setOnClickListener([context]() {
+            context->toggleComponent(0);
+        });
+        addChild(view);
+
+        view = new LinearLayout(context, {
+                .width = WRAP_CONTENT,
+                .height = FILL_PARENT,
+                .padding = Padding(8),
+                .children = {
+                        new TextView(context, {
+                                .id = COMPONENT_2_TEXT_VIEW_ID,
+                                .width = WRAP_CONTENT,
+                                .height = WRAP_CONTENT,
+                                .text = L"2",
+                                .fontSize = 16})
+                },
+                .gravity = VCENTER
+        });
+        view->setOnClickListener([context]() {
+            context->toggleComponent(1);
+        });
+        addChild(view);
+
+        view = new LinearLayout(context, {
+                .width = WRAP_CONTENT,
+                .height = FILL_PARENT,
+                .padding = Padding(8),
+                .children = {
+                        new TextView(context, {
+                                .id = COMPONENT_3_TEXT_VIEW_ID,
+                                .width = WRAP_CONTENT,
+                                .height = WRAP_CONTENT,
+                                .text = L"3",
+                                .fontSize = 16})
+                },
+                .gravity = VCENTER
+        });
+        view->setOnClickListener([context]() {
+            context->toggleComponent(2);
+        });
+        addChild(view);
+
+        view = new DropDownView(
+                context,
+                {},
+                new LinearLayout(context, {
+                        .width = WRAP_CONTENT,
+                        .height = FILL_PARENT,
+                        .padding = Padding(8),
+                        .background = theme.hoverBackground,
+                        .children = {
+                                new TextView(context, {
+                                        .id = MODE_TEXT_VIEW_ID,
+                                        .width = WRAP_CONTENT,
+                                        .height = WRAP_CONTENT,
+                                        .text = L"Mode",
+                                        .fontSize = 16})
+                        },
+                        .gravity = VCENTER
+                }), {
+                        {L"RGB", [context]() { context->setColorModel(COLOR_MODEL_RGB); }},
+                        {L"HSL", [context]() { context->setColorModel(COLOR_MODEL_HSL); }},
+                }, {
+                        .width = WRAP_CONTENT + FILL_SPARE,
+                        .height = WRAP_CONTENT,
+                        .padding = Padding(8),
+                        .background = StateBackground{
+                                ColorBackground{rgba{COLOR_PRIMARY}},
+                                ColorBackground{rgba{75, 110, 175, 255}},
+                                ColorBackground{rgba{66, 98, 155, 255}}
+                        }
+                }
+        );
+        addChild(view);
+
+        /// Edit
+        view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_edit.png");
+        view->setOnClickListener([context]() {
+            context->toggleEdit();
+        });
+        addChild(view);
 
         /// Show Error
-        view = new IconView(context, {
-                .width = controlSize,
-                .height = controlSize,
-                .padding = controlPadding,
-                .background = StateBackground{
-                        Background{},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
-                .imageFile = context->getAppDir() / "assets/icons/ic_show_error.png"});
+        view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_show_error.png");
         view->setOnClickListener([context]() {
             context->showError(L"Test error");
         });
         addChild(view);
 
         /// Fit Content Button
-        view = new IconView(context, {
-                .width = controlSize,
-                .height = controlSize,
-                .padding = controlPadding,
-                .background = StateBackground{
-                        Background{},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
-                .imageFile = context->getAppDir() / "assets/icons/ic_fit_screen.png"});
+        view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_fit_screen.png");
         view->setOnClickListener([context]() {
             static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
             view->imageFitScreen();
@@ -99,15 +163,7 @@ namespace view {
         addChild(view);
 
         /// Original Scale Button
-        view = new IconView(context, {
-                .width = controlSize,
-                .height = controlSize,
-                .padding = controlPadding,
-                .background = StateBackground{
-                        Background{},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_HOVER}},
-                        ColorBackground{{COLOR_WINDOW_BAR_BG_PRESS}}},
-                .imageFile = context->getAppDir() / "assets/icons/ic_original_scale.png"});
+        view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_original_scale.png");
         view->setOnClickListener([context]() {
             static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
             view->imageOriginalScale();
@@ -118,14 +174,16 @@ namespace view {
         const unsigned btnWidth = 46;
         const unsigned btnHeight = 30;
 
-        const Padding btnPadding = Padding((float) (btnWidth - iconSize) / 2, (float) (btnHeight - iconSize) / 2);
+        const Padding btnPadding = Padding((float) (btnWidth - iconSize) / 2,
+                                           (float) (btnHeight - iconSize) / 2);
 
         auto windowControlLay = new LinearLayout(context, {
                 .width = btnWidth * 3,
                 .height = FILL_PARENT,
                 .padding = Padding(0, 0, 0, WINDOW_BAR_HEIGHT - btnHeight),
                 .orientation = HORIZONTAL,
-                .gravity = TOP});
+                .gravity = TOP
+        });
         addChild(windowControlLay);
 
         /// Iconify Icon
@@ -138,7 +196,8 @@ namespace view {
                         ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
                         ColorBackground{rgba{COLOR_WINDOW_BAR_BG_PRESS}}
                 },
-                .imageFile = context->getAppDir() / "assets/icons/ic_iconify.png"});
+                .imageFile = context->getAppDir() / "assets/icons/ic_iconify.png"
+        });
         view->setOnClickListener([windowWrapper]() {
             windowWrapper->iconify();
         });
@@ -159,11 +218,14 @@ namespace view {
         view->setOnClickListener([windowWrapper]() {
             windowWrapper->toggleMaximized();
         });
-        view->setOnWindowResizeListener([context, windowWrapper](View& view, unsigned width, unsigned height) {
-            ((IconView*) &view)->setImage(windowWrapper->isMaximized()
-                                          ? context->getAppDir() / "assets/icons/ic_maximized.png"
-                                          : context->getAppDir() / "assets/icons/ic_minimized.png");
-        });
+        view->setOnWindowResizeListener(
+                [context, windowWrapper](View& view, unsigned width, unsigned height) {
+                    ((IconView*) &view)->setImage(windowWrapper->isMaximized()
+                                                  ? context->getAppDir() /
+                                                    "assets/icons/ic_maximized.png"
+                                                  : context->getAppDir() /
+                                                    "assets/icons/ic_minimized.png");
+                });
         windowControlLay->addChild(view);
 
         /// Close Icon

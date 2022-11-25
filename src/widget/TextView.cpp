@@ -3,6 +3,7 @@
 //
 
 #include "TextView.h"
+#include "utils/gl_utils.h"
 
 namespace view {
     TextView::TextView(Context* context, const TextViewAttributes& attr) : View(context, (const ViewAttributes&) attr) {
@@ -14,6 +15,7 @@ namespace view {
     }
 
     void TextView::onDraw() {
+        glColor(fontColor);
         fontRenderer->renderText(text, innerEdges.left, innerEdges.top);
     }
 

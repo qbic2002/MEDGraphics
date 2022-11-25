@@ -35,6 +35,8 @@ namespace view {
 
         void imageOriginalScale();
 
+        void setTexture(int textureId, int textureWidth, int textureHeight);
+
     private:
         void setZoomRatio(float ratio);
 
@@ -43,6 +45,8 @@ namespace view {
         float zoom = 1;
         float zoomOffset = 0;
         float translateX = 0, translateY = 0;
+        int textureWidth = 0, textureHeight = 0;
+        int textureId;
     };
 
 } // view

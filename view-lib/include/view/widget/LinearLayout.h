@@ -44,8 +44,8 @@ namespace view {
             childrenSize[1 - oIndex] = max_size;
 
             return {
-                    .width = width.evaluateContent(childrenSize[0]),
-                    .height = height.evaluateContent(childrenSize[1]),
+                    .width = width.evaluateContent(childrenSize[0]) + padding.width(),
+                    .height = height.evaluateContent(childrenSize[1]) + padding.height(),
                     .parentPartW = width.parentK,
                     .parentPartH = height.parentK,
                     .parentSparePartW = width.parentSpareK,

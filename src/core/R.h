@@ -6,8 +6,12 @@
 #define MEDGRAPHICS_R_H
 
 #define APP_ICON_MENU_ID 1
-#define MESSAGE_VIEW_ID 2
+#define MODE_TEXT_VIEW_ID 2
 #define IMAGE_VIEW_ID 3
+#define EDITOR_TEXTURE_VIEW_ID 4
+#define COMPONENT_1_TEXT_VIEW_ID 5
+#define COMPONENT_2_TEXT_VIEW_ID 6
+#define COMPONENT_3_TEXT_VIEW_ID 7
 
 #define COLOR_PRIMARY 33, 33, 33, 255
 #define COLOR_PRIMARY_DARK 0, 0, 0, 255
@@ -15,13 +19,19 @@
 #define COLOR_FONT_PRIMARY 255, 255, 255, 255
 #define COLOR_FONT_GRAY 127, 127, 127, 255
 
-#define COLOR_WINDOW_BAR_BG COLOR_PRIMARY_DARK
+#define COLOR_BLUE_HOVER 75, 110, 175, 255
+#define COLOR_BLUE_PRESS 66, 98, 155, 255
+
+#define COLOR_WINDOW_BAR_BG 0, 0, 0, 0
 #define COLOR_WINDOW_BAR_BG_HOVER COLOR_PRIMARY
 #define COLOR_WINDOW_BAR_BG_PRESS COLOR_PRIMARY
 
 #include <windows.h>
 #include <csignal>
 #include <string>
+#include "view/Style.h"
+#include "view/View.h"
+#include "../widget/TextView.h"
 
 #define SIGSEGV_HANDLER posix_death_signal
 #define HANDLE_SIGSEGV signal(SIGSEGV, SIGSEGV_HANDLER);
@@ -31,6 +41,46 @@ static void posix_death_signal(int signum) {
     signal(signum, SIG_DFL);
     exit(SIGSEGV);
 }
+
+namespace view {
+    struct {
+        TextViewAttributes dropDownViewAttr = {
+                .width = WRAP_CONTENT + FILL_SPARE,
+                .height = WRAP_CONTENT,
+                .padding = Padding(8),
+                .background = StateBackground{
+                        ColorBackground{rgba{COLOR_PRIMARY}},
+                        ColorBackground{rgba{COLOR_BLUE_HOVER}},
+                        ColorBackground{rgba{COLOR_BLUE_PRESS}}
+                }
+        };
+        BackgroundWrapper hoverBackground = StateBackground{
+                Background{},
+                ColorBackground{rgba{COLOR_WINDOW_BAR_BG_HOVER}},
+                ColorBackground{rgba{COLOR_WINDOW_BAR_BG_PRESS}}
+        };
+        BackgroundWrapper notActiveComponentBackground = StateBackground{
+                ColorBackground{rgba{75, 100, 125, 255}},
+                ColorBackground{rgba{65, 85, 105, 255}},
+                ColorBackground{rgba{60, 80, 100, 255}}
+        };
+        BackgroundWrapper activeComponentBackground = StateBackground{
+                ColorBackground{rgba{80, 155, 245, 255}},
+                ColorBackground{rgba{60, 145, 245, 255}},
+                ColorBackground{rgba{50, 130, 236, 255}}
+        };
+    } static const theme;
+}
+
+#define THEME_WINDOW_BAR_CONTROL(TEXTURE)       \
+IconView(context, {                             \
+    .width = WINDOW_BAR_HEIGHT,                 \
+    .height = WINDOW_BAR_HEIGHT,                \
+    .background = view::theme.hoverBackground,  \
+    .imageFile = context->getAppDir() / TEXTURE,\
+    .imageWidth = 32,                           \
+    .imageHeight = 32,                          \
+})
 
 #endif //MEDGRAPHICS_R_H
 

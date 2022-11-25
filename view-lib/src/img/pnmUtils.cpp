@@ -7,12 +7,16 @@
 #include "utils/file.h"
 #include "utils/logging.h"
 
-PNMMode readPnmMode(const char* fileData) {
-    if (fileData[0] == 'P') {
-        if (fileData[1] == '5')
+PNMMode readPnmMode(const char* data, int& offset) {
+    if (data[0] == 'P') {
+        if (data[1] == '5') {
+            offset += 2;
             return PNMMode::P5;
-        if (fileData[1] == '6')
+        }
+        if (data[1] == '6') {
+            offset += 2;
             return PNMMode::P6;
+        }
     }
 
     throw std::exception();
@@ -49,81 +53,14 @@ int parsePnmInt(const char* data, int& offset) {
     return num;
 }
 
-int pnm::parsePnmHeader(const char* fileData, PNMHeader& pnmHeader) {
-    pnmHeader.pnmMode = readPnmMode(fileData);
-    int offset = 2;
-    pnmHeader.width = parsePnmInt(fileData, offset);
-    pnmHeader.height = parsePnmInt(fileData, offset);
-    pnmHeader.maxGray = parsePnmInt(fileData, offset);
-    return offset;
+PNMHeader readPnmHeader(const char* data, int& offset) {
+    return {.mode = readPnmMode(data, offset),
+            .width = parsePnmInt(data, offset),
+            .height = parsePnmInt(data, offset),
+            .maxValue = parsePnmInt(data, offset)};
 }
 
-AbstractRaster*
-pnm::parseData(const unsigned char* fileData, int offset, const PNMHeader& pnmHeader, unsigned int length) {
-    int i = offset;
-    switch (pnmHeader.pnmMode) {
-        case PNMMode::P5: {
-            if (offset + pnmHeader.width * pnmHeader.height > length)
-                throw std::exception();
-
-            auto* raster = new Raster<PixelGray8>(pnmHeader.width, pnmHeader.height);
-            for (int y = 0; y < pnmHeader.height; ++y) {
-                for (int x = 0; x < pnmHeader.width; ++x) {
-                    unsigned char color = fileData[i++];
-                    if (color > pnmHeader.maxGray) {
-                        throw std::exception();
-                    }
-                    raster->set(x, y, PixelGray8(color));
-                }
-            }
-
-            return raster;
-        }
-        case PNMMode::P6: {
-            if (offset + pnmHeader.width * pnmHeader.height * 3 > length)
-                throw std::exception();
-
-            auto* raster = new Raster<PixelRGB8>(pnmHeader.width, pnmHeader.height);
-
-            for (int y = 0; y < pnmHeader.height; ++y) {
-                for (int x = 0; x < pnmHeader.width; ++x) {
-                    unsigned char r = fileData[i++];
-                    unsigned char g = fileData[i++];
-                    unsigned char b = fileData[i++];
-                    if (r > pnmHeader.maxGray || g > pnmHeader.maxGray || b > pnmHeader.maxGray) {
-                        throw std::exception();
-                    }
-                    raster->set(x, y, {r, g, b});
-                }
-            }
-
-            return raster;
-        }
-    }
-
-    throw std::exception();
-}
-
-PNMImage pnm::readPNMImageFromMemory(const char* data, unsigned int length) {
-    PNMImage pnmImage{};
-
-    int offset = pnm::parsePnmHeader(data, pnmImage.pnmHeader);
-
-    pnmImage.pnmMeta = pnm::parseMeta(data, offset);
-    pnmImage.data = pnm::parseData((unsigned char*) data, offset, pnmImage.pnmHeader, length);
-
-    for (const auto& item: pnmImage.pnmMeta.getMeta()) {
-        info() << item.first;
-    }
-    return std::move(pnmImage);
-}
-
-PNMImage pnm::readPnmImage(const std::filesystem::path& filename) {
-    std::vector<char> data = utils::readAllBytes(filename);
-    return readPNMImageFromMemory(data.data(), data.size());
-}
-
-PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
+PNMMeta parseMeta(const char* fileData, int headerSize) {
     PNMMeta pnmMeta;
     for (int i = 0; i < headerSize; ++i) {
         char ch = fileData[i];
@@ -144,78 +81,90 @@ PNMMeta pnm::parseMeta(const char* fileData, int headerSize) {
     return pnmMeta;
 }
 
-void pnm::writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
-    std::string mode;
-    if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
-        mode = "P5";
-    }
-    if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
-        mode = "P6";
-    }
+ModernRaster* parseData(const unsigned char* data, int offset, const PNMHeader& header, unsigned int length) {
+    data += offset;
 
-    std::string width = std::to_string(pnmImage.pnmHeader.width);
-    std::string height = std::to_string(pnmImage.pnmHeader.height);
+    const ColorModel* colorModel = findColorModel(header.mode == PNMMode::P5 ? COLOR_MODEL_GRAY : COLOR_MODEL_RGB);
+    int values = colorModel->getComponentsCount() * header.width * header.height;
+    int bytesPerValue = (header.maxValue <= 255) ? 1 : 2;
+    int bytesToRead = values * bytesPerValue;
 
-    std::string maxGray = std::to_string(pnmImage.pnmHeader.maxGray);
+    if (offset + bytesToRead < length)
+        throw std::runtime_error("more bytes expected than provided");
 
-    std::string data;
-    if (pnmImage.pnmHeader.pnmMode == PNMMode::P5) {
-        for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
-            for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(((Raster<PixelGray8>*) pnmImage.data)->get(j, i).grayScale);
-            }
+    auto maxValue = (float) header.maxValue;
+    std::shared_ptr<float[]> rasterData = std::shared_ptr<float[]>(new float[bytesToRead]);
+    if (bytesPerValue == 1) {
+        for (int i = 0; i < values; i++) {
+            rasterData[i] = data[i] / maxValue;
         }
-    }
-    if (pnmImage.pnmHeader.pnmMode == PNMMode::P6) {
-        for (int i = 0; i < pnmImage.pnmHeader.height; i++) {
-            for (int j = 0; j < pnmImage.pnmHeader.width; ++j) {
-                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).r);
-                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).g);
-                data.push_back(((Raster<PixelRGB8>*) pnmImage.data)->get(j, i).b);
-            }
+    } else {
+        for (int i = 0; i < values; i++) {
+            float value = (data[i * 2] << 8) | data[i * 2 + 1];
+            rasterData[i] = value / maxValue;
         }
     }
 
-    std::string result;
-    result
-            .append(mode)
-            .append("\n")
-            .append(width).append(" ").append(height)
-            .append("\n")
-            .append(maxGray)
-            .append("\n")
-            .append(data);
-
-    for (const auto& item: pnmImage.pnmMeta.getMeta()) {
-        std::string curr_meta = item.first + '\n';
-        result.insert(item.second, curr_meta);
-    }
-    os.write(result.c_str(), result.length());
-    os.flush();
+    return new ModernRaster(header.width, header.height, rasterData, colorModel);
 }
 
-void pnm::writePNMImage(const PNMImage& pnmImage, const std::filesystem::path& filename) {
-    std::ofstream fileStream = utils::openFileOStream(filename);
-    writePNMImage(pnmImage, fileStream);
-}
+namespace pnm {
+    PNMImage readPNMImageFromMemory(const char* data, unsigned int length) {
+        int offset = 0;
+        auto header = readPnmHeader(data, offset);
+        auto meta = parseMeta(data, offset);
+        auto raster = parseData((unsigned char*) data, offset, header, length);
 
-PNMImage pnm::convertP6ToP5(const PNMImage& other) {
-    if (other.pnmHeader.pnmMode == P5)
-        return other;
-
-    PNMImage pnmImage;
-    pnmImage.pnmHeader = other.pnmHeader;
-    pnmImage.pnmHeader.pnmMode = PNMMode::P5;
-
-    pnmImage.pnmMeta = other.pnmMeta;
-
-    auto* grayRaster = new Raster<PixelGray8>(other.data->getWidth(), other.data->getHeight());
-    auto* rgbaData = (const rgba*) other.data->getRgbaData();
-    for (unsigned int i = 0; i < other.data->getWidth() * other.data->getHeight(); ++i) {
-        auto grayScale = (rgbaData[i].r + rgbaData[i].g + rgbaData[i].b) / 3;
-        grayRaster->set(i, PixelGray8(grayScale));
+        for (const auto& item: meta.getMeta()) {
+            info() << item.first;
+        }
+        return PNMImage(header, meta, *raster);
     }
 
-    pnmImage.data = grayRaster;
-    return pnmImage;
+    void writePNMImage(const PNMImage& pnmImage, std::ofstream& os) {
+        std::string mode;
+        if (pnmImage.header.mode == PNMMode::P5) {
+            mode = "P5";
+        }
+        if (pnmImage.header.mode == PNMMode::P6) {
+            mode = "P6";
+        }
+
+        std::string width = std::to_string(pnmImage.header.width);
+        std::string height = std::to_string(pnmImage.header.height);
+
+        std::string maxGray = std::to_string(pnmImage.header.maxValue);
+
+        std::string data;
+
+        auto& raster = pnmImage.raster;
+        int length = raster.getWidth() * raster.getHeight()
+                     * raster.getColorModel()->getComponentsCount();
+        const float* dataF = raster.getData();
+        for (int i = 0; i < length; i++) {
+            data.push_back((unsigned char) (dataF[i] * pnmImage.header.maxValue));
+        }
+
+        std::string result;
+        result
+                .append(mode)
+                .append("\n")
+                .append(width).append(" ").append(height)
+                .append("\n")
+                .append(maxGray)
+                .append("\n")
+                .append(data);
+
+        for (const auto& item: pnmImage.meta.getMeta()) {
+            std::string curr_meta = item.first + '\n';
+            result.insert(item.second, curr_meta);
+        }
+        os.write(result.c_str(), result.length());
+        os.flush();
+    }
+
+    void writePNMImage(const PNMImage& pnmImage, const std::filesystem::path& filename) {
+        std::ofstream fileStream = utils::openFileOStream(filename);
+        writePNMImage(pnmImage, fileStream);
+    }
 }

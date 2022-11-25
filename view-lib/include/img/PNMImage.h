@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "../img/Raster.h"
+#include "ModernColorModel.h"
 
 enum PNMMode {
     P5,
@@ -15,10 +16,10 @@ enum PNMMode {
 
 class PNMHeader {
 public:
-    PNMMode pnmMode;
+    PNMMode mode;
     int width;
     int height;
-    int maxGray;
+    int maxValue;
 };
 
 class PNMMeta {
@@ -33,22 +34,17 @@ private:
 
 class PNMImage {
 public:
+    PNMImage(const PNMHeader& header, const PNMMeta& meta, const ModernRaster& raster);
 
-    PNMImage() = default;
-
-    PNMImage(const AbstractRaster* abstractRaster);
+    explicit PNMImage(const ModernRaster& raster);
 
     PNMImage(const PNMImage& other);
 
-    PNMImage(PNMImage&& other) noexcept;
-
-    ~PNMImage();
-
     PNMImage& operator=(const PNMImage& other) = delete;
 
-    PNMHeader pnmHeader;
-    PNMMeta pnmMeta;
-    AbstractRaster* data = nullptr;
+    PNMHeader header;
+    PNMMeta meta;
+    ModernRaster raster;
 };
 
 

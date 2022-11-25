@@ -5,14 +5,76 @@
 #include "MyApp.h"
 #include "../widget/RootView.h"
 #include "utils/explorer_utils.h"
-#include "img/PNMImage.h"
 #include "img/pnmUtils.h"
 #include "../widget/IconView.h"
-#include "../widget/TextView.h"
+#include "../widget/ImageView.h"
 #include <view/Dialog.h>
+
+view::View* viewerRootView = nullptr;
 
 view::Dialog* messageDialog = nullptr;
 view::TextView* messageDialogTxt = nullptr;
+
+view::ImageView* imageView = nullptr;
+
+bool isEditing = false;
+
+ModernRaster* editedRaster;
+gl::Texture* editedTexture;
+
+view::TextView* modeTxt;
+view::TextView* componentToggles[3];
+
+void createMessageDialog(Context* context) {
+    using namespace view;
+    auto* dialogLay = new LinearLayout(context, {
+            .width = FILL_PARENT / 2,
+            .height = FILL_PARENT / 2,
+            .background = ColorBackground{rgba{COLOR_PRIMARY_LIGHT}}
+    });
+
+    auto* titleLay = new LinearLayout(context, {
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .orientation = HORIZONTAL,
+            .gravity = RIGHT});
+    dialogLay->addChild(titleLay);
+
+    auto* dialogTitleTxt = new TextView(context, {
+            .width = FILL_SPARE,
+            .height = WRAP_CONTENT,
+            .padding = Padding(12),
+            .text = L"Error",
+            .fontSize = 18});
+    titleLay->addChild(dialogTitleTxt);
+
+    auto* closeBtn = new IconView(context, {
+            .width = 32,
+            .height = 32,
+            .background = StateBackground{
+                    Background{},
+                    ColorBackground{rgba{COLOR_PRIMARY}},
+                    ColorBackground{rgba{COLOR_PRIMARY_DARK}}},
+            .imageFile = context->getAppDir() / "assets/icons/ic_close.png",
+            .imageWidth = 16,
+            .imageHeight = 16
+    });
+    closeBtn->setOnClickListener([&]() {
+        messageDialog->hide();
+    });
+    titleLay->addChild(closeBtn);
+
+    messageDialogTxt = new TextView(context, {
+            .width = FILL_SPARE,
+            .height = FILL_SPARE,
+            .padding = Padding(12),
+            .text = L"{message text}",
+            .fontSize = 14
+    });
+    dialogLay->addChild(messageDialogTxt);
+
+    messageDialog = context->createDialog(dialogLay, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
+}
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
     glClearColor(0, 0, 0, 1);
@@ -20,52 +82,24 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     using namespace view;
 
-    setRootView(new RootView(this, {.width = FILL_PARENT, .height = FILL_PARENT}));
+    createMessageDialog(this);
 
-    auto* messageLay = new LinearLayout(this, {
-            .width = FILL_PARENT / 2,
-            .height = FILL_PARENT / 2,
-            .background = ColorBackground{rgba{COLOR_PRIMARY_LIGHT}}
-    });
+    viewerRootView = new RootView(this, {.width = FILL_PARENT, .height = FILL_PARENT});
+    setRootView(viewerRootView);
 
-    messageLay->addChild(new LinearLayout(this, {
-            .width = FILL_PARENT,
-            .height = WRAP_CONTENT,
-            .children = {
-                    new TextView(this, {
-                            .width = FILL_SPARE,
-                            .height = WRAP_CONTENT,
-                            .padding = Padding(12),
-                            .text = L"Error",
-                            .fontSize = 18}),
-                    &((new IconView(this, {
-                            .width = 32,
-                            .height = 32,
-                            .background = StateBackground{
-                                    Background{},
-                                    ColorBackground{rgba{COLOR_PRIMARY}},
-                                    ColorBackground{rgba{COLOR_PRIMARY_DARK}}},
-                            .imageFile = getAppDir() / "assets/icons/ic_close.png",
-                            .imageWidth = 16,
-                            .imageHeight = 16
-                    }))->setOnClickListener([&]() {
-                        messageDialog->hide();
-                    }))},
-            .orientation = HORIZONTAL,
-            .gravity = RIGHT}));
-
-    messageDialogTxt = new TextView(this, {
-            .width = FILL_SPARE,
-            .height = FILL_SPARE,
-            .padding = Padding(12),
-            .text = L"{message text}",
-            .fontSize = 14
-    });
-    messageLay->addChild(messageDialogTxt);
-
-    messageDialog = createDialog(messageLay, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
+    imageView = (ImageView*) findViewById(IMAGE_VIEW_ID);
+    modeTxt = (view::TextView*) findViewById(MODE_TEXT_VIEW_ID);
+    componentToggles[0] = (view::TextView*) findViewById(COMPONENT_1_TEXT_VIEW_ID);
+    componentToggles[1] = (view::TextView*) findViewById(COMPONENT_2_TEXT_VIEW_ID);
+    componentToggles[2] = (view::TextView*) findViewById(COMPONENT_3_TEXT_VIEW_ID);
 
     imageFileStorage.open(args[1]);
+    imageFileStorage.addImageChangedListener([&]() {
+        auto* imageFile = imageFileStorage.getCurImageFile();
+        imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
+        imageView->invalidate();
+    });
+    setColorModel(colorModelEnum);
 }
 
 void MyApp::update() {
@@ -92,7 +126,7 @@ void MyApp::saveImage() {
     std::wstring filename = utils::fixFileName(openFileInfo.filename, openFileInfo.filterIndex);
 
     try {
-        pnm::writePNMImage(PNMImage(imageFileStorage.getCurImageFile()->raster), filename);
+        pnm::writePNMImage(PNMImage(*imageFileStorage.getCurImageFile()->raster), filename);
     } catch (std::exception&) {
         showError(L"Error with saving =(");
     }
@@ -111,6 +145,8 @@ void MyApp::showError(const String& message) {
 }
 
 void MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
+    if (isEditing)
+        return;
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
         switch (key) {
             case GLFW_KEY_LEFT:
@@ -123,4 +159,97 @@ void MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
                 break;
         }
     }
+}
+
+void updateEditingImageView() {
+    editedTexture->update(*editedRaster);
+    imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+}
+
+void setModeTexts(const std::wstring& listText, const std::wstring& comp0, const std::wstring& comp1,
+                  const std::wstring& comp2) {
+    modeTxt->setText(listText);
+    componentToggles[0]->setText(comp0);
+    componentToggles[1]->setText(comp1);
+    componentToggles[2]->setText(comp2);
+}
+
+void MyApp::setColorModel(ColorModelEnum colorModelEnum) {
+    this->colorModelEnum = colorModelEnum;
+    info() << "color model changed: " << colorModelEnum;
+
+    switch (colorModelEnum) {
+        case COLOR_MODEL_RGB:
+            setModeTexts(L"RGB", L"R", L"G", L"B");
+            break;
+        case COLOR_MODEL_HSL:
+            setModeTexts(L"HSL", L"H", L"S", L"L");
+            break;
+    }
+
+    if (isEditing) {
+        editedRaster->convertToColorModel(colorModelEnum);
+        updateEditingImageView();
+    }
+}
+
+void setToggleViewActive(int index, bool value) {
+    componentToggles[index]->getParent()->setBackground(value
+                                                        ? view::theme.activeComponentBackground
+                                                        : view::theme.notActiveComponentBackground);
+}
+
+void MyApp::toggleEdit() {
+    if (!isEditing) {
+        auto imageFile = imageFileStorage.getCurImageFile();
+        if (imageFile == nullptr) {
+            showError(L"Open image to enter editing mode");
+            return;
+        }
+        if (imageFile->raster == nullptr) {
+            showError(L"Wait image loading");
+            return;
+        }
+        if (imageFile->raster->getColorModel()->getComponentsCount() != 3) {
+            showError(L"Only 3-component images can be edited");
+            return;
+        }
+
+        editedRaster = new ModernRaster(*imageFile->raster);
+        editedRaster->reinterpretColorModel(colorModelEnum);
+
+        editedTexture = new gl::Texture(*editedRaster);
+
+        imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+
+        for (int i = 0; i < 3; i++)
+            setToggleViewActive(i, editedRaster->getFilter(i));
+
+        isEditing = true;
+        viewerRootView->setBackground(view::ColorBackground(rgba{60, 63, 65, 255}));
+    } else {
+        delete editedRaster;
+        editedRaster = nullptr;
+        delete editedTexture;
+        editedTexture = nullptr;
+
+        auto imageFile = imageFileStorage.getCurImageFile();
+        imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
+
+        for (int i = 0; i < 3; i++)
+            componentToggles[i]->getParent()->setBackground({});
+
+        isEditing = false;
+        viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));
+    }
+    info() << "isEditing: " << isEditing;
+}
+
+void MyApp::toggleComponent(int index) {
+    if (!isEditing)
+        return;
+    bool newValue = !editedRaster->getFilter(index);
+    editedRaster->setFilter(index, newValue);
+    updateEditingImageView();
+    setToggleViewActive(index, newValue);
 }

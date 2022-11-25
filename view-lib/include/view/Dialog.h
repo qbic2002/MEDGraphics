@@ -80,7 +80,7 @@ namespace view {
             int width = rootViewManager.getWindowWidth();
             int height = rootViewManager.getWindowHeight();
             float viewX = x.evaluate(width, 0);
-            float viewY = y.evaluate(width, 0);
+            float viewY = y.evaluate(height, 0);
             view->layout(
                     viewX,
                     viewY,

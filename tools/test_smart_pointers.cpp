@@ -68,6 +68,7 @@ public:
 int main() {
     shared_ptr<Box>* p1, * p2;
     p1 = new shared_ptr<Box>(new Box(2));
+    std::cout << "use count: " << p1->use_count() << std::endl;
     delete p1;
     println(p1->get()->x);
     println("end 1");

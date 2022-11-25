@@ -17,7 +17,7 @@ void RootViewManager::setRootView(view::View* view, int windowWidth, int windowH
     if (rootView)
         activeViews.erase(rootView);
     activeViews.insert(view);
-    delete rootView;
+//    delete rootView;
     rootView = view;
     remeasureView(rootView, windowWidth, windowHeight);
     rootView->onWindowResize(windowWidth, windowHeight);

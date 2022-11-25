@@ -27,9 +27,7 @@ namespace view {
 
     class View {
     public:
-        View(Context* context, const ViewAttributes& attr) : context(context) {
-            VIEW_ATTRS_SET(attr)
-        }
+        View(Context* context, const ViewAttributes& attr);
 
         View(const View& other) = delete;
 
@@ -41,9 +39,7 @@ namespace view {
 
         virtual ~View() = default;
 
-        Style& getStyle() {
-            return style;
-        }
+        Style& getStyle();
 
         /// @return whether event was consumed
         virtual bool onClick(const ClickEvent& event);
@@ -100,66 +96,27 @@ namespace view {
             };
         };
 
-        SpaceRequirement measure() {
-            if (isMeasured)
-                return measuredSpaceRequirement;
-            measuredSpaceRequirement = onMeasure();
-            isMeasured = true;
-            return measuredSpaceRequirement;
-        }
+        SpaceRequirement measure();
 
-        virtual float getContentWidth() {
-            return 0;
-        }
+        virtual float getContentWidth();
 
-        virtual float getContentHeight() {
-            return 0;
-        }
+        virtual float getContentHeight();
 
-        virtual SpaceRequirement onMeasure() {
-            return {width.evaluateContent(getContentWidth()) + padding.width(),
-                    height.evaluateContent(getContentHeight()) + padding.height(),
-                    width.parentK,
-                    height.parentK,
-                    width.parentSpareK,
-                    height.parentSpareK};
-        }
+        virtual SpaceRequirement onMeasure();
 
-        void layout(float left, float top, float right, float bottom) {
-            edges.left = left;
-            edges.top = top;
-            edges.right = right;
-            edges.bottom = bottom;
-            innerEdges.left = left + padding.left;
-            innerEdges.top = top + padding.top;
-            if (innerEdges.top == 153) {
-                info() << "oh";
-            }
-            innerEdges.right = right - padding.right;
-            innerEdges.bottom = bottom - padding.bottom;
-            onLayout(left, top, right, bottom);
-        }
+        void layout(float left, float top, float right, float bottom);
 
         virtual void onLayout(float left, float top, float right, float bottom) {}
 
-        void setParent(View* parent) {
-            if (this->parent != nullptr) {
-                throw std::runtime_error("View already has a parent");
-            }
-            this->parent = parent;
-        }
+        void setParent(View* parent);
 
-        bool isDirty() const {
-            return needRerender;
-        }
+        View* getParent();
 
-        void invalidate() {
-            isMeasured = false;
-            needRerender = true;
-            if (parent != nullptr) {
-                parent->invalidate();
-            }
-        }
+        bool isDirty() const;
+
+        void invalidate();
+
+        void setBackground(const BackgroundWrapper& background);
 
     protected:
         Context* context;

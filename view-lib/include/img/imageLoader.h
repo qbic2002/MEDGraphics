@@ -9,11 +9,12 @@
 #include <vector>
 #include <filesystem>
 #include "AbstractRaster.h"
+#include "ModernColorModel.h"
 
 namespace img {
-    AbstractRaster* loadImageData(const std::filesystem::path& file);
+    ModernRaster* loadImageData(const std::filesystem::path& file);
 
-    AbstractRaster* loadImageData(const std::vector<char>& bytes);
+    ModernRaster* loadImageData(const std::vector<char>& bytes);
 
     bool isImage(const std::filesystem::path& file) noexcept;
 }

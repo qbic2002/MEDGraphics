@@ -9,6 +9,7 @@
 #include "img/PixelGray8.h"
 #include "img/PixelRGBA8.h"
 #include "img/PixelHSV.h"
+#include "img/ModernColorModel.h"
 
 template<class T>
 T max(T a, T b) {
@@ -19,7 +20,6 @@ template<class T, class... Arguments>
 T max(T a, T b, Arguments... args) {
     return max(std::max(a, b), args...);
 }
-
 
 template<class T>
 T min(T a, T b) {
@@ -41,7 +41,6 @@ PixelHSL toHSL(const Pixel* pixel) {
     int r = rgba.r;
     int g = rgba.g;
     int b = rgba.b;
-
 
     unsigned char cMax = max(rgba.r, rgba.g, rgba.b);
     unsigned char cMin = min(rgba.r, rgba.g, rgba.b);

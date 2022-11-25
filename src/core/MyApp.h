@@ -32,8 +32,15 @@ public:
 
     void onKey(int key, int scancode, int action, int mods) override;
 
+    void setColorModel(ColorModelEnum colorModelEnum);
+
+    void toggleEdit();
+
+    void toggleComponent(int index);
+
 protected:
     ImageFileStorage imageFileStorage;
+    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
 };
 
 

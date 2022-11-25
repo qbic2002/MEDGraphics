@@ -10,7 +10,6 @@
 #include "GLFWWindowProvider.h"
 #include "utils/encoding.h"
 #include "utils/measureFps.h"
-#include "../../../../src/core/R.h"
 #include "RootViewManager.h"
 
 namespace fs = std::filesystem;

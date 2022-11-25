@@ -6,6 +6,10 @@
 
 namespace view {
 
+    View::View(Context* context, const ViewAttributes& attr) : context(context) {
+        VIEW_ATTRS_SET(attr)
+    }
+
     void View::draw() {
         context->clipArea(edges.left, edges.top, edges.right, edges.bottom);
         background.get().draw(this, edges.left, edges.top, edges.right, edges.bottom);
@@ -89,5 +93,74 @@ namespace view {
     void View::setState(State _state) {
         state = _state;
         invalidate();
+    }
+
+    Style& View::getStyle() {
+        return style;
+    }
+
+    View::SpaceRequirement View::measure() {
+        if (isMeasured)
+            return measuredSpaceRequirement;
+        measuredSpaceRequirement = onMeasure();
+        isMeasured = true;
+        return measuredSpaceRequirement;
+    }
+
+    float View::getContentWidth() {
+        return 0;
+    }
+
+    float View::getContentHeight() {
+        return 0;
+    }
+
+    View::SpaceRequirement View::onMeasure() {
+        return {width.evaluateContent(getContentWidth()) + padding.width(),
+                height.evaluateContent(getContentHeight()) + padding.height(),
+                width.parentK,
+                height.parentK,
+                width.parentSpareK,
+                height.parentSpareK};
+    }
+
+    void View::layout(float left, float top, float right, float bottom) {
+        edges.left = left;
+        edges.top = top;
+        edges.right = right;
+        edges.bottom = bottom;
+        innerEdges.left = left + padding.left;
+        innerEdges.top = top + padding.top;
+        innerEdges.right = right - padding.right;
+        innerEdges.bottom = bottom - padding.bottom;
+        onLayout(left, top, right, bottom);
+    }
+
+    void View::setParent(View* parent) {
+        if (this->parent != nullptr) {
+            throw std::runtime_error("View already has a parent");
+        }
+        this->parent = parent;
+    }
+
+    bool View::isDirty() const {
+        return needRerender;
+    }
+
+    void View::invalidate() {
+        isMeasured = false;
+        needRerender = true;
+        if (parent != nullptr) {
+            parent->invalidate();
+        }
+    }
+
+    void View::setBackground(const BackgroundWrapper& background) {
+        this->background = background;
+        invalidate();
+    }
+
+    View* View::getParent() {
+        return parent;
     }
 } // view

@@ -12,6 +12,9 @@
 #include "AbstractRaster.h"
 #include "utils/pixelTypeMethods.h"
 
+template<class T>
+concept CheckPixelType = std::is_base_of<Pixel, T>::value;
+
 template<class T> requires CheckPixelType<T>
 class Raster : public AbstractRaster {
 public:
@@ -122,29 +125,11 @@ public:
         return raster + width_ * height_;
     }
 
-    const T* cbegin() const {
-        return (raster);
-    }
-
-    const T* cend() const {
-        return raster + width_ * height_;
-    }
-
-    const T* getRaster() const {
-        return raster;
-    }
-
     AbstractRaster* clone() const override {
         return new Raster<T>(*this);
     }
 
 private:
-    inline void fillRgbaArray() {
-        for (int i = 0; i < width_ * height_; ++i) {
-            rgbaRaster[i] = raster[i].toRGBA();
-        }
-    }
-
     int width_ = 0;
     int height_ = 0;
     T* raster = nullptr;

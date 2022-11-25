@@ -11,7 +11,7 @@ namespace utils {
 
     OsLock::~OsLock() {
         if (needToUnlock) {
-            os << "\n";
+            os << std::endl;
             osLockMutex.unlock();
         }
     }
