@@ -236,7 +236,7 @@ void MyApp::toggleEdit() {
         editedRaster = new ModernRaster(*imageFile->raster);
 
         editedRaster->reinterpretColorModel(colorModelEnum);
-//        editedRaster->reinterpretGamma(gamma);
+//        editedRaster->dither(2, DitheringMethods::ATKINSON_DITHERING);
 
         editedTexture = new gl::Texture(*editedRaster);
 
