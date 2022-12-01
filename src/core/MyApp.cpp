@@ -187,6 +187,15 @@ void MyApp::setColorModel(ColorModelEnum colorModelEnum) {
     }
 }
 
+void MyApp::setGamma(float gamma) {
+    this->gamma = gamma;
+    if (isEditing) {
+        editedRaster->convertToNewGamma(gamma);
+        updateEditingImageView();
+    }
+}
+
+
 void setToggleViewActive(int index, bool value) {
     componentToggles[index]->getParent()->setBackground(value
                                                         ? view::theme.activeComponentBackground
@@ -211,7 +220,9 @@ void MyApp::toggleEdit() {
         isEditing = true;
 
         editedRaster = new ModernRaster(*imageFile->raster);
+
         editedRaster->reinterpretColorModel(colorModelEnum);
+        editedRaster->reinterpretGamma(gamma);
 
         editedTexture = new gl::Texture(*editedRaster);
 

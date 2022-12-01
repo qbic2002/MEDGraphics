@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 #include <memory>
+#include <cmath>
+
 #include "AbstractRaster.h"
 #include "rgba.h"
 #include "ColorModels.h"
@@ -56,113 +58,43 @@
 
 class ModernRaster : public AbstractRaster {
 public:
-    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel)
-            : width(width), height(height), data(data), colorModel(colorModel) {
-        rgbaData = std::shared_ptr<rgba[]>(new rgba[width * height]);
-        fillRgbaData();
-    }
+    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel);
 
-    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModelEnum colorModelEnum)
-            : ModernRaster(width, height, data, findColorModel(colorModelEnum)) {}
+    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModelEnum colorModelEnum);
 
-    ModernRaster(const ModernRaster& other) : width(other.width), height(other.height), colorModel(other.colorModel) {
-        int length = width * height * other.colorModel->getComponentsCount();
-        data = std::shared_ptr<float[]>(new float[length]);
-        for (int i = 0; i < length; i++) {
-            data[i] = other.data[i];
-        }
-        rgbaData = std::shared_ptr<rgba[]>(new rgba[width * height]);
-        fillRgbaData();
-    }
+    ModernRaster(const ModernRaster& other);
 
-    ModernRaster(const ModernRaster&& other) noexcept: ModernRaster(other.width, other.height, other.data,
-                                                                    other.colorModel) {
-        rgbaData = other.rgbaData;
-    }
+    ModernRaster(const ModernRaster&& other) noexcept;
 
-    int getWidth() const override {
-        return width;
-    }
+    int getWidth() const override;
 
-    int getHeight() const override {
-        return height;
-    }
+    int getHeight() const override;
 
-    const unsigned char* getRgbaData() const override {
-        return (unsigned char*) rgbaData.get();
-    }
+    const unsigned char* getRgbaData() const override;
 
-    PixelType getPixelType() const override {
-        throw std::runtime_error("(");
-    }
+    PixelType getPixelType() const override;
 
-    ModernRaster* clone() const override {
-        return new ModernRaster(*this);
-    }
+    ModernRaster* clone() const override;
 
-    const ColorModel* getColorModel() const {
-        return colorModel;
-    }
+    const ColorModel* getColorModel() const;
 
-    const float* getData() const {
-        return data.get();
-    }
+    const float* getData() const;
 
-    void reinterpretColorModel(const ColorModelEnum colorModelEnum) {
-        if (this->colorModel->getEnum() == colorModelEnum)
-            return;
-        auto newColorModel = findColorModel(colorModelEnum);
-        if (this->colorModel->getComponentsCount() != newColorModel->getComponentsCount())
-            throw std::runtime_error("color model components count must be the same");
+    void reinterpretColorModel(const ColorModelEnum colorModelEnum);
 
-        this->colorModel = newColorModel;
-        fillRgbaData();
-    }
+    void reinterpretGamma(float gamma);
 
-    void convertToColorModel(const ColorModelEnum colorModelEnum) {
-        if (colorModel->getEnum() == colorModelEnum)
-            return;
-        auto destColorModel = findColorModel(colorModelEnum);
-        if (colorModel->getComponentsCount() != 3)
-            throw std::runtime_error("color model only with 3 components are supported");
+    void convertToNewGamma(float gamma);
 
-        int length = width * height;
-        float* dataPtr = data.get();
-        int componentsCount = colorModel->getComponentsCount();
-        for (int i = 0; i < length; i++) {
-            auto rgbaf = colorModel->toRgba(dataPtr);
-            destColorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
-            dataPtr += componentsCount;
-        }
+    void convertToColorModel(const ColorModelEnum colorModelEnum);
 
-        colorModel = destColorModel;
-        fillRgbaData();
-    }
+    void setFilter(int index, bool value);
 
-    void setFilter(int index, bool value) {
-        if (filter[index] == value)
-            return;
-        filter[index] = value;
-        fillRgbaData();
-    }
-
-    bool getFilter(int index) const {
-        return filter[index];
-    }
+    bool getFilter(int index) const;
 
 private:
-    void fillRgbaData() {
-        int length = width * height;
-        const float* dataPtr = data.get();
-        int componentsCount = colorModel->getComponentsCount();
-        float components[4];
-        for (int i = 0; i < length; i++) {
-            for (int c = 0; c < componentsCount; c++)
-                components[c] = filter[c] ? dataPtr[c] : 0;
-            rgbaData[i] = colorModel->toRgba(components).toRgba();
-            dataPtr += componentsCount;
-        }
-    }
+    void fillRgbaData();
+
 
     int width = 0;
     int height = 0;
@@ -170,6 +102,8 @@ private:
     std::shared_ptr<rgba[]> rgbaData;
     const ColorModel* colorModel = findColorModel(COLOR_MODEL_RGB);
     bool filter[4] = {true, true, true, true};
+    float outGamma = 1;
+    float inGamma = 1;
 };
 
 #endif //MEDGRAPHICS_MODERN_COLOR_MODEL_H
