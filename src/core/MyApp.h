@@ -34,7 +34,9 @@ public:
 
     void setColorModel(ColorModelEnum colorModelEnum);
 
-    void setGamma(float gamma);
+    void convertGamma(float gamma);
+
+    void reinterpretGamma(float gamma);
 
     void toggleEdit();
 

@@ -7,6 +7,7 @@
 #include "img/pnmUtils.h"
 #include "../widget/ImageView.h"
 #include "MyLayout.h"
+#include "../widget/EditText.h"
 #include <view/Dialog.h>
 
 MyApp* instance = nullptr;
@@ -34,6 +35,9 @@ struct {
         view::TextView* heightTxt = nullptr;
         view::TextView* channelsTxt = nullptr;
     } info;
+    struct {
+        view::EditText* gammaEdt = nullptr;
+    } gamma;
 } rightTool;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
@@ -60,6 +64,7 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     rightTool.info.widthTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_WIDTH_TXT);
     rightTool.info.heightTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_HEIGHT_TXT);
     rightTool.info.channelsTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_CHANNELS_TXT);
+    rightTool.gamma.gammaEdt = (EditText*) findViewById(ID_RIGHT_TOOL_GAMMA_EDT);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -187,14 +192,23 @@ void MyApp::setColorModel(ColorModelEnum colorModelEnum) {
     }
 }
 
-void MyApp::setGamma(float gamma) {
+void MyApp::convertGamma(float gamma) {
     this->gamma = gamma;
+    rightTool.gamma.gammaEdt->setText(std::to_wstring(gamma));
     if (isEditing) {
         editedRaster->convertToNewGamma(gamma);
         updateEditingImageView();
     }
 }
 
+void MyApp::reinterpretGamma(float gamma) {
+    this->gamma = gamma;
+    rightTool.gamma.gammaEdt->setText(std::to_wstring(gamma));
+    if (isEditing) {
+        editedRaster->reinterpretGamma(gamma);
+        updateEditingImageView();
+    }
+}
 
 void setToggleViewActive(int index, bool value) {
     componentToggles[index]->getParent()->setBackground(value
@@ -222,7 +236,7 @@ void MyApp::toggleEdit() {
         editedRaster = new ModernRaster(*imageFile->raster);
 
         editedRaster->reinterpretColorModel(colorModelEnum);
-        editedRaster->reinterpretGamma(gamma);
+//        editedRaster->reinterpretGamma(gamma);
 
         editedTexture = new gl::Texture(*editedRaster);
 
@@ -234,6 +248,7 @@ void MyApp::toggleEdit() {
         rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
         rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
         rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
+        rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
     } else {
         delete editedRaster;
         editedRaster = nullptr;

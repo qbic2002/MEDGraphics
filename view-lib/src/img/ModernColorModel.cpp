@@ -71,7 +71,7 @@ void ModernRaster::reinterpretColorModel(const ColorModelEnum colorModelEnum) {
 }
 
 void ModernRaster::reinterpretGamma(float gamma) {
-    this->inGamma = gamma;
+    this->gamma = gamma;
     fillRgbaData();
 }
 
@@ -113,27 +113,28 @@ void ModernRaster::fillRgbaData() {
     float components[4];
     for (int i = 0; i < length; i++) {
         for (int c = 0; c < componentsCount; c++)
-            components[c] = (filter[c] ? powf(dataPtr[c], outGamma / inGamma) : 0);
+            components[c] = (filter[c] ? std::pow(dataPtr[c], 1 / gamma) : 0);
         rgbaData[i] = colorModel->toRgba(components).toRgba();
         dataPtr += componentsCount;
     }
 }
 
 void ModernRaster::convertToNewGamma(float gamma) {
-    outGamma = gamma;
-//    int length = width * height;
-//    float* dataPtr = data.get();
-//    int componentsCount = colorModel->getComponentsCount();
-//    for (int i = 0; i < length; i++) {
-//        auto rgbaf = colorModel->toRgba(dataPtr);
-//
-//        rgbaf.r = powf(rgbaf.r, outGamma / inGamma);
-//        rgbaf.g = powf(rgbaf.g, outGamma / inGamma);
-//        rgbaf.b = powf(rgbaf.b, outGamma / inGamma);
-//
-//        colorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
-//        dataPtr += componentsCount;
-//    }
+    int length = width * height;
+    float* dataPtr = data.get();
+    int componentsCount = colorModel->getComponentsCount();
+    for (int i = 0; i < length; i++) {
+        auto rgbaf = colorModel->toRgba(dataPtr);
+
+        rgbaf.r = powf(rgbaf.r, gamma / gamma);
+        rgbaf.g = powf(rgbaf.g, gamma / gamma);
+        rgbaf.b = powf(rgbaf.b, gamma / gamma);
+
+        colorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
+        dataPtr += componentsCount;
+    }
+
+    gamma = gamma;
 
     fillRgbaData();
 }

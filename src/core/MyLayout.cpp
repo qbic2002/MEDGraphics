@@ -19,6 +19,7 @@ view::LinearLayout* createToolSectionLay(Context* context, const String& title) 
             .width = FILL_PARENT,
             .height = WRAP_CONTENT,
             .padding = Padding(8),
+            .gravity = LEFT,
     });
 
     auto titleTxt = new TextView(context, TextViewAttributes{
@@ -116,6 +117,7 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
     keysLay->addChild(keyGamma);
 
     auto valueGamma = new EditText(context, {
+            .id = ID_RIGHT_TOOL_GAMMA_EDT,
             .width = 200,
             .padding = Padding(4),
             .background = ColorBackground{theme.color.primaryBg},
@@ -124,6 +126,28 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
             .inputType = view::DECIMAL,
     });
     valuesLay->addChild(valueGamma);
+
+    auto convertButton = new TextView(context, {
+            .width = FILL_PARENT,
+            .padding = Padding(4),
+            .background = theme.hoverBackground,
+            .text = L"Преобразовать в гамму",
+    });
+    convertButton->setOnClickListener([valueGamma]() {
+        getAppInstance()->convertGamma(std::stof(valueGamma->getText()));
+    });
+    lay->addChild(convertButton);
+
+    auto reinterpretButton = new TextView(context, {
+            .width = FILL_PARENT,
+            .padding = Padding(4),
+            .background = theme.hoverBackground,
+            .text = L"Назначить гамму",
+    });
+    reinterpretButton->setOnClickListener([valueGamma]() {
+        getAppInstance()->reinterpretGamma(std::stof(valueGamma->getText()));
+    });
+    lay->addChild(reinterpretButton);
 
     return lay;
 }
@@ -151,7 +175,7 @@ view::View* createRootView(Context* context) {
 
     auto imageView = new ImageView(context, {
             .id = IMAGE_VIEW_ID,
-            .width = FILL_SPARE * 7,
+            .width = FILL_SPARE * 4,
             .height = FILL_PARENT,
             .style = Style{true}});
     mainLay->addChild(imageView);

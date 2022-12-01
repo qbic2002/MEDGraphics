@@ -92,9 +92,12 @@ public:
 
     bool getFilter(int index) const;
 
+    float getGamma() const {
+        return gamma;
+    };
+
 private:
     void fillRgbaData();
-
 
     int width = 0;
     int height = 0;
@@ -102,8 +105,7 @@ private:
     std::shared_ptr<rgba[]> rgbaData;
     const ColorModel* colorModel = findColorModel(COLOR_MODEL_RGB);
     bool filter[4] = {true, true, true, true};
-    float outGamma = 1;
-    float inGamma = 1;
+    float gamma = 1;
 };
 
 #endif //MEDGRAPHICS_MODERN_COLOR_MODEL_H
