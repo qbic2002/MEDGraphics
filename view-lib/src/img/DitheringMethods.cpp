@@ -12,8 +12,10 @@
 OrderedDithering orderedDithering;
 RandomDithering randomDithering;
 FloydSteinbergDithering floydSteinbergDithering;
+AtkinsonDithering atkinsonDithering;
 
-const DitheringMethod* ditheringMethods[] = {&orderedDithering, &randomDithering, &floydSteinbergDithering};
+const DitheringMethod* ditheringMethods[] = {&orderedDithering, &randomDithering, &floydSteinbergDithering,
+                                             &atkinsonDithering};
 
 const DitheringMethod* findDitheringMethod(DitheringMethods ditheringMethod) {
     return ditheringMethods[ditheringMethod];
@@ -116,7 +118,7 @@ void FloydSteinbergDithering::dither(int bits, const rgba* data, rgba* dest, int
     int colors = pow(2, bits);
 
     typedef struct {
-        int r, g, b, a;
+        int r, g, b;
     } rgbaInt;
 
     auto* newData = new rgbaInt[width * height];
@@ -154,6 +156,72 @@ void FloydSteinbergDithering::dither(int bits, const rgba* data, rgba* dest, int
                 newData[((h - 1) * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 16.0);
                 newData[((h - 1) * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 16.0);
                 newData[((h - 1) * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 16.0);
+            }
+
+            dest[(h * width + w)].r = r;
+            dest[(h * width + w)].g = g;
+            dest[(h * width + w)].b = b;
+            dest[(h * width + w)].a = data[(h * width + w)].a;
+        }
+    }
+
+    delete[] newData;
+}
+
+void AtkinsonDithering::dither(int bits, const rgba* data, rgba* dest, int height, int width) const {
+    int colors = pow(2, bits);
+
+    typedef struct {
+        int r, g, b;
+    } rgbaInt;
+
+    auto* newData = new rgbaInt[width * height];
+
+    for (int i = 0; i < height * width; ++i) {
+        newData[i].r = data[i].r;
+        newData[i].g = data[i].g;
+        newData[i].b = data[i].b;
+    }
+
+    for (int h = height - 1; h >= 0; --h) {
+        for (int w = 0; w < width; ++w) {
+
+            unsigned char r = nearestColor(newData[(h * width + w)].r, colors);
+            unsigned char g = nearestColor(newData[(h * width + w)].g, colors);
+            unsigned char b = nearestColor(newData[(h * width + w)].b, colors);
+
+            if (w != width - 1) {
+                newData[(h * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[(h * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[(h * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            }
+            if ((w != 0) && (h != 0)) {
+                newData[((h - 1) * width + w - 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[((h - 1) * width + w - 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[((h - 1) * width + w - 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            }
+            if ((h != 0)) {
+                newData[((h - 1) * width + w)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[((h - 1) * width + w)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[((h - 1) * width + w)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            }
+
+            if ((w != width - 1) && (h != 0)) {
+                newData[((h - 1) * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[((h - 1) * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[((h - 1) * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            }
+
+            if ((w < width - 2)) {
+                newData[(h * width + w + 2)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[(h * width + w + 2)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[(h * width + w + 2)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            }
+
+            if ((h > 1)) {
+                newData[((h - 2) * width + w)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
+                newData[((h - 2) * width + w)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
+                newData[((h - 2) * width + w)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
             }
 
             dest[(h * width + w)].r = r;
