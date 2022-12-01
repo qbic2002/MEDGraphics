@@ -34,6 +34,8 @@ public:
 
     void setColorModel(ColorModelEnum colorModelEnum);
 
+    void setGamma(float gamma);
+
     void toggleEdit();
 
     void toggleComponent(int index);
@@ -41,6 +43,7 @@ public:
 protected:
     ImageFileStorage imageFileStorage;
     ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
+    float gamma = 1;
 };
 
 
