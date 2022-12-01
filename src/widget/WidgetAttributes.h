@@ -35,6 +35,12 @@ font = src.font;                    \
 fontColor = src.fontColor;          \
 fontSize = src.fontSize;
 
+#define EDIT_TEXT_VIEW_ATTRS                    \
+InputType inputType = TEXT;
+
+#define EDIT_TEXT_VIEW_ATTRS_SET(src)    \
+inputType = src.inputType;
+
 #define VIEW_GROUP_ATTRS            \
 std::vector<View*> children;
 

@@ -5,6 +5,12 @@
 #include "EditText.h"
 
 namespace view {
+    EditText::EditText(Context* context, const EditTextAttributes& attr)
+            : TextView(context, *((const TextViewAttributes*) &attr)) {
+        EDIT_TEXT_VIEW_ATTRS_SET(attr)
+        validateText();
+    }
+
     void EditText::onDraw() {
         TextView::onDraw();
 
@@ -57,6 +63,7 @@ namespace view {
             case GLFW_KEY_BACKSPACE:
                 if (text.length() > 0 && cursorIndex > 0) {
                     text.erase(cursorIndex - 1, 1);
+                    validateText();
                     setCursorIndex(cursorIndex - 1);
                     invalidate();
                 }
@@ -64,6 +71,7 @@ namespace view {
             case GLFW_KEY_DELETE:
                 if (text.length() > 0 && cursorIndex < text.length()) {
                     text.erase(cursorIndex, 1);
+                    validateText();
                     invalidate();
                 }
                 return true;
@@ -79,6 +87,7 @@ namespace view {
 
         wchar_t charToInsert[2] = {(wchar_t) codepoint, 0};
         text.insert(cursorIndex, charToInsert);
+        validateText();
         invalidate();
         setCursorIndex(cursorIndex + 1);
 
@@ -103,5 +112,53 @@ namespace view {
             return;
         cursorIndex = index;
         invalidate();
+    }
+
+    void EditText::validateText() {
+        size_t textLength = text.length();
+        auto iter = text.begin();
+        switch (inputType) {
+            case TEXT:
+                break;
+            case INTEGER: {
+                bool canHaveMinus = true;
+                while (iter != text.end()) {
+                    auto c = *iter;
+                    if (('0' <= c && c <= '9') || (canHaveMinus && c == '-')) {
+                        canHaveMinus = false;
+                        iter++;
+                    } else {
+                        iter = text.erase(iter);
+                    }
+                }
+                break;
+            }
+            case DECIMAL: {
+                bool canHaveMinus = true;
+                bool canHavePoint = true;
+                while (iter != text.end()) {
+                    auto c = *iter;
+                    if (('0' <= c && c <= '9') || (canHaveMinus && c == '-')) {
+                        canHaveMinus = false;
+                        iter++;
+                    } else if (canHavePoint && c == '.') {
+                        canHaveMinus = false;
+                        canHavePoint = false;
+                        iter++;
+                    } else {
+                        iter = text.erase(iter);
+                    }
+                }
+                break;
+            }
+        }
+        if (textLength != text.length()) { // text changed
+            invalidate();
+        }
+    }
+
+    void EditText::setText(const String& text) {
+        TextView::setText(text);
+        validateText();
     }
 } // view

@@ -19,7 +19,7 @@ namespace view {
 
         void onDraw() override;
 
-        void setText(const String& text);
+        virtual void setText(const String& text);
 
         const String& getText();
 

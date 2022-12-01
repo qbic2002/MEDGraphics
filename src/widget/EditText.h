@@ -9,9 +9,21 @@
 
 namespace view {
 
+    enum InputType {
+        TEXT,
+        INTEGER,
+        DECIMAL,
+    };
+
+    struct EditTextAttributes {
+        VIEW_ATTRS
+        TEXT_VIEW_ATTRS
+        EDIT_TEXT_VIEW_ATTRS
+    };
+
     class EditText : public TextView {
     public:
-        EditText(Context* context, const TextViewAttributes& attr) : TextView(context, attr) {}
+        EditText(Context* context, const EditTextAttributes& attr);
 
         void onDraw() override;
 
@@ -25,7 +37,12 @@ namespace view {
 
         void setCursorIndex(int index);
 
+        void setText(const String& text) override;
+
     protected:
+        void validateText();
+
+        EDIT_TEXT_VIEW_ATTRS
         bool isFocused = false;
         int cursorIndex = 0;
     };

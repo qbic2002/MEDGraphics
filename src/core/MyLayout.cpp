@@ -121,6 +121,7 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
             .background = ColorBackground{theme.color.primaryBg},
             .text = L"четыре",
             .fontSize = 12,
+            .inputType = view::DECIMAL,
     });
     valuesLay->addChild(valueGamma);
 
