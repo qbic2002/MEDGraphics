@@ -137,3 +137,26 @@ void ModernRaster::convertToNewGamma(float gamma) {
 
     fillRgbaData();
 }
+
+void ModernRaster::dither(int bits, DitheringMethods ditheringMethods) {
+    auto ditheringMethod = findDitheringMethod(ditheringMethods);
+
+    int length = width * height;
+    float* dataPtr = data.get();
+    int componentsCount = colorModel->getComponentsCount();
+
+    rgba* ditheredRgbaData = new rgba[length];
+    ditheringMethod->dither(bits, rgbaData.get(), ditheredRgbaData, height, width);
+
+    for (int i = 0; i < length; i++) {
+        colorModel->fromRgb(ditheredRgbaData[i].r / 255.0, ditheredRgbaData[i].g / 255.0, ditheredRgbaData[i].b / 255.0,
+                            dataPtr);
+        dataPtr += componentsCount;
+    }
+
+    fillRgbaData();
+}
+
+void ModernRaster::drawLine(Point p1, Point p2, float* color) {
+
+}

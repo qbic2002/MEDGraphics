@@ -223,6 +223,7 @@ void MyApp::toggleEdit() {
 
         editedRaster->reinterpretColorModel(colorModelEnum);
         editedRaster->reinterpretGamma(gamma);
+        editedRaster->dither(2, DitheringMethods::FLOYD_STEINBERG_DITHERING);
 
         editedTexture = new gl::Texture(*editedRaster);
 

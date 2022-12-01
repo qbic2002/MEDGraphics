@@ -14,6 +14,7 @@
 #include "AbstractRaster.h"
 #include "rgba.h"
 #include "ColorModels.h"
+#include "DitheringMethods.h"
 
 //class Pixel1f {
 //public:
@@ -56,6 +57,10 @@
 //    };
 //};
 
+struct Point {
+    int x, y;
+};
+
 class ModernRaster : public AbstractRaster {
 public:
     ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel);
@@ -87,6 +92,10 @@ public:
     void convertToNewGamma(float gamma);
 
     void convertToColorModel(const ColorModelEnum colorModelEnum);
+
+    void dither(int bits, DitheringMethods ditheringMethods);
+
+    void drawLine(Point p1, Point p2, float* color);
 
     void setFilter(int index, bool value);
 

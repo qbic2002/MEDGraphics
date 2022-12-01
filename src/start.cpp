@@ -6,14 +6,9 @@
 #include "img/colorModelConverter.h"
 
 int main([[maybe_unused]] int argc, char** argv) {
-//    PixelRGB8 p(2, 173, 9);
-//    PixelCMY8 p1 = toCMY8(&p);
+//    OrderedDithering d;
+//    d.dither(8, nullptr, 1, 1);
 //
-//    std::cout << p1.c << " " << p1.m << " " << p1.y << "\n";
-//
-//    rgba rgba = p1.toRGBA();
-//
-//    std::cout << (int)rgba.r << " " << (int)rgba.g << " " << (int)rgba.b << "\n";
 //    return 0;
     MyApp app;
     app.run(argc, argv, 1280, 720, "Hello World", true);
