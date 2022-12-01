@@ -138,3 +138,7 @@ void ModernRaster::convertToNewGamma(float gamma) {
 
     fillRgbaData();
 }
+
+float ModernRaster::getGamma() const {
+    return gamma;
+}

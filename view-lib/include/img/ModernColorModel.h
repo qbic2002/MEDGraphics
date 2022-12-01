@@ -92,9 +92,7 @@ public:
 
     bool getFilter(int index) const;
 
-    float getGamma() const {
-        return gamma;
-    };
+    float getGamma() const;;
 
 private:
     void fillRgbaData();
