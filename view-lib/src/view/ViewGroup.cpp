@@ -19,6 +19,8 @@ namespace view {
 
     bool ViewGroup::onClick(const ClickEvent& event) {
         for (View* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             if (child->isInside(event.x, event.y)) {
                 child->setState(event.action == GLFW_PRESS ? PRESSED : HOVERED);
                 if (child->onClick(event)) {
@@ -38,6 +40,8 @@ namespace view {
 
     void ViewGroup::onMouseLeave() {
         for (View* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             if (child->getState() != DEFAULT) {
                 child->onMouseLeave();
             }
@@ -47,6 +51,8 @@ namespace view {
 
     void ViewGroup::onMouseMove(double x, double y) {
         for (View* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             if (child->isInside(x, y)) {
                 if (child->getState() == DEFAULT) {
                     child->onMouseEnter();
@@ -71,12 +77,16 @@ namespace view {
 
     void ViewGroup::onDraw() {
         for (auto* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             child->draw();
         }
     }
 
     bool ViewGroup::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {
         for (auto* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             if (child->isInside(cursorX, cursorY)) {
                 if (child->onScroll(xOffset, yOffset, cursorX, cursorY)) {
                     return true;
@@ -89,12 +99,32 @@ namespace view {
 
     bool ViewGroup::onDrag(double x, double y, double dx, double dy) {
         for (auto* child: children) {
+            if (child->getVisibility() != VISIBLE)
+                continue;
             if (child->isInside(x, y) && child->getState() == PRESSED) {
                 if (child->onDrag(x, y, dx, dy))
                     return true;
             }
         }
         return View::onDrag(x, y, dx, dy);
+    }
+
+    bool ViewGroup::onKey(int key, int scancode, int action, int mods) {
+        for (auto* child: children) {
+            if (child->getVisibility() == VISIBLE && child->onKey(key, scancode, action, mods)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool ViewGroup::onChar(unsigned int codepoint) {
+        for (auto* child: children) {
+            if (child->getVisibility() == VISIBLE && child->onChar(codepoint)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     View* ViewGroup::findViewById(int id) {

@@ -61,6 +61,15 @@ void GLFWWindowWrapper::getPointerPos(double& x, double& y) {
     y = cursorPos.y;
 }
 
+double GLFWWindowWrapper::getPointerX() {
+    return cursorPos.x;
+}
+
+double GLFWWindowWrapper::getPointerY() {
+    return cursorPos.y;
+}
+
+
 /* ======================================== *
  * =              Callbacks               = *
  * ======================================== */
@@ -131,4 +140,8 @@ void GLFWWindowWrapper::windowSizeCallback(int width, int height) {
     windowSize.width = width;
     windowSize.height = height;
     callbacks->onWindowResize(width, height);
+}
+
+void GLFWWindowWrapper::charCallback(unsigned int codepoint) {
+    callbacks->onChar(codepoint);
 }

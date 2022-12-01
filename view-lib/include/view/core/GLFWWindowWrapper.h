@@ -57,6 +57,12 @@ public:
 
     void getPointerPos(double& x, double& y) override;
 
+    double getPointerX() override;
+
+    double getPointerY() override;
+
+    void charCallback(unsigned int codepoint);
+
 private:
     ContextCallbacks* callbacks;
     GLFWwindow* window;

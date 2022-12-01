@@ -13,7 +13,7 @@ namespace view {
 
     class ImageView : public View {
     public:
-        ImageView(MyApp* context, const ViewAttributes& attr);
+        ImageView(Context* context, const ViewAttributes& attr);
 
         ImageView(const ImageView& other) = delete;
 

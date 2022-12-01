@@ -21,6 +21,12 @@ namespace view {
         PRESSED
     };
 
+    enum Visibility {
+        VISIBLE,
+        GONE,
+        INVISIBLE
+    };
+
     struct ViewAttributes {
         VIEW_ATTRS
     };
@@ -59,6 +65,10 @@ namespace view {
         virtual void onMouseMove(double x, double y);
 
         virtual bool onScroll(double xOffset, double yOffset, double x, double y);
+
+        virtual bool onKey(int key, int scancode, int action, int mods);
+
+        virtual bool onChar(unsigned int codepoint);
 
         void draw();
 
@@ -117,6 +127,10 @@ namespace view {
         void invalidate();
 
         void setBackground(const BackgroundWrapper& background);
+
+        void setVisibility(Visibility visibility);
+
+        Visibility getVisibility();
 
     protected:
         Context* context;

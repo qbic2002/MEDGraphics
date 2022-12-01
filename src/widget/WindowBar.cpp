@@ -8,7 +8,7 @@
 #include "DropDownView.h"
 
 namespace view {
-    WindowBar::WindowBar(MyApp* context, const LinearLayoutAttributes& attr)
+    WindowBar::WindowBar(Context* context, const LinearLayoutAttributes& attr)
             : LinearLayout(context, attr) {
         auto* windowWrapper = context->getWindowWrapper();
         View* view;
@@ -26,8 +26,8 @@ namespace view {
                         .imageHeight = 32}),
                 {
                         {L"Fast exit", []() { throw std::exception(); }},
-                        {L"Save to",   [context]() { context->saveImage(); }},
-                        {L"Open...",   [context]() { context->openImage(); }}
+                        {L"Save to",   []() { getAppInstance()->saveImage(); }},
+                        {L"Open...",   []() { getAppInstance()->openImage(); }}
                 }, theme.dropDownViewAttr);
         addChild(view);
 
@@ -41,8 +41,8 @@ namespace view {
         });
         addChild(titleView);
 
-        context->getImageFileStorage().addImageTitleChangedListener([titleView, context]() {
-            auto* imageFile = context->getImageFileStorage().getCurImageFile();
+        getAppInstance()->getImageFileStorage().addImageTitleChangedListener([titleView]() {
+            auto* imageFile = getAppInstance()->getImageFileStorage().getCurImageFile();
             if (imageFile == nullptr) {
                 titleView->setText(L"MEDGraphics");
             } else {
@@ -64,8 +64,8 @@ namespace view {
                 },
                 .gravity = VCENTER
         });
-        view->setOnClickListener([context]() {
-            context->toggleComponent(0);
+        view->setOnClickListener([]() {
+            getAppInstance()->toggleComponent(0);
         });
         addChild(view);
 
@@ -83,8 +83,8 @@ namespace view {
                 },
                 .gravity = VCENTER
         });
-        view->setOnClickListener([context]() {
-            context->toggleComponent(1);
+        view->setOnClickListener([]() {
+            getAppInstance()->toggleComponent(1);
         });
         addChild(view);
 
@@ -102,8 +102,8 @@ namespace view {
                 },
                 .gravity = VCENTER
         });
-        view->setOnClickListener([context]() {
-            context->toggleComponent(2);
+        view->setOnClickListener([]() {
+            getAppInstance()->toggleComponent(2);
         });
         addChild(view);
 
@@ -125,14 +125,14 @@ namespace view {
                         },
                         .gravity = VCENTER
                 }), {
-                        {L"RGB",      [context]() { context->setColorModel(COLOR_MODEL_RGB); }},
-                        {L"HSL",      [context]() { context->setColorModel(COLOR_MODEL_HSL); }},
-                        {L"HSV",      [context]() { context->setColorModel(COLOR_MODEL_HSV); }},
-                        {L"YCbCr601", [context]() { context->setColorModel(COLOR_MODEL_YCbCr601); }},
-                        {L"YCbCr709", [context]() { context->setColorModel(COLOR_MODEL_YCbCr709); }},
-                        {L"YCoCg",    [context]() { context->setColorModel(COLOR_MODEL_YCoCg); }},
-                        {L"CMY",      [context]() { context->setColorModel(COLOR_MODEL_CMY); }}
-                        
+                        {L"RGB",      []() { getAppInstance()->setColorModel(COLOR_MODEL_RGB); }},
+                        {L"HSL",      []() { getAppInstance()->setColorModel(COLOR_MODEL_HSL); }},
+                        {L"HSV",      []() { getAppInstance()->setColorModel(COLOR_MODEL_HSV); }},
+                        {L"YCbCr601", []() { getAppInstance()->setColorModel(COLOR_MODEL_YCbCr601); }},
+                        {L"YCbCr709", []() { getAppInstance()->setColorModel(COLOR_MODEL_YCbCr709); }},
+                        {L"YCoCg",    []() { getAppInstance()->setColorModel(COLOR_MODEL_YCoCg); }},
+                        {L"CMY",      []() { getAppInstance()->setColorModel(COLOR_MODEL_CMY); }}
+
                 }, {
                         .width = WRAP_CONTENT + FILL_SPARE,
                         .height = WRAP_CONTENT,
@@ -148,15 +148,15 @@ namespace view {
 
         /// Edit
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_edit.png");
-        view->setOnClickListener([context]() {
-            context->toggleEdit();
+        view->setOnClickListener([]() {
+            getAppInstance()->toggleEdit();
         });
         addChild(view);
 
         /// Show Error
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_show_error.png");
-        view->setOnClickListener([context]() {
-            context->showError(L"Test error");
+        view->setOnClickListener([]() {
+            getAppInstance()->showError(L"Test error");
         });
         addChild(view);
 

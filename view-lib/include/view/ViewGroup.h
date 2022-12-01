@@ -41,6 +41,10 @@ namespace view {
 
         View* findViewById(int id) override;
 
+        bool onKey(int key, int scancode, int action, int mods) override;
+
+        bool onChar(unsigned int codepoint) override;
+
     protected:
         VIEW_GROUP_ATTRS
     };

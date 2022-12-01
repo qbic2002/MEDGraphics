@@ -3,12 +3,13 @@
 //
 
 #include "MyApp.h"
-#include "../widget/RootView.h"
 #include "utils/explorer_utils.h"
 #include "img/pnmUtils.h"
-#include "../widget/IconView.h"
 #include "../widget/ImageView.h"
+#include "MyLayout.h"
 #include <view/Dialog.h>
+
+MyApp* instance = nullptr;
 
 view::View* viewerRootView = nullptr;
 
@@ -25,66 +26,27 @@ gl::Texture* editedTexture;
 view::TextView* modeTxt;
 view::TextView* componentToggles[3];
 
-void createMessageDialog(Context* context) {
-    using namespace view;
-    auto* dialogLay = new LinearLayout(context, {
-            .width = FILL_PARENT / 2,
-            .height = FILL_PARENT / 2,
-            .background = ColorBackground{rgba{COLOR_PRIMARY_LIGHT}}
-    });
+view::View* rightToolLay = nullptr;
 
-    auto* titleLay = new LinearLayout(context, {
-            .width = FILL_PARENT,
-            .height = WRAP_CONTENT,
-            .orientation = HORIZONTAL,
-            .gravity = RIGHT});
-    dialogLay->addChild(titleLay);
-
-    auto* dialogTitleTxt = new TextView(context, {
-            .width = FILL_SPARE,
-            .height = WRAP_CONTENT,
-            .padding = Padding(12),
-            .text = L"Error",
-            .fontSize = 18});
-    titleLay->addChild(dialogTitleTxt);
-
-    auto* closeBtn = new IconView(context, {
-            .width = 32,
-            .height = 32,
-            .background = StateBackground{
-                    Background{},
-                    ColorBackground{rgba{COLOR_PRIMARY}},
-                    ColorBackground{rgba{COLOR_PRIMARY_DARK}}},
-            .imageFile = context->getAppDir() / "assets/icons/ic_close.png",
-            .imageWidth = 16,
-            .imageHeight = 16
-    });
-    closeBtn->setOnClickListener([&]() {
-        messageDialog->hide();
-    });
-    titleLay->addChild(closeBtn);
-
-    messageDialogTxt = new TextView(context, {
-            .width = FILL_SPARE,
-            .height = FILL_SPARE,
-            .padding = Padding(12),
-            .text = L"{message text}",
-            .fontSize = 14
-    });
-    dialogLay->addChild(messageDialogTxt);
-
-    messageDialog = context->createDialog(dialogLay, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
-}
+struct {
+    struct {
+        view::TextView* widthTxt = nullptr;
+        view::TextView* heightTxt = nullptr;
+        view::TextView* channelsTxt = nullptr;
+    } info;
+} rightTool;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
+    instance = this;
+
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     using namespace view;
 
-    createMessageDialog(this);
+    messageDialog = createMessageDialog(this);
 
-    viewerRootView = new RootView(this, {.width = FILL_PARENT, .height = FILL_PARENT});
+    viewerRootView = createRootView(this);
     setRootView(viewerRootView);
 
     imageView = (ImageView*) findViewById(IMAGE_VIEW_ID);
@@ -92,6 +54,12 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     componentToggles[0] = (view::TextView*) findViewById(COMPONENT_1_TEXT_VIEW_ID);
     componentToggles[1] = (view::TextView*) findViewById(COMPONENT_2_TEXT_VIEW_ID);
     componentToggles[2] = (view::TextView*) findViewById(COMPONENT_3_TEXT_VIEW_ID);
+    messageDialogTxt = (TextView*) findViewById(ID_DIALOG_MESSAGE_TXT);
+    rightToolLay = findViewById(ID_RIGHT_TOOL_LAY);
+
+    rightTool.info.widthTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_WIDTH_TXT);
+    rightTool.info.heightTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_HEIGHT_TXT);
+    rightTool.info.channelsTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_CHANNELS_TXT);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -150,21 +118,26 @@ void MyApp::showError(const String& message) {
     messageDialog->show();
 }
 
-void MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
+bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
+    if (RootViewManager::onKey(key, scancode, action, mods))
+        return true;
+
     if (isEditing)
-        return;
+        return false;
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
         switch (key) {
             case GLFW_KEY_LEFT:
                 imageFileStorage.prev();
-                break;
+                return true;
             case GLFW_KEY_RIGHT:
                 imageFileStorage.next();
-                break;
+                return true;
             default:
                 break;
         }
     }
+
+    return false;
 }
 
 void updateEditingImageView() {
@@ -235,6 +208,7 @@ void MyApp::toggleEdit() {
             showError(L"Only 3-component images can be edited");
             return;
         }
+        isEditing = true;
 
         editedRaster = new ModernRaster(*imageFile->raster);
         editedRaster->reinterpretColorModel(colorModelEnum);
@@ -246,8 +220,9 @@ void MyApp::toggleEdit() {
         for (int i = 0; i < 3; i++)
             setToggleViewActive(i, editedRaster->getFilter(i));
 
-        isEditing = true;
-        viewerRootView->setBackground(view::ColorBackground(rgba{60, 63, 65, 255}));
+        rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
+        rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
+        rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
     } else {
         delete editedRaster;
         editedRaster = nullptr;
@@ -263,6 +238,7 @@ void MyApp::toggleEdit() {
         isEditing = false;
         viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));
     }
+    rightToolLay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
     info() << "isEditing: " << isEditing;
 }
 
@@ -273,4 +249,8 @@ void MyApp::toggleComponent(int index) {
     editedRaster->setFilter(index, newValue);
     updateEditingImageView();
     setToggleViewActive(index, newValue);
+}
+
+MyApp* getAppInstance() {
+    return instance;
 }

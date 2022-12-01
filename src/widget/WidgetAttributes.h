@@ -7,10 +7,11 @@
 
 #define VIEW_ATTRS \
 int id = 0;        \
-Dimension width;   \
-Dimension height;  \
+Dimension width = WRAP_CONTENT;   \
+Dimension height = WRAP_CONTENT;  \
 Padding padding;   \
-BackgroundWrapper background;  \
+BackgroundWrapper background;       \
+Visibility visibility = VISIBLE;    \
 Style style;
 
 #define VIEW_ATTRS_SET(src) \
@@ -18,7 +19,8 @@ id = src.id;                \
 width = src.width;          \
 height = src.height;        \
 padding = src.padding;      \
-background = src.background; \
+background = src.background;\
+visibility = src.visibility;\
 style = src.style;
 
 #define TEXT_VIEW_ATTRS                         \

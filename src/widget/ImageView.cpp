@@ -13,7 +13,7 @@ namespace view {
         glVertex2f(x, y);
     }
 
-    ImageView::ImageView(MyApp* context, const ViewAttributes& attr) : View(context, attr) {}
+    ImageView::ImageView(Context* context, const ViewAttributes& attr) : View(context, attr) {}
 
     void ImageView::onDraw() {
         if (textureId == 0)
@@ -69,7 +69,7 @@ namespace view {
     }
 
     void ImageView::onLayout(float left, float top, float right, float bottom) {
-        imageFitScreen();
+        validateZoom();
     }
 
     void ImageView::imageFitScreen() {

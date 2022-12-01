@@ -73,7 +73,6 @@ namespace view {
             view->onWindowResize(width, height);
         }
 
-    private:
         void posUpdated() {
             view->invalidate();
             auto req = view->measure();
@@ -88,6 +87,7 @@ namespace view {
                     viewY + req.height + req.parentPartH * height);
         }
 
+    private:
         RootViewManager& rootViewManager;
         View* view = nullptr;
         Dimension x, y;

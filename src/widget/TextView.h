@@ -29,7 +29,7 @@ namespace view {
 
         float getContentHeight() override;
 
-    private:
+    protected:
         TEXT_VIEW_ATTRS
         std::shared_ptr<gl::FontRenderer> fontRenderer;
     };

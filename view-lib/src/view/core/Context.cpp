@@ -29,6 +29,7 @@ void Context::loop() {
         windowWrapper->waitEvents(0.1);
         update();
         if (isDrawRequired()) {
+            updateDirtyViews();
             draw();
             windowWrapper->swapBuffers();
             utils::updateTimer();

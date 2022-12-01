@@ -66,6 +66,14 @@ namespace view {
         return false;
     }
 
+    bool View::onKey(int key, int scancode, int action, int mods) {
+        return false;
+    }
+
+    bool View::onChar(unsigned int codepoint) {
+        return false;
+    }
+
     const Context* View::getContext() const {
         return context;
     }
@@ -162,5 +170,16 @@ namespace view {
 
     View* View::getParent() {
         return parent;
+    }
+
+    void View::setVisibility(Visibility _visibility) {
+        if (visibility == _visibility)
+            return;
+        visibility = _visibility;
+        invalidate();
+    }
+
+    Visibility View::getVisibility() {
+        return visibility;
     }
 } // view

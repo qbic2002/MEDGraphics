@@ -36,6 +36,8 @@ namespace view {
             int oIndex = orientation == VERTICAL ? 1 : 0; // orientation index
             float max_size = 0;
             for (auto* child: children) {
+                if (child->getVisibility() == INVISIBLE)
+                    continue;
                 auto req = child->measure();
                 if (max_size < req.size[1 - oIndex])
                     max_size = req.size[1 - oIndex];
@@ -61,6 +63,8 @@ namespace view {
             float spareSpace = innerSize[oIndex];
             float spareWeight = 0;
             for (auto* child: children) {
+                if (child->getVisibility() == INVISIBLE)
+                    continue;
                 auto req = child->measure();
                 spareSpace -= req.size[oIndex] + req.parentPart[oIndex] * innerSize[oIndex];
                 spareWeight += req.parentSparePart[oIndex];

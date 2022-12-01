@@ -30,7 +30,7 @@ public:
     /// @param message Error message to be shown
     void showError(const String& message);
 
-    void onKey(int key, int scancode, int action, int mods) override;
+    bool onKey(int key, int scancode, int action, int mods) override;
 
     void setColorModel(ColorModelEnum colorModelEnum);
 
@@ -43,5 +43,6 @@ protected:
     ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
 };
 
+MyApp* getAppInstance();
 
 #endif //MEDGRAPHICS_MYAPP_H

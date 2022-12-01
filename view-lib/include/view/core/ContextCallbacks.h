@@ -53,7 +53,9 @@ public:
     /// @param key The key that was pressed or released.
     /// @param scancode The system-specific scancode of the key.
     /// @param action `GLFW_PRESS`, `GLFW_RELEASE` or `GLFW_REPEAT`
-    virtual void onKey(int key, int scancode, int action, int mods);
+    virtual bool onKey(int key, int scancode, int action, int mods);
+
+    virtual bool onChar(unsigned int codepoint);
 };
 
 #endif //MEDGRAPHICS_CONTEXT_CALLBACKS_H

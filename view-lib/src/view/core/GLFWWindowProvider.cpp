@@ -57,6 +57,10 @@ void windowRefreshCallback(GLFWwindow* window) {
     wrappers[window]->windowRefreshCallback();
 }
 
+void charCallback(GLFWwindow* window, unsigned int codepoint) {
+    wrappers[window]->charCallback(codepoint);
+}
+
 void setCallbacks(GLFWwindow* window) {
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -66,6 +70,7 @@ void setCallbacks(GLFWwindow* window) {
     glfwSetKeyCallback(window, keyCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
     glfwSetWindowRefreshCallback(window, windowRefreshCallback);
+    glfwSetCharCallback(window, charCallback);
 }
 
 GLFWwindow* createWindow(uint width, uint height, const std::string& title, bool vsync) {

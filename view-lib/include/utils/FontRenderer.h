@@ -39,6 +39,10 @@ namespace gl {
 
         float getTextWidth(const String& str) const;
 
+        float getTextWidth(const String& str, int beginIndex, int endIndex) const;
+
+        int positionToIndex(const String& str, float x, float y) const;
+
         void renderText(const String& str, float x, float y);
 
         int getLineHeight() const;

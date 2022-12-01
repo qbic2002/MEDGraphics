@@ -32,6 +32,10 @@ public:
     virtual void getWindowSize(int* width, int* height) = 0;
 
     virtual void getPointerPos(double& x, double& y) = 0;
+
+    virtual double getPointerX() = 0;
+
+    virtual double getPointerY() = 0;
 };
 
 #endif //MEDGRAPHICS_WINDOW_WRAPPER_H

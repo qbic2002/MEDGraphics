@@ -189,6 +189,8 @@ rgbaF ColorModelHSV::toRgba(const float* data) const {
             return {vInc, vMin, v, 1};
         case 5:
             return {v, vMin, vDec, 1};
+        default:
+            throw std::runtime_error("impossible");
     }
 }
 

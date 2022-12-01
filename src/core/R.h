@@ -12,6 +12,11 @@
 #define COMPONENT_1_TEXT_VIEW_ID 5
 #define COMPONENT_2_TEXT_VIEW_ID 6
 #define COMPONENT_3_TEXT_VIEW_ID 7
+#define ID_DIALOG_MESSAGE_TXT 8
+#define ID_RIGHT_TOOL_LAY 9
+#define ID_RIGHT_TOOL_INFO_WIDTH_TXT 10
+#define ID_RIGHT_TOOL_INFO_HEIGHT_TXT 11
+#define ID_RIGHT_TOOL_INFO_CHANNELS_TXT 12
 
 #define COLOR_PRIMARY 33, 33, 33, 255
 #define COLOR_PRIMARY_DARK 0, 0, 0, 255
@@ -44,6 +49,10 @@ static void posix_death_signal(int signum) {
 
 namespace view {
     struct {
+        struct {
+            rgba primaryBg = rgba{33, 33, 33, 255};
+            rgba secondaryBg = rgba{56, 56, 56, 255};
+        } color;
         TextViewAttributes dropDownViewAttr = {
                 .width = WRAP_CONTENT + FILL_SPARE,
                 .height = WRAP_CONTENT,

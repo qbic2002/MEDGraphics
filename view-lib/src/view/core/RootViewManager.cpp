@@ -31,6 +31,17 @@ bool RootViewManager::isDrawRequired() {
     });
 }
 
+void RootViewManager::updateDirtyViews() {
+    if (rootView->isDirty())
+        remeasureView(rootView, windowWidth, windowHeight);
+    for (auto dialog: dialogs) {
+        if (!dialog->isShown())
+            continue;
+        if (dialog->getView()->isDirty())
+            dialog->posUpdated();
+    }
+}
+
 void RootViewManager::drawViews() const {
     rootView->draw();
     std::for_each(activeViews.begin(), activeViews.end(), [&](const auto& view) {
@@ -41,11 +52,14 @@ void RootViewManager::drawViews() const {
 }
 
 view::View* RootViewManager::findViewById(int id) {
-    for (const auto& view: activeViews) {
-        auto* found = view->findViewById(id);
+    for (const auto dialog: dialogs) {
+        auto* found = dialog->getView()->findViewById(id);
         if (found)
             return found;
     }
+    auto* found = rootView->findViewById(id);
+    if (found)
+        return found;
 
     return nullptr;
 }
@@ -60,13 +74,24 @@ bool RootViewManager::onDrag(double x, double y, double dx, double dy) {
 }
 
 bool RootViewManager::onMouseButton(ClickEvent& event) {
-    for (const auto& view: activeViews) {
-        if (view->isInside(event.x, event.y) && view->onClick(event)) {
-            return true;
+    bool consumed = false;
+    for (auto dialog: dialogs) {
+        if (!dialog->isShown())
+            continue;
+
+        if (dialog->getView()->isInside(event.x, event.y)) {
+            if (!consumed && dialog->getView()->onClick(event)) {
+                consumed = true;
+            }
+        } else {
+            dialog->hide();
         }
     }
+    if (!consumed && rootView->onClick(event)) {
+        consumed = true;
+    }
 
-    return false;
+    return consumed;
 }
 
 void RootViewManager::onMouseLeave() {
@@ -95,6 +120,26 @@ void RootViewManager::onScroll(double xOffset, double yOffset, double cursorX, d
         if (view->isInside(cursorX, cursorY) && view->onScroll(xOffset, yOffset, cursorX, cursorY))
             return;
     }
+}
+
+bool RootViewManager::onKey(int key, int scancode, int action, int mods) {
+    for (auto* view: activeViews) {
+        if (view->onKey(key, scancode, action, mods)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool RootViewManager::onChar(unsigned int codepoint) {
+    for (auto* view: activeViews) {
+        if (view->onChar(codepoint)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void RootViewManager::onWindowResize(unsigned int width, unsigned int height) {

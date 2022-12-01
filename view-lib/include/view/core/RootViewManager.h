@@ -23,6 +23,8 @@ public:
 
     bool isDrawRequired();
 
+    void updateDirtyViews();
+
     void drawViews() const;
 
     view::View* findViewById(int id);
@@ -48,6 +50,10 @@ public:
     int getWindowWidth() const;
 
     int getWindowHeight() const;
+
+    bool onKey(int key, int scancode, int action, int mods) override;
+
+    bool onChar(unsigned int codepoint) override;
 
 protected:
     void onWindowResize(unsigned int width, unsigned int height) override;

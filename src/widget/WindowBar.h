@@ -16,7 +16,7 @@ namespace view {
 
     class WindowBar : public LinearLayout {
     public:
-        WindowBar(MyApp* context, const LinearLayoutAttributes& attr);
+        WindowBar(Context* context, const LinearLayoutAttributes& attr);
     };
 
 } // view

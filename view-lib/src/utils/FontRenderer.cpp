@@ -54,12 +54,28 @@ namespace gl {
     }
 
     float FontRenderer::getTextWidth(const String& str) const {
+        return getTextWidth(str, 0, str.length());
+    }
+
+    float FontRenderer::getTextWidth(const String& str, int beginIndex, int endIndex) const {
         float width = 0;
-        for (const auto& c: str) {
-            width += myGlyphData[c].advanceX;
+        while (beginIndex < endIndex) {
+            width += myGlyphData[str[beginIndex]].advanceX;
+            beginIndex++;
         }
 
         return width;
+    }
+
+    int FontRenderer::positionToIndex(const String& str, float x, float y) const {
+        float width = 0;
+        int index = 0;
+        while (width < x && index < str.length()) {
+            width += myGlyphData[str[index]].advanceX;
+            index++;
+        }
+
+        return index;
     }
 
     void FontRenderer::renderText(const String& str, float x, float y) {

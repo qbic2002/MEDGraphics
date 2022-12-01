@@ -24,4 +24,10 @@ void ContextCallbacks::onMouseEnter(double x, double y) {}
 
 void ContextCallbacks::onScroll(double xOffset, double yOffset, double cursorX, double cursorY) {}
 
-void ContextCallbacks::onKey(int key, int scancode, int action, int mods) {}
+bool ContextCallbacks::onKey(int key, int scancode, int action, int mods) {
+    return false;
+}
+
+bool ContextCallbacks::onChar(unsigned int codepoint) {
+    return false;
+}
