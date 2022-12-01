@@ -70,11 +70,6 @@ void ModernRaster::reinterpretColorModel(const ColorModelEnum colorModelEnum) {
     fillRgbaData();
 }
 
-void ModernRaster::reinterpretGamma(float gamma) {
-    this->gamma = gamma;
-    fillRgbaData();
-}
-
 void ModernRaster::convertToColorModel(const ColorModelEnum colorModelEnum) {
     if (colorModel->getEnum() == colorModelEnum)
         return;
@@ -119,22 +114,27 @@ void ModernRaster::fillRgbaData() {
     }
 }
 
-void ModernRaster::convertToNewGamma(float gamma) {
+void ModernRaster::reinterpretGamma(float gamma) {
+    this->gamma = gamma;
+    fillRgbaData();
+}
+
+void ModernRaster::convertToNewGamma(float gamma_) {
     int length = width * height;
     float* dataPtr = data.get();
     int componentsCount = colorModel->getComponentsCount();
     for (int i = 0; i < length; i++) {
         auto rgbaf = colorModel->toRgba(dataPtr);
 
-        rgbaf.r = powf(rgbaf.r, gamma / gamma);
-        rgbaf.g = powf(rgbaf.g, gamma / gamma);
-        rgbaf.b = powf(rgbaf.b, gamma / gamma);
+        rgbaf.r = powf(rgbaf.r, gamma_ / gamma);
+        rgbaf.g = powf(rgbaf.g, gamma_ / gamma);
+        rgbaf.b = powf(rgbaf.b, gamma_ / gamma);
 
         colorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
         dataPtr += componentsCount;
     }
 
-    gamma = gamma;
+    gamma = gamma_;
 
     fillRgbaData();
 }
