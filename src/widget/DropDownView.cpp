@@ -24,7 +24,7 @@ namespace view {
             auto curItemAttr = itemAttr;
             curItemAttr.text = item.text;
             auto* itemView = new TextView(context, curItemAttr);
-            itemView->setOnClickListener([this, item]() {
+            itemView->setOnClickListener([this, item](View* view) {
                 item.onClickListener();
                 this->dialog->hide();
             });
@@ -38,15 +38,11 @@ namespace view {
         delete dialog;
     }
 
-    bool DropDownView::onClick(const ClickEvent& event) {
+    bool DropDownView::onClick(const MouseEvent& event) {
         if (ViewGroup::onClick(event))
             return true;
-        if (event.action == GLFW_RELEASE) {
-            dialog->toggleShown();
-            return true;
-        }
-
-        return false;
+        dialog->toggleShown();
+        return true;
     }
 
     bool DropDownView::isInside(double x, double y) {
@@ -65,7 +61,7 @@ namespace view {
         presenter.draw();
     }
 
-    View::SpaceRequirement DropDownView::onMeasure() {
+    SpaceRequirement DropDownView::onMeasure() {
         return presenter.onMeasure();
     }
 

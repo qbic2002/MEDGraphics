@@ -137,7 +137,7 @@ view::LinearLayout* createToolSectionColorModel(Context* context) {
             .background = theme.hoverBackground,
             .text = L"Преобразовать",
     });
-    convertColorModel->setOnClickListener([selectColorModel]() {
+    convertColorModel->setOnClickListener([selectColorModel](View*) {
         getAppInstance()->convertColorModel(modes[selectColorModel->getSelectIndex()]);
     });
     lay->addChild(convertColorModel);
@@ -148,7 +148,7 @@ view::LinearLayout* createToolSectionColorModel(Context* context) {
             .background = theme.hoverBackground,
             .text = L"Назначить",
     });
-    reinterpretButton->setOnClickListener([selectColorModel]() {
+    reinterpretButton->setOnClickListener([selectColorModel](View*) {
         getAppInstance()->reinterpretColorModel(modes[selectColorModel->getSelectIndex()]);
     });
     lay->addChild(reinterpretButton);
@@ -177,7 +177,7 @@ view::LinearLayout* createToolSectionColorModel(Context* context) {
                 },
                 .gravity = CENTER
         });
-        compToggle->setOnClickListener([i]() {
+        compToggle->setOnClickListener([i](View*) {
             getAppInstance()->toggleComponent(i);
         });
         togglesLay->addChild(compToggle);
@@ -234,7 +234,7 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
             .background = theme.hoverBackground,
             .text = L"Преобразовать в гамму",
     });
-    convertButton->setOnClickListener([valueGamma]() {
+    convertButton->setOnClickListener([valueGamma](View*) {
         getAppInstance()->convertGamma(std::stof(valueGamma->getText()));
     });
     lay->addChild(convertButton);
@@ -245,7 +245,7 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
             .background = theme.hoverBackground,
             .text = L"Назначить гамму",
     });
-    reinterpretButton->setOnClickListener([valueGamma]() {
+    reinterpretButton->setOnClickListener([valueGamma](View*) {
         getAppInstance()->reinterpretGamma(std::stof(valueGamma->getText()));
     });
     lay->addChild(reinterpretButton);
@@ -316,6 +316,93 @@ view::LinearLayout* createToolSectionDithering(Context* context) {
     return lay;
 }
 
+view::LinearLayout* createToolSectionPaint(Context* context) {
+    auto lay = createToolSectionLay(context, L"Рисование");
+
+    auto propertiesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .orientation = HORIZONTAL,
+    });
+    lay->addChild(propertiesLay);
+
+    auto keysLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(keysLay);
+
+    auto valuesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_SPARE,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(valuesLay);
+
+    for (int i = 0; i < 4; i++) {
+        keysLay->addChild(new TextView(context, {
+                .id = ID_RIGHT_TOOL_PAINT_COMP1_TXT + i,
+                .padding = Padding(4),
+                .fontSize = 12,
+        }));
+        valuesLay->addChild(new EditText(context, {
+                .id = ID_RIGHT_TOOL_PAINT_COMP1_EDT + i,
+                .width = 200,
+                .padding = Padding(4),
+                .background = ColorBackground{theme.color.primaryBg},
+                .fontSize = 12,
+                .inputType = view::DECIMAL,
+        }));
+    }
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Прозрачность: ",
+            .fontSize = 12,
+    }));
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_PAINT_COMP_OPACITY_EDT,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .fontSize = 12,
+            .inputType = view::DECIMAL,
+    }));
+//
+//    auto selectBits = new SelectView(context, {
+//            .id = ID_RIGHT_TOOL_DITHER_BITS,
+//            .padding = Padding(4),
+//            .background = ColorBackground{theme.color.primaryBg},
+//            .fontSize = 12,
+//            .items = {L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8",}
+//    }, theme.dropDownViewAttr);
+//    selectBits->setOnSelectChangeListener([](int index) {
+//        getAppInstance()->setDitheringBits(index + 1);
+//    });
+//    valuesLay->addChild(selectBits);
+//
+//    keysLay->addChild(new TextView(context, {
+//            .padding = Padding(4),
+//            .text = L"Алгоритм: ",
+//            .fontSize = 12,
+//    }));
+//
+//    auto selectMode = new SelectView(context, {
+//            .id = ID_RIGHT_TOOL_DITHER_MODE,
+//            .padding = Padding(4),
+//            .background = ColorBackground{theme.color.primaryBg},
+//            .fontSize = 12,
+//            .items = {L"Без зерновки", L"Ordered (8x8)", L"Random", L"Floyd-Steinberg", L"Atkinson"}
+//    }, theme.dropDownViewAttr);
+//    selectMode->setOnSelectChangeListener([](int index) {
+//        getAppInstance()->setDitheringMethod((DitheringMethodEnum) (index - 1));
+//    });
+//    valuesLay->addChild(selectMode);
+
+    return lay;
+}
+
 view::View* createRootView(Context* context) {
     using namespace view;
 
@@ -358,6 +445,7 @@ view::View* createRootView(Context* context) {
     rightToolLay->addChild(createToolSectionColorModel(context));
     rightToolLay->addChild(createToolSectionGamma(context));
     rightToolLay->addChild(createToolSectionDithering(context));
+    rightToolLay->addChild(createToolSectionPaint(context));
 
     return rootView;
 }
@@ -411,7 +499,7 @@ view::Dialog* createMessageDialog(Context* context) {
 
     auto messageDialog = context->createDialog(dialogLay, FILL_PARENT * 0.25, FILL_PARENT * 0.25);
 
-    closeBtn->setOnClickListener([messageDialog]() {
+    closeBtn->setOnClickListener([messageDialog](View*) {
         messageDialog->hide();
     });
 

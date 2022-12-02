@@ -24,6 +24,9 @@ bool isEditing = false;
 ModernRaster* editedRaster;
 gl::Texture* editedTexture;
 
+int xBegin = 0;
+int yBegin = 0;
+
 struct {
     view::View* lay = nullptr;
     struct {
@@ -42,6 +45,11 @@ struct {
         view::SelectView* bitsSelect = nullptr;
         view::SelectView* modeSelect = nullptr;
     } dithering;
+    struct {
+        view::TextView* componentText[4] = {nullptr, nullptr, nullptr, nullptr};
+        view::EditText* componentEdt[4] = {nullptr, nullptr, nullptr, nullptr};
+        view::EditText* opacityEdt = nullptr;
+    } paint;
 } rightTool;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
@@ -72,6 +80,11 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     rightTool.gamma.gammaEdt = (EditText*) findViewById(ID_RIGHT_TOOL_GAMMA_EDT);
     rightTool.dithering.bitsSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_DITHER_BITS);
     rightTool.dithering.modeSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_DITHER_MODE);
+    for (int i = 0; i < 4; i++) {
+        rightTool.paint.componentText[i] = (TextView*) findViewById(ID_RIGHT_TOOL_PAINT_COMP1_TXT + i);
+        rightTool.paint.componentEdt[i] = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP1_EDT + i);
+    }
+    rightTool.paint.opacityEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP_OPACITY_EDT);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -79,6 +92,10 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
         imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
         imageView->invalidate();
     });
+}
+
+void drawLine(int x1, int y1, int x2, int y2) {
+    info() << x1 << " " << y1;
 }
 
 void MyApp::update() {
@@ -163,6 +180,12 @@ void setToggleViewActive(int index, bool value) {
                                                                             : view::theme.notActiveComponentBackground);
 }
 
+void updateInfoUI() {
+    rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
+    rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
+    rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
+}
+
 void updateColorModelUI() {
     if (!editedRaster)
         return;
@@ -234,7 +257,7 @@ void MyApp::convertColorModel(ColorModelEnum colorModel) {
 
     editedRaster->convertToColorModel(colorModel);
     updateEditingImageView();
-
+    updateInfoUI();
     updateColorModelUI();
 }
 
@@ -298,13 +321,26 @@ void MyApp::toggleEdit() {
             rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
         }
 
-        rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
-        rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
-        rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
+        imageView->setOnMouseEventListener([](view::View* view, const MouseEvent& e) {
+            if (!isEditing)
+                return false;
+            if (e.button != 1)
+                return false;
+            if (e.action == GLFW_PRESS) {
+                xBegin = imageView->getPointerX();
+                yBegin = imageView->getPointerY();
+                return true;
+            }
+            if (e.action == GLFW_RELEASE) {
+                drawLine(xBegin, yBegin, imageView->getPointerX(), imageView->getPointerY());
+                return true;
+            }
+            return true;
+        });
+        updateInfoUI();
         rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
         rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
         rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
-
         updateColorModelUI();
 
         isEditing = true;

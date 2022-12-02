@@ -37,7 +37,7 @@ namespace view {
 
         SpaceRequirement onMeasure() override;
 
-        bool onClick(const ClickEvent& event) override;
+        bool onClick(const MouseEvent& event) override;
 
         bool isInside(double x, double y) override;
 

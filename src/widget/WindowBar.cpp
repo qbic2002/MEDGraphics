@@ -52,31 +52,35 @@ namespace view {
 
         /// Edit
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_edit.png");
-        view->setOnClickListener([]() {
+        view->setOnClickListener([](View* v) {
             getAppInstance()->toggleEdit();
+            return true;
         });
         addChild(view);
 
         /// Show Error
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_show_error.png");
-        view->setOnClickListener([]() {
-            getAppInstance()->showError(L"Test error");
+        view->setOnClickListener([](View* v) {
+            MyApp::showError(L"Test error");
+            return true;
         });
         addChild(view);
 
         /// Fit Content Button
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_fit_screen.png");
-        view->setOnClickListener([context]() {
+        view->setOnClickListener([context](View* v) {
             static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
             view->imageFitScreen();
+            return true;
         });
         addChild(view);
 
         /// Original Scale Button
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_original_scale.png");
-        view->setOnClickListener([context]() {
+        view->setOnClickListener([context](View* v) {
             static auto* view = (ImageView*) context->findViewById(IMAGE_VIEW_ID);
             view->imageOriginalScale();
+            return true;
         });
         addChild(view);
 
@@ -108,8 +112,9 @@ namespace view {
                 },
                 .imageFile = context->getAppDir() / "assets/icons/ic_iconify.png"
         });
-        view->setOnClickListener([windowWrapper]() {
+        view->setOnClickListener([windowWrapper](View* v) {
             windowWrapper->iconify();
+            return true;
         });
         windowControlLay->addChild(view);
 
@@ -125,8 +130,9 @@ namespace view {
                 },
                 .imageFile = context->getAppDir() / "assets/icons/ic_minimized.png"
         });
-        view->setOnClickListener([windowWrapper]() {
+        view->setOnClickListener([windowWrapper](View* v) {
             windowWrapper->toggleMaximized();
+            return true;
         });
         view->setOnWindowResizeListener(
                 [context, windowWrapper](View& view, unsigned width, unsigned height) {
@@ -150,8 +156,9 @@ namespace view {
                 },
                 .imageFile = context->getAppDir() / "assets/icons/ic_close.png"
         });
-        view->setOnClickListener([windowWrapper]() {
+        view->setOnClickListener([windowWrapper](View* v) {
             windowWrapper->setShouldClose(1);
+            return true;
         });
         windowControlLay->addChild(view);
     }

@@ -105,7 +105,7 @@ void GLFWWindowWrapper::keyCallback(int key, int scancode, int action, int mods)
 }
 
 void GLFWWindowWrapper::mouseButtonCallback(int button, int action, int mods) {
-    ClickEvent event{cursorPos.x, cursorPos.y, button, action, mods};
+    MouseEvent event{cursorPos.x, cursorPos.y, button, action, mods};
 
     if (event.action == GLFW_RELEASE && isGrabbing)
         isGrabbing = false;

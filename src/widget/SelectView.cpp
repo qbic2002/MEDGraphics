@@ -24,9 +24,10 @@ namespace view {
             auto curItemAttr = itemAttr;
             curItemAttr.text = items[i];
             auto* itemView = new TextView(context, curItemAttr);
-            itemView->setOnClickListener([this, i]() {
+            itemView->setOnClickListener([this, i](View* view) {
                 itemSelected(i);
                 this->dialog->hide();
+                return true;
             });
             lay->addChild(itemView);
         }
@@ -38,7 +39,7 @@ namespace view {
         delete dialog;
     }
 
-    bool SelectView::onClick(const ClickEvent& event) {
+    bool SelectView::onClick(const MouseEvent& event) {
         if (event.action == GLFW_RELEASE) {
             dialog->toggleShown();
             return true;

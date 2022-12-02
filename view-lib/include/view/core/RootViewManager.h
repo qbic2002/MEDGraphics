@@ -33,7 +33,7 @@ public:
 
     void onMouseMove(double x, double y) override;
 
-    bool onMouseButton(ClickEvent& event) override;
+    bool onMouseButton(MouseEvent& event) override;
 
     void onMouseLeave() override;
 

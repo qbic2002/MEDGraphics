@@ -19,17 +19,34 @@ namespace view {
 
     void View::onDraw() {}
 
-    bool View::onClick(const ClickEvent& event) {
-        if (event.button == 0 && onClickListener != nullptr) {
-            if (event.action == GLFW_RELEASE) {
-                onClickListener();
-            }
+    bool View::onMouseEvent(const MouseEvent& event) {
+        if (onMouseEventListener != nullptr) {
+            onMouseEventListener(this, event);
+            return true;
+        }
+        if (event.action == GLFW_PRESS) {
+            setState(PRESSED);
+        } else if (event.action == GLFW_RELEASE && state == PRESSED) {
+            state = HOVERED;
+            if (onClick(event))
+                return true;
+        }
+        return false;
+    }
+
+    bool View::onClick(const MouseEvent& event) {
+        if (onClickListener != nullptr) {
+            onClickListener(this);
             return true;
         }
         return false;
     }
 
-    View& View::setOnClickListener(const std::function<void()>& _onClickListener) {
+    void View::setOnMouseEventListener(const OnMouseEventListener& listener) {
+        onMouseEventListener = listener;
+    }
+
+    View& View::setOnClickListener(const OnClickListener& _onClickListener) {
         onClickListener = _onClickListener;
         return *this;
     }
@@ -99,6 +116,8 @@ namespace view {
     }
 
     void View::setState(State _state) {
+        if (state == _state)
+            return;
         state = _state;
         invalidate();
     }
@@ -107,7 +126,7 @@ namespace view {
         return style;
     }
 
-    View::SpaceRequirement View::measure() {
+    SpaceRequirement View::measure() {
         if (isMeasured)
             return measuredSpaceRequirement;
         measuredSpaceRequirement = onMeasure();
@@ -123,7 +142,7 @@ namespace view {
         return 0;
     }
 
-    View::SpaceRequirement View::onMeasure() {
+    SpaceRequirement View::onMeasure() {
         return {width.evaluateContent(getContentWidth()) + padding.width(),
                 height.evaluateContent(getContentHeight()) + padding.height(),
                 width.parentK,

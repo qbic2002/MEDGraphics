@@ -23,7 +23,7 @@ namespace view {
 
         ~SelectView() override;
 
-        bool onClick(const ClickEvent& event) override;
+        bool onClick(const MouseEvent& event) override;
 
         void onLayout(float left, float top, float right, float bottom) override;
 
