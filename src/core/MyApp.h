@@ -26,6 +26,8 @@ public:
     /// Run open image operation from filesystem
     void openImage();
 
+    void openGrad(int width, int height);
+
     /// Display message box with the message
     /// @param message Error message to be shown
     static void showError(const String& message);

@@ -272,6 +272,40 @@ void MyApp::reinterpretGamma(float gamma) {
     }
 }
 
+void editRaster(ModernRaster* modernRaster) {
+    int componentsCount = modernRaster->getColorModel()->getComponentsCount();
+
+    editedRaster = new ModernRaster(*modernRaster);
+    editedTexture = new gl::Texture(*editedRaster);
+
+    imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+
+    for (int i = 0; i < componentsCount; i++) {
+        rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::VISIBLE);
+        setToggleViewActive(i, editedRaster->getFilter(i));
+    }
+    for (int i = componentsCount; i < 4; i++) {
+        rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
+    }
+
+    rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
+    rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
+    rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
+    rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
+    rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
+    rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
+
+//        float col[] = {1, 1, 0};
+//        editedRaster->drawLine({10, 35}, {500, 400}, col, 5, 0.7);
+
+    updateColorModelUI();
+
+    isEditing = true;
+
+    rightTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
+    info() << "isEditing: " << isEditing;
+}
+
 void MyApp::toggleEdit() {
     if (!isEditing) {
         auto imageFile = imageFileStorage.getCurImageFile();
@@ -283,34 +317,7 @@ void MyApp::toggleEdit() {
             showError(L"Wait image loading");
             return;
         }
-        int componentsCount = imageFile->raster->getColorModel()->getComponentsCount();
-
-        editedRaster = new ModernRaster(*imageFile->raster);
-        editedTexture = new gl::Texture(*editedRaster);
-
-        imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
-
-        for (int i = 0; i < componentsCount; i++) {
-            rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::VISIBLE);
-            setToggleViewActive(i, editedRaster->getFilter(i));
-        }
-        for (int i = componentsCount; i < 4; i++) {
-            rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
-        }
-
-        rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
-        rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
-        rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
-        rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
-        rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
-        rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
-
-//        float col[] = {1, 1, 0};
-//        editedRaster->drawLine({10, 35}, {500, 400}, col, 5, 0.7);
-
-        updateColorModelUI();
-
-        isEditing = true;
+        editRaster(imageFileStorage.getCurImageFile()->raster);
     } else {
         delete editedRaster;
         editedRaster = nullptr;
@@ -323,8 +330,6 @@ void MyApp::toggleEdit() {
         isEditing = false;
         viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));
     }
-    rightTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
-    info() << "isEditing: " << isEditing;
 }
 
 void MyApp::toggleComponent(int index) {
@@ -348,6 +353,22 @@ void MyApp::setDitheringMethod(DitheringMethodEnum method) {
         return;
     editedRaster->setDitheringMethod(method);
     updateEditingImageView();
+}
+
+void MyApp::openGrad(int width, int height) {
+    auto* grad = new float[width * height];
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            grad[y * width + x] = (float) x / width;
+        }
+    }
+    std::shared_ptr<float[]> raster(grad);
+    ModernRaster gradientRaster(width, height, raster, COLOR_MODEL_GRAY);
+    if (isEditing) {
+        toggleEdit();
+    }
+
+    editRaster(&gradientRaster);
 }
 
 MyApp* getAppInstance() {
