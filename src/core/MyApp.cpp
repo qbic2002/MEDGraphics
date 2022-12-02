@@ -361,17 +361,9 @@ void MyApp::toggleEdit() {
         editedTexture = nullptr;
 
         auto imageFile = imageFileStorage.getCurImageFile();
-        imageView->
-                setTexture(imageFile
-                                   ->textureId, imageFile->raster->
-
-                getWidth(), imageFile
-
-                                   ->raster->
-
-                getHeight()
-
-        );
+        imageView->setTexture(imageFile->textureId,
+                              imageFile->raster->getWidth(),
+                              imageFile->raster->getHeight());
 
         isEditing = false;
         viewerRootView->
