@@ -45,7 +45,7 @@ namespace view {
         };
     };
 
-    typedef std::function<void(view::View* view, const MouseEvent& event)> OnMouseEventListener;
+    typedef std::function<bool(view::View* view, const MouseEvent& event)> OnMouseEventListener;
     typedef std::function<void(view::View* view)> OnClickListener;
 
     struct ViewAttributes {

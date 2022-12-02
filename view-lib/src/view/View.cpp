@@ -21,8 +21,8 @@ namespace view {
 
     bool View::onMouseEvent(const MouseEvent& event) {
         if (onMouseEventListener != nullptr) {
-            onMouseEventListener(this, event);
-            return true;
+            if (onMouseEventListener(this, event))
+                return true;
         }
         if (event.action == GLFW_PRESS) {
             setState(PRESSED);
