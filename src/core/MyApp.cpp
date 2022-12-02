@@ -291,8 +291,8 @@ void updateColorModelUI() {
         rightTool.paint.componentText[i]->setText(componentNames[index][i]);
     }
     for (int i = componentsCount; i < 4; i++) {
-        rightTool.paint.componentText[i]->setVisibility(view::INVISIBLE);
-        rightTool.paint.componentEdt[i]->setVisibility(view::INVISIBLE);
+        rightTool.paint.componentText[i]->setText(L"");
+//        rightTool.paint.componentEdt[i]->setVisibility(view::INVISIBLE);
     }
 }
 
