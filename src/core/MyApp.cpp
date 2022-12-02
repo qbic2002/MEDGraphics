@@ -104,7 +104,8 @@ void updateEditingImageView() {
 void drawLine(int x1, int y1, int x2, int y2) {
     if (!isEditing)
         return;
-    info() << x1 << " " << y1 << " " << x2 << " " << y2;
+    if (x1 == x2 && y1 == y2)
+        return;
     float color[4] = {0, 0, 0, 0};
     for (int i = 0; i < editedRaster->getColorModel()->getComponentsCount(); i++) {
         float value = 1;
