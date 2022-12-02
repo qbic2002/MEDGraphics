@@ -107,7 +107,11 @@ public:
 
     int getDitheringBits() const;
 
-    void drawLine(Point p1, Point p2, float* color);
+    void drawLine(Point p1, Point p2, float* color_, float lineWidth, float opacity);
+
+    void setPixel(rgbaF rgbaf, int x, int y);
+
+    rgbaF getPixel(int x, int y);
 
 private:
     void fillRgbaData();

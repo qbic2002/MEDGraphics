@@ -341,6 +341,7 @@ void MyApp::toggleEdit() {
         rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
         rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
         rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
+
         updateColorModelUI();
 
         isEditing = true;
