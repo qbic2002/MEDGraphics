@@ -25,9 +25,10 @@ namespace view {
                         .imageWidth = 32,
                         .imageHeight = 32}),
                 {
-                        {L"Fast exit", []() { throw std::exception(); }},
-                        {L"Save to",   []() { getAppInstance()->saveImage(); }},
-                        {L"Open...",   []() { getAppInstance()->openImage(); }}
+                        {L"Fast exit",       []() { throw std::exception(); }},
+                        {L"Save to",         []() { getAppInstance()->saveImage(); }},
+                        {L"Open...",         []() { getAppInstance()->openImage(); }},
+                        {L"Create Gradient", []() { getAppInstance()->openGrad(512, 512); }}
                 }, theme.dropDownViewAttr);
         addChild(view);
 
