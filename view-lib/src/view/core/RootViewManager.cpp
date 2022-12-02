@@ -83,7 +83,7 @@ bool RootViewManager::onMouseButton(MouseEvent& event) {
             if (!consumed && dialog->getView()->onMouseEvent(event)) {
                 consumed = true;
             }
-        } else {
+        } else if (event.action == GLFW_RELEASE) {
             dialog->hide();
         }
     }
