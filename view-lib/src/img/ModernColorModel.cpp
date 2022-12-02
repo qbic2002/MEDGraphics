@@ -274,14 +274,17 @@ void ModernRaster::drawLine(Point p1, Point p2, float* color_, float lineWidth, 
 }
 
 void ModernRaster::setPixel(rgbaF rgbaf, int x, int y) {
-    rgbaData[y * width + x] = rgbaf.toRgba();
-    for (int i = 0; i < 3; ++i) {
-        rgbaf.components[i] = std::pow(rgbaf.components[i], gamma);
-    }
-    colorModel->fromRgba(rgbaf, data.get() + (y * width + x) * colorModel->getComponentsCount());
+    int index = (y * width + x);
+    colorModel->fromRgba(rgbaf, data.get() + index * colorModel->getComponentsCount());
+
+    float components[4] = {0, 0, 0, 0};
+    for (int c = 0; c < colorModel->getComponentsCount(); c++)
+        components[c] = (filter[c] ? data.get()[index * colorModel->getComponentsCount() + c] : 0);
+    rgbaf = colorModel->toRgba(components);
+    rgbaData[index] = rgbaf.toRgba();
 }
 
 rgbaF ModernRaster::getPixel(int x, int y) {
-    return {rgbaData[y * width + x].r / 255.0f, rgbaData[y * width + x].r / 255.0f, rgbaData[y * width + x].r / 255.0f,
-            rgbaData[y * width + x].r / 255.0f};
+    rgbaF rgbaf = colorModel->toRgba(data.get() + (y * width + x) * colorModel->getComponentsCount());
+    return rgbaf;
 }
