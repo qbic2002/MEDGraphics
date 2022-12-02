@@ -29,7 +29,12 @@ T min(T a, T b, Arguments... args) {
 }
 
 struct rgbaF {
-    float r, g, b, a;
+    union {
+        struct {
+            float r, g, b, a;
+        };
+        float components[4];
+    };
 
     rgba toRgba() const;
 };
@@ -44,7 +49,6 @@ enum ColorModelEnum {
     COLOR_MODEL_YCbCr709 = 6,
     COLOR_MODEL_YCoCg = 7,
     COLOR_MODEL_CMY = 8
-
 };
 
 class ColorModel {
@@ -57,7 +61,7 @@ public:
 
     virtual rgbaF toRgba(const float* data) const = 0;
 
-    virtual void fromRgb(float r, float g, float b, float* dest) const = 0;
+    virtual void fromRgba(rgbaF color, float* dest) const = 0;
 
     virtual int getComponentsCount() const = 0;
 
@@ -70,7 +74,7 @@ class ColorModelGray : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -81,7 +85,7 @@ class ColorModelRGB : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -92,7 +96,7 @@ class ColorModelRGBA : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -103,7 +107,7 @@ class ColorModelHSL : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -114,7 +118,7 @@ class ColorModelHSV : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -125,7 +129,7 @@ class ColorModelYCbCr601 : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -136,7 +140,7 @@ class ColorModelYCbCr709 : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -147,7 +151,7 @@ class ColorModelYCoCg : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 
@@ -158,7 +162,7 @@ class ColorModelCMY : public ColorModel {
 public:
     rgbaF toRgba(const float* data) const override;
 
-    void fromRgb(float r, float g, float b, float* dest) const override;
+    void fromRgba(rgbaF color, float* dest) const override;
 
     int getComponentsCount() const override;
 

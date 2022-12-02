@@ -15,7 +15,7 @@ add_executable(MEDGraphics
         widget/DropDownView.cpp widget/DropDownView.h
         widget/IconView.cpp widget/IconView.h
         core/MyLayout.cpp core/MyLayout.h
-        widget/EditText.cpp widget/EditText.h)
+        widget/EditText.cpp widget/EditText.h widget/SelectView.cpp widget/SelectView.h)
 target_link_libraries(MEDGraphics view)
 add_dependencies(MEDGraphics copy_assets)
 
@@ -34,5 +34,5 @@ add_executable(Experiment
         widget/WindowBar.cpp widget/WindowBar.h
         widget/TextView.cpp widget/TextView.h
         widget/DropDownView.cpp widget/DropDownView.h
-        widget/WidgetAttributes.h widget/EditText.cpp widget/EditText.h)
+        widget/WidgetAttributes.h widget/EditText.cpp widget/EditText.h widget/SelectView.cpp widget/SelectView.h)
 target_link_libraries(Experiment view)

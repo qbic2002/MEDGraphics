@@ -29,8 +29,8 @@ rgbaF ColorModelGray::toRgba(const float* data) const {
     return {data[0], data[0], data[0], 1};
 }
 
-void ColorModelGray::fromRgb(float r, float g, float b, float* dest) const {
-    dest[0] = (r + g + b) / 3;
+void ColorModelGray::fromRgba(rgbaF color, float* dest) const {
+    dest[0] = (color.r + color.g + color.b) / 3;
 }
 
 int ColorModelGray::getComponentsCount() const {
@@ -45,10 +45,10 @@ rgbaF ColorModelRGB::toRgba(const float* data) const {
     return {data[0], data[1], data[2], 1};
 }
 
-void ColorModelRGB::fromRgb(float r, float g, float b, float* dest) const {
-    dest[0] = r;
-    dest[1] = g;
-    dest[2] = b;
+void ColorModelRGB::fromRgba(rgbaF color, float* dest) const {
+    dest[0] = color.r;
+    dest[1] = color.g;
+    dest[2] = color.b;
 }
 
 int ColorModelRGB::getComponentsCount() const {
@@ -63,11 +63,11 @@ rgbaF ColorModelRGBA::toRgba(const float* data) const {
     return {data[0], data[1], data[2], data[3]};
 }
 
-void ColorModelRGBA::fromRgb(float r, float g, float b, float* dest) const {
-    dest[0] = r;
-    dest[1] = g;
-    dest[2] = b;
-    dest[3] = 1;
+void ColorModelRGBA::fromRgba(rgbaF color, float* dest) const {
+    dest[0] = color.r;
+    dest[1] = color.g;
+    dest[2] = color.b;
+    dest[3] = color.a;
 }
 
 int ColorModelRGBA::getComponentsCount() const {
@@ -119,28 +119,28 @@ rgbaF ColorModelHSL::toRgba(const float* data) const {
     return {rgb[0], rgb[1], rgb[2], 1};
 }
 
-void ColorModelHSL::fromRgb(float r, float g, float b, float* dest) const {
-    r *= 255;
-    g *= 255;
-    b *= 255;
+void ColorModelHSL::fromRgba(rgbaF color, float* dest) const {
+    color.r *= 255;
+    color.g *= 255;
+    color.b *= 255;
 
-    float cMax = std::max(std::max(r, g), b);
-    float cMin = std::min(std::min(r, g), b);
+    float cMax = std::max(std::max(color.r, color.g), color.b);
+    float cMin = std::min(std::min(color.r, color.g), color.b);
 
     float delta = cMax - cMin;
 
     float h = 0;
     if (delta == 0) {
         h = 0;
-    } else if (cMax == r) {
-        h = 60 * (((g - b) / delta));
-        if (g < b) {
+    } else if (cMax == color.r) {
+        h = 60 * (((color.g - color.b) / delta));
+        if (color.g < color.b) {
             h += 360;
         }
-    } else if (cMax == g) {
-        h = 60.0 * (((b - r) / delta) + 2.0);
-    } else if (cMax == b) {
-        h = 60 * (((r - g) / delta) + 4.0);
+    } else if (cMax == color.g) {
+        h = 60.0 * (((color.b - color.r) / delta) + 2.0);
+    } else if (cMax == color.b) {
+        h = 60 * (((color.r - color.g) / delta) + 4.0);
     }
 
     float l = (cMax + cMin) / 255.0 / 2.0;
@@ -194,25 +194,24 @@ rgbaF ColorModelHSV::toRgba(const float* data) const {
     }
 }
 
-void ColorModelHSV::fromRgb(float r, float g, float b, float* dest) const {
-
-    float cMax = max(r, g, b);
-    float cMin = min(r, g, b);
+void ColorModelHSV::fromRgba(rgbaF color, float* dest) const {
+    float cMax = max(color.r, color.g, color.b);
+    float cMin = min(color.r, color.g, color.b);
 
     float delta = cMax - cMin;
 
     float h = 0;
     if (delta == 0) {
         h = 0;
-    } else if (cMax == r) {
-        h = 60 * (((g - b) / delta));
-        if (g < b) {
+    } else if (cMax == color.r) {
+        h = 60 * (((color.g - color.b) / delta));
+        if (color.g < color.b) {
             h += 360;
         }
-    } else if (cMax == g) {
-        h = 60.0 * (((b - r) / delta) + 2.0);
-    } else if (cMax == b) {
-        h = 60 * (((r - g) / delta) + 4.0);
+    } else if (cMax == color.g) {
+        h = 60.0 * (((color.b - color.r) / delta) + 2.0);
+    } else if (cMax == color.b) {
+        h = 60 * (((color.r - color.g) / delta) + 4.0);
     }
 
     float s;
@@ -258,11 +257,10 @@ rgbaF ColorModelYCbCr601::toRgba(const float* data) const {
 
 }
 
-void ColorModelYCbCr601::fromRgb(float r, float g, float b, float* dest) const {
-
-    float y = ((65.481 * r) + (128.553 * g) + (24.966 * b));
-    float cb = (128 - (37.797 * r) - (74.203 * g) + (112.0 * b));
-    float cr = (128 + (112.0 * r) - (93.786 * g) - (18.214 * b));
+void ColorModelYCbCr601::fromRgba(rgbaF color, float* dest) const {
+    float y = ((65.481 * color.r) + (128.553 * color.g) + (24.966 * color.b));
+    float cb = (128 - (37.797 * color.r) - (74.203 * color.g) + (112.0 * color.b));
+    float cr = (128 + (112.0 * color.r) - (93.786 * color.g) - (18.214 * color.b));
 
     dest[0] = y / 255;
     dest[1] = cb / 255;
@@ -296,14 +294,14 @@ rgbaF ColorModelYCbCr709::toRgba(const float* data) const {
     return {r / 255, g / 255, b / 255, 1};
 }
 
-void ColorModelYCbCr709::fromRgb(float r, float g, float b, float* dest) const {
-    r *= 255;
-    g *= 255;
-    b *= 255;
+void ColorModelYCbCr709::fromRgba(rgbaF color, float* dest) const {
+    color.r *= 255;
+    color.g *= 255;
+    color.b *= 255;
 
-    float y = (0 + (0.299 * r) + (0.587 * g) + (0.114 * b));
-    float cb = (128 - (0.168736 * r) - (0.331264 * g) + (0.5 * b));
-    float cr = (128 + (0.5 * r) - (0.418688 * g) - (0.081312 * b));
+    float y = (0 + (0.299 * color.r) + (0.587 * color.g) + (0.114 * color.b));
+    float cb = (128 - (0.168736 * color.r) - (0.331264 * color.g) + (0.5 * color.b));
+    float cr = (128 + (0.5 * color.r) - (0.418688 * color.g) - (0.081312 * color.b));
 
     dest[0] = y / 255;
     dest[1] = cb / 255;
@@ -331,10 +329,10 @@ rgbaF ColorModelYCoCg::toRgba(const float* data) const {
     return {r, g, b, 1};
 }
 
-void ColorModelYCoCg::fromRgb(float r, float g, float b, float* dest) const {
-    float y = ((0.25 * r) + (0.5 * g) + (0.25 * b));
-    float co = ((0.5 * r) - (0.5 * b));
-    float cg = (-(0.25 * r) + (0.5 * g) - (0.25 * b));
+void ColorModelYCoCg::fromRgba(rgbaF color, float* dest) const {
+    float y = ((0.25 * color.r) + (0.5 * color.g) + (0.25 * color.b));
+    float co = ((0.5 * color.r) - (0.5 * color.b));
+    float cg = (-(0.25 * color.r) + (0.5 * color.g) - (0.25 * color.b));
 
     dest[0] = y;
     dest[1] = co + 0.5;
@@ -353,10 +351,10 @@ rgbaF ColorModelCMY::toRgba(const float* data) const {
     return {1 - data[0], 1 - data[1], 1 - data[2], 1};
 }
 
-void ColorModelCMY::fromRgb(float r, float g, float b, float* dest) const {
-    dest[0] = 1 - r;
-    dest[1] = 1 - g;
-    dest[2] = 1 - b;
+void ColorModelCMY::fromRgba(rgbaF color, float* dest) const {
+    dest[0] = 1 - color.r;
+    dest[1] = 1 - color.g;
+    dest[2] = 1 - color.b;
 }
 
 int ColorModelCMY::getComponentsCount() const {

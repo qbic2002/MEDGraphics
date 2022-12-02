@@ -11,6 +11,7 @@
 #include "R.h"
 #include "../widget/WindowBar.h"
 #include "../widget/EditText.h"
+#include "../widget/SelectView.h"
 
 using namespace view;
 
@@ -85,6 +86,106 @@ view::LinearLayout* createToolSectionInfo(Context* context) {
     return lay;
 }
 
+view::LinearLayout* createToolSectionColorModel(Context* context) {
+    auto lay = createToolSectionLay(context, L"Цветовое пространство");
+
+    auto propertiesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .orientation = HORIZONTAL,
+    });
+    lay->addChild(propertiesLay);
+
+    auto keysLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(keysLay);
+
+    auto valuesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_SPARE,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(valuesLay);
+
+    static const ColorModelEnum modes[9] = {COLOR_MODEL_RGB, COLOR_MODEL_HSL, COLOR_MODEL_HSV, COLOR_MODEL_YCbCr601,
+                                            COLOR_MODEL_YCbCr709, COLOR_MODEL_YCoCg, COLOR_MODEL_CMY, COLOR_MODEL_GRAY,
+                                            COLOR_MODEL_RGBA,};
+
+    auto keyColorModel = new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Цветовое пространство: ",
+            .fontSize = 12,
+    });
+    keysLay->addChild(keyColorModel);
+
+    auto selectColorModel = new SelectView(context, {
+            .id = ID_RIGHT_TOOL_COLOR_MODEL,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .fontSize = 12,
+            .items = {L"RGB", L"HSL", L"HSV", L"YCbCr601", L"YCbCr709", L"YCoCg", L"CMY", L"Gray", L"RGBA"}
+    }, theme.dropDownViewAttr);
+    valuesLay->addChild(selectColorModel);
+
+    auto convertColorModel = new TextView(context, {
+            .width = FILL_PARENT,
+            .padding = Padding(4),
+            .background = theme.hoverBackground,
+            .text = L"Преобразовать",
+    });
+    convertColorModel->setOnClickListener([selectColorModel]() {
+        getAppInstance()->convertColorModel(modes[selectColorModel->getSelectIndex()]);
+    });
+    lay->addChild(convertColorModel);
+
+    auto reinterpretButton = new TextView(context, {
+            .width = FILL_PARENT,
+            .padding = Padding(4),
+            .background = theme.hoverBackground,
+            .text = L"Назначить",
+    });
+    reinterpretButton->setOnClickListener([selectColorModel]() {
+        getAppInstance()->reinterpretColorModel(modes[selectColorModel->getSelectIndex()]);
+    });
+    lay->addChild(reinterpretButton);
+
+    auto togglesLay = new LinearLayout(context, {
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .orientation = HORIZONTAL,
+            .gravity = LEFT,
+    });
+    lay->addChild(togglesLay);
+
+    for (int i = 0; i < 4; i++) {
+        auto compToggle = new LinearLayout(context, {
+                .width = FILL_SPARE,
+                .height = WRAP_CONTENT,
+                .padding = Padding(8),
+                .children = {
+                        new TextView(context, {
+                                .id = ID_RIGHT_TOOL_COLOR_MODEL_COMP1 + i,
+                                .width = WRAP_CONTENT,
+                                .height = WRAP_CONTENT,
+                                .text = std::to_wstring(i),
+                                .fontSize = 16})
+                },
+                .gravity = CENTER
+        });
+        compToggle->setOnClickListener([i]() {
+            getAppInstance()->toggleComponent(i);
+        });
+        togglesLay->addChild(compToggle);
+    }
+
+    return lay;
+}
+
 view::LinearLayout* createToolSectionGamma(Context* context) {
     auto lay = createToolSectionLay(context, L"Гамма");
 
@@ -152,6 +253,69 @@ view::LinearLayout* createToolSectionGamma(Context* context) {
     return lay;
 }
 
+view::LinearLayout* createToolSectionDithering(Context* context) {
+    auto lay = createToolSectionLay(context, L"Зерновка (не жук)");
+
+    auto propertiesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .orientation = HORIZONTAL,
+    });
+    lay->addChild(propertiesLay);
+
+    auto keysLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(keysLay);
+
+    auto valuesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_SPARE,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(valuesLay);
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Битность: ",
+            .fontSize = 12,
+    }));
+
+    auto selectBits = new SelectView(context, {
+            .id = ID_RIGHT_TOOL_DITHER_BITS,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .fontSize = 12,
+            .items = {L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8",}
+    }, theme.dropDownViewAttr);
+    selectBits->setOnSelectChangeListener([](int index) {
+        getAppInstance()->setDitheringBits(index + 1);
+    });
+    valuesLay->addChild(selectBits);
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Алгоритм: ",
+            .fontSize = 12,
+    }));
+
+    auto selectMode = new SelectView(context, {
+            .id = ID_RIGHT_TOOL_DITHER_MODE,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .fontSize = 12,
+            .items = {L"Без зерновки", L"Ordered (8x8)", L"Random", L"Floyd-Steinberg", L"Atkinson"}
+    }, theme.dropDownViewAttr);
+    selectMode->setOnSelectChangeListener([](int index) {
+        getAppInstance()->setDitheringMethod((DitheringMethodEnum) (index - 1));
+    });
+    valuesLay->addChild(selectMode);
+
+    return lay;
+}
+
 view::View* createRootView(Context* context) {
     using namespace view;
 
@@ -191,7 +355,9 @@ view::View* createRootView(Context* context) {
     mainLay->addChild(rightToolLay);
 
     rightToolLay->addChild(createToolSectionInfo(context));
+    rightToolLay->addChild(createToolSectionColorModel(context));
     rightToolLay->addChild(createToolSectionGamma(context));
+    rightToolLay->addChild(createToolSectionDithering(context));
 
     return rootView;
 }

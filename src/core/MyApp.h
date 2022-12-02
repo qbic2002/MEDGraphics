@@ -28,11 +28,15 @@ public:
 
     /// Display message box with the message
     /// @param message Error message to be shown
-    void showError(const String& message);
+    static void showError(const String& message);
 
     bool onKey(int key, int scancode, int action, int mods) override;
 
-    void setColorModel(ColorModelEnum colorModelEnum);
+    void selectColorModel(ColorModelEnum colorModelEnum);
+
+    void convertColorModel(ColorModelEnum colorModel);
+
+    void reinterpretColorModel(ColorModelEnum colorModel);
 
     void convertGamma(float gamma);
 
@@ -42,9 +46,13 @@ public:
 
     void toggleComponent(int index);
 
+    void setDitheringBits(int bits);
+
+    void setDitheringMethod(DitheringMethodEnum method);
+
 protected:
     ImageFileStorage imageFileStorage;
-    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
+//    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
     float gamma = 1;
 };
 

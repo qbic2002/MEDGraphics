@@ -4,10 +4,8 @@
 
 #include <stdexcept>
 #include <cmath>
-#include <iostream>
-#include <random>
-
 #include "../include/img/DitheringMethods.h"
+#include <utils/random.h>
 
 OrderedDithering orderedDithering;
 RandomDithering randomDithering;
@@ -17,25 +15,24 @@ AtkinsonDithering atkinsonDithering;
 const DitheringMethod* ditheringMethods[] = {&orderedDithering, &randomDithering, &floydSteinbergDithering,
                                              &atkinsonDithering};
 
-const DitheringMethod* findDitheringMethod(DitheringMethods ditheringMethod) {
+const DitheringMethod* findDitheringMethod(DitheringMethodEnum ditheringMethod) {
     return ditheringMethods[ditheringMethod];
 }
 
-constexpr int* getMatrix(int n) {
+constexpr float* getMatrix(int n) {
     if (n < 2)
         throw std::runtime_error("wrong param n");
     if (n == 2)
-        return new int[4]{0, 2, 3, 1};
+        return new float[4]{0, 2, 3, 1};
 
-    int* matrix = new int[n * n];
+    auto* matrix = new float[n * n];
 
-    int* prevMatrix = getMatrix(n / 2);
+    float* prevMatrix = getMatrix(n / 2);
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            matrix[j * n + i] = prevMatrix[(n / 2) * (j % 2) + (i % 2)] * 4 +
-                                prevMatrix[(n / 2) * (int) floor(j / 2.0) + (int) floor(i / 2.0)];
-
+    for (int j = 0; j < n; ++j) {
+        for (int i = 0; i < n; ++i) {
+            matrix[j * n + i] = prevMatrix[(n / 2) * (j / 2) + (i / 2)]
+                                + prevMatrix[(n / 2) * (j % 2) + (i % 2)] * 4;
         }
     }
 
@@ -44,192 +41,117 @@ constexpr int* getMatrix(int n) {
     return matrix;
 }
 
-inline unsigned char nearestColor(int color, int totalColors) {
-    if (color > 255)
-        return 255;
-    if (color < 0)
+inline float nearestColorF(float value, int totalColors) {
+    if (value >= 1)
+        return 1;
+    if (value < 0)
         return 0;
 
-
-    float step = 255.0 / (totalColors - 1);
-    int temp = roundf(color / step);
-    int result = (temp * step);
-
-    if (result > 255)
-        result = 255;
-    if (result < 0)
-        result = 0;
-    return (unsigned char) result;
+    return std::floor(value * totalColors) / (totalColors - 1);
 }
 
-void OrderedDithering::dither(int bits, const rgba* data, rgba* dest, int height, int width) const {
+void OrderedDithering::dither(int bits, const float* src, float* dst, int stride, int width, int height) const {
     if (bits > 8 || bits < 1) {
         throw std::runtime_error("wrong number of bits in dithering");
     }
 
     int colors = pow(2, bits);
-    int* m = getMatrix(8);
+    float* m = getMatrix(8);
+    for (int i = 0; i < 64; i++)
+        m[i] = m[i] / 64 - 0.5;
 
-    for (int w = 0; w < width; ++w) {
-        for (int h = 0; h < height; ++h) {
-            unsigned char r = nearestColor(
-                    data[(h * width + w)].r + 255.0 / bits * ((m[8 * (h % 8) + (w % 8)] / 64.0) - 0.5),
-                    colors);
-            unsigned char g = nearestColor(
-                    data[(h * width + w)].g + 255.0 / bits * ((m[8 * (h % 8) + (w % 8)] / 64.0) - 0.5),
-                    colors);
-            unsigned char b = nearestColor(
-                    data[(h * width + w)].b + 255.0 / bits * ((m[8 * (h % 8) + (w % 8)] / 64.0) - 0.5),
-                    colors);
-
-            dest[(h * width + w)].r = r;
-            dest[(h * width + w)].g = g;
-            dest[(h * width + w)].b = b;
-            dest[(h * width + w)].a = data[(h * width + w)].a;
+    for (int h = 0; h < height; ++h) {
+        for (int w = 0; w < width; ++w) {
+            *dst = nearestColorF(*src + 1.0f / bits * m[8 * (h % 8) + (w % 8)], colors);
+            src += stride;
+            dst += stride;
         }
-
     }
 
     delete[] m;
 }
 
-void RandomDithering::dither(int bits, const rgba* data, rgba* dest, int height, int width) const {
-    srand((unsigned) time(nullptr));
+void RandomDithering::dither(int bits, const float* src, float* dst, int stride, int width, int height) const {
     for (int w = 0; w < width; ++w) {
         for (int h = 0; h < height; ++h) {
-
-
-            unsigned char treshold = rand() % 255;
-//            std::cout << (int)treshold << "\n";
-            unsigned char r = data[(h * width + w)].r < treshold ? 0 : 255;
-            unsigned char g = (data[(h * width + w)].g < treshold) ? 0 : 255;
-            unsigned char b = (data[(h * width + w)].b < treshold) ? 0 : 255;
-
-            dest[(h * width + w)].r = r;
-            dest[(h * width + w)].g = g;
-            dest[(h * width + w)].b = b;
-            dest[(h * width + w)].a = data[(h * width + w)].a;
+            float threshold = utils::randomFloat();
+            *dst = *src < threshold ? 0 : 1;
+            dst += stride;
+            src += stride;
         }
-
     }
 }
 
-void FloydSteinbergDithering::dither(int bits, const rgba* data, rgba* dest, int height, int width) const {
+void FloydSteinbergDithering::dither(int bits, const float* src, float* dst, int stride, int width, int height) const {
     int colors = pow(2, bits);
 
-    typedef struct {
-        int r, g, b;
-    } rgbaInt;
-
-    auto* newData = new rgbaInt[width * height];
-
-    for (int i = 0; i < height * width; ++i) {
-        newData[i].r = data[i].r;
-        newData[i].g = data[i].g;
-        newData[i].b = data[i].b;
+    auto* tmpData = new float[width * height];
+    for (int i = 0; i < width * height; ++i) {
+        tmpData[i] = src[i * stride];
     }
 
-    for (int h = height - 1; h >= 0; --h) {
+    for (int h = 0; h < height; ++h) {
         for (int w = 0; w < width; ++w) {
-
-            unsigned char r = nearestColor(newData[(h * width + w)].r, colors);
-            unsigned char g = nearestColor(newData[(h * width + w)].g, colors);
-            unsigned char b = nearestColor(newData[(h * width + w)].b, colors);
+            float value = nearestColorF(tmpData[h * width + w], colors);
+            float error = (tmpData[h * width + w] - value) / 16;
 
             if (w != width - 1) {
-                newData[(h * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 7.0 / 16.0);
-                newData[(h * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 7.0 / 16.0);
-                newData[(h * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 7.0 / 16.0);
+                tmpData[h * width + w + 1] += 7 * error;
             }
-            if ((w != 0) && (h != 0)) {
-                newData[((h - 1) * width + w - 1)].r += roundf((newData[h * width + w].r - r) * 3.0 / 16.0);
-                newData[((h - 1) * width + w - 1)].g += roundf((newData[h * width + w].g - g) * 3.0 / 16.0);
-                newData[((h - 1) * width + w - 1)].b += roundf((newData[h * width + w].b - b) * 3.0 / 16.0);
+            if ((w != 0) && (h != height - 1)) {
+                tmpData[(h + 1) * width + w - 1] += 3 * error;
             }
-            if ((h != 0)) {
-                newData[((h - 1) * width + w)].r += roundf((newData[h * width + w].r - r) * 5.0 / 16.0);
-                newData[((h - 1) * width + w)].g += roundf((newData[h * width + w].g - g) * 5.0 / 16.0);
-                newData[((h - 1) * width + w)].b += roundf((newData[h * width + w].b - b) * 5.0 / 16.0);
+            if (h != height - 1) {
+                tmpData[(h + 1) * width + w] += 5 * error;
+            }
+            if ((w != width - 1) && (h != height - 1)) {
+                tmpData[(h + 1) * width + w] += error;
             }
 
-            if ((w != width - 1) && (h != 0)) {
-                newData[((h - 1) * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 16.0);
-                newData[((h - 1) * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 16.0);
-                newData[((h - 1) * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 16.0);
-            }
-
-            dest[(h * width + w)].r = r;
-            dest[(h * width + w)].g = g;
-            dest[(h * width + w)].b = b;
-            dest[(h * width + w)].a = data[(h * width + w)].a;
+            *dst = value;
+            dst += stride;
         }
     }
 
-    delete[] newData;
+    delete[] tmpData;
 }
 
-void AtkinsonDithering::dither(int bits, const rgba* data, rgba* dest, int height, int width) const {
+void AtkinsonDithering::dither(int bits, const float* src, float* dst, int stride, int width, int height) const {
     int colors = pow(2, bits);
 
-    typedef struct {
-        int r, g, b;
-    } rgbaInt;
-
-    auto* newData = new rgbaInt[width * height];
-
-    for (int i = 0; i < height * width; ++i) {
-        newData[i].r = data[i].r;
-        newData[i].g = data[i].g;
-        newData[i].b = data[i].b;
+    auto* tmpData = new float[width * height];
+    for (int i = 0; i < width * height; ++i) {
+        tmpData[i] = src[i * stride];
     }
 
-    for (int h = height - 1; h >= 0; --h) {
+    for (int h = 0; h < height; ++h) {
         for (int w = 0; w < width; ++w) {
-
-            unsigned char r = nearestColor(newData[(h * width + w)].r, colors);
-            unsigned char g = nearestColor(newData[(h * width + w)].g, colors);
-            unsigned char b = nearestColor(newData[(h * width + w)].b, colors);
+            float value = nearestColorF(tmpData[h * width + w], colors);
+            float error = (tmpData[h * width + w] - value) / 8;
 
             if (w != width - 1) {
-                newData[(h * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[(h * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[(h * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+                tmpData[h * width + w + 1] += error;
             }
-            if ((w != 0) && (h != 0)) {
-                newData[((h - 1) * width + w - 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[((h - 1) * width + w - 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[((h - 1) * width + w - 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            if ((w != 0) && (h != height - 1)) {
+                tmpData[(h + 1) * width + w - 1] += error;
             }
-            if ((h != 0)) {
-                newData[((h - 1) * width + w)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[((h - 1) * width + w)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[((h - 1) * width + w)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            if (h != height - 1) {
+                tmpData[(h + 1) * width + w] += error;
             }
-
-            if ((w != width - 1) && (h != 0)) {
-                newData[((h - 1) * width + w + 1)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[((h - 1) * width + w + 1)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[((h - 1) * width + w + 1)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
+            if ((w != width - 1) && (h != height - 1)) {
+                tmpData[(h + 1) * width + w] += error;
+            }
+            if (h < height - 2) {
+                tmpData[(h + 2) * width + w] += error;
+            }
+            if (w < width - 2) {
+                tmpData[h * width + w + 2] += error;
             }
 
-            if ((w < width - 2)) {
-                newData[(h * width + w + 2)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[(h * width + w + 2)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[(h * width + w + 2)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
-            }
-
-            if ((h > 1)) {
-                newData[((h - 2) * width + w)].r += roundf((newData[h * width + w].r - r) * 1.0 / 8.0);
-                newData[((h - 2) * width + w)].g += roundf((newData[h * width + w].g - g) * 1.0 / 8.0);
-                newData[((h - 2) * width + w)].b += roundf((newData[h * width + w].b - b) * 1.0 / 8.0);
-            }
-
-            dest[(h * width + w)].r = r;
-            dest[(h * width + w)].g = g;
-            dest[(h * width + w)].b = b;
-            dest[(h * width + w)].a = data[(h * width + w)].a;
+            *dst = value;
+            dst += stride;
         }
     }
 
-    delete[] newData;
+    delete[] tmpData;
 }

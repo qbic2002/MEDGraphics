@@ -4,6 +4,7 @@
 
 
 #include "img/ModernColorModel.h"
+#include "utils/measureTime.h"
 
 ModernRaster::ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel)
         : width(width), height(height), data(data), colorModel(colorModel) {
@@ -74,18 +75,19 @@ void ModernRaster::convertToColorModel(const ColorModelEnum colorModelEnum) {
     if (colorModel->getEnum() == colorModelEnum)
         return;
     auto destColorModel = findColorModel(colorModelEnum);
-    if (colorModel->getComponentsCount() != 3)
-        throw std::runtime_error("color model only with 3 components are supported");
-
     int length = width * height;
-    float* dataPtr = data.get();
-    int componentsCount = colorModel->getComponentsCount();
+    int readComponentsCount = colorModel->getComponentsCount();
+    int writeComponentsCount = destColorModel->getComponentsCount();
+    float* readPtr = data.get();
+    auto* writePtr = new float[length * writeComponentsCount];
     for (int i = 0; i < length; i++) {
-        auto rgbaf = colorModel->toRgba(dataPtr);
-        destColorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
-        dataPtr += componentsCount;
+        auto rgbaf = colorModel->toRgba(readPtr);
+        destColorModel->fromRgba(rgbaf, writePtr);
+        readPtr += readComponentsCount;
+        writePtr += writeComponentsCount;
     }
 
+    data.reset(writePtr - length * writeComponentsCount);
     colorModel = destColorModel;
     fillRgbaData();
 }
@@ -102,16 +104,33 @@ bool ModernRaster::getFilter(int index) const {
 }
 
 void ModernRaster::fillRgbaData() {
+    utils::TimeStamp timeStamp;
+
     int length = width * height;
-    const float* dataPtr = data.get();
     int componentsCount = colorModel->getComponentsCount();
-    float components[4];
+    float components[componentsCount];
+
+    float* dataPtr = ditheringMethodEnum != NO_DITHERING ? dither(data.get()) : data.get();
+
+    auto rgbaFData = new rgbaF[length];
     for (int i = 0; i < length; i++) {
         for (int c = 0; c < componentsCount; c++)
-            components[c] = (filter[c] ? std::pow(dataPtr[c], 1 / gamma) : 0);
-        rgbaData[i] = colorModel->toRgba(components).toRgba();
-        dataPtr += componentsCount;
+            components[c] = (filter[c] ? dataPtr[i * componentsCount + c] : 0);
+        auto rgbaf = colorModel->toRgba(components);
+        rgbaFData[i] = rgbaf;
     }
+
+    if (ditheringMethodEnum != NO_DITHERING)
+        delete[] dataPtr;
+
+    for (int i = 0; i < length; i++) {
+        for (int c = 0; c < 3; c++)
+            rgbaFData[i].components[c] = std::pow(rgbaFData[i].components[c], 1 / gamma);
+        rgbaData[i] = rgbaFData[i].toRgba();
+    }
+
+    delete[] rgbaFData;
+    timeStamp.report("fillRgbaData");
 }
 
 void ModernRaster::reinterpretGamma(float gamma) {
@@ -119,18 +138,18 @@ void ModernRaster::reinterpretGamma(float gamma) {
     fillRgbaData();
 }
 
-void ModernRaster::convertToNewGamma(float gamma_) {
+void ModernRaster::convertToGamma(float gamma_) {
     int length = width * height;
     float* dataPtr = data.get();
     int componentsCount = colorModel->getComponentsCount();
     for (int i = 0; i < length; i++) {
         auto rgbaf = colorModel->toRgba(dataPtr);
 
-        rgbaf.r = powf(rgbaf.r, gamma_ / gamma);
-        rgbaf.g = powf(rgbaf.g, gamma_ / gamma);
-        rgbaf.b = powf(rgbaf.b, gamma_ / gamma);
+        rgbaf.r = std::pow(rgbaf.r, gamma_ / gamma);
+        rgbaf.g = std::pow(rgbaf.g, gamma_ / gamma);
+        rgbaf.b = std::pow(rgbaf.b, gamma_ / gamma);
 
-        colorModel->fromRgb(rgbaf.r, rgbaf.g, rgbaf.b, dataPtr);
+        colorModel->fromRgba(rgbaf, dataPtr);
         dataPtr += componentsCount;
     }
     gamma = gamma_;
@@ -142,23 +161,46 @@ float ModernRaster::getGamma() const {
     return gamma;
 }
 
-void ModernRaster::dither(int bits, DitheringMethods ditheringMethods) {
-    auto ditheringMethod = findDitheringMethod(ditheringMethods);
+
+/// @return tmpData must be deleted
+float* ModernRaster::dither(float* dataPtr) {
+    utils::TimeStamp timeStamp;
+    auto ditheringMethod = findDitheringMethod(ditheringMethodEnum);
 
     int length = width * height;
-    float* dataPtr = data.get();
     int componentsCount = colorModel->getComponentsCount();
 
-    rgba* ditheredRgbaData = new rgba[length];
-    ditheringMethod->dither(bits, rgbaData.get(), ditheredRgbaData, height, width);
-
-    for (int i = 0; i < length; i++) {
-        colorModel->fromRgb(ditheredRgbaData[i].r / 255.0, ditheredRgbaData[i].g / 255.0, ditheredRgbaData[i].b / 255.0,
-                            dataPtr);
-        dataPtr += componentsCount;
+    auto* tmpData = new float[length * componentsCount];
+    for (int c = 0; c < componentsCount; c++) {
+        ditheringMethod->dither(ditheringBits, dataPtr + c, tmpData + c, componentsCount, width, height);
     }
 
+    timeStamp.report("dither");
+    return tmpData;
+}
+
+void ModernRaster::setDitheringMethod(DitheringMethodEnum method) {
+    if (ditheringMethodEnum == method)
+        return;
+    ditheringMethodEnum = method;
     fillRgbaData();
+}
+
+DitheringMethodEnum ModernRaster::getDitheringMethodEnum() const {
+    return ditheringMethodEnum;
+}
+
+void ModernRaster::setDitheringBits(int bits) {
+    if (ditheringBits == bits)
+        return;
+    ditheringBits = bits;
+    if (ditheringMethodEnum == NO_DITHERING)
+        return;
+    fillRgbaData();
+}
+
+int ModernRaster::getDitheringBits() const {
+    return ditheringBits;
 }
 
 void ModernRaster::drawLine(Point p1, Point p2, float* color) {

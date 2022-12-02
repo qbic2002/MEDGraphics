@@ -8,7 +8,7 @@
 #include "../widget/ImageView.h"
 #include "MyLayout.h"
 #include "../widget/EditText.h"
-#include <view/Dialog.h>
+#include "../widget/SelectView.h"
 
 MyApp* instance = nullptr;
 
@@ -24,20 +24,24 @@ bool isEditing = false;
 ModernRaster* editedRaster;
 gl::Texture* editedTexture;
 
-view::TextView* modeTxt;
-view::TextView* componentToggles[3];
-
-view::View* rightToolLay = nullptr;
-
 struct {
+    view::View* lay = nullptr;
     struct {
         view::TextView* widthTxt = nullptr;
         view::TextView* heightTxt = nullptr;
         view::TextView* channelsTxt = nullptr;
     } info;
     struct {
+        view::SelectView* colorModel = nullptr;
+        view::TextView* componentToggle[4] = {nullptr, nullptr, nullptr, nullptr};
+    } colorModel;
+    struct {
         view::EditText* gammaEdt = nullptr;
     } gamma;
+    struct {
+        view::SelectView* bitsSelect = nullptr;
+        view::SelectView* modeSelect = nullptr;
+    } dithering;
 } rightTool;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
@@ -54,17 +58,20 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     setRootView(viewerRootView);
 
     imageView = (ImageView*) findViewById(IMAGE_VIEW_ID);
-    modeTxt = (view::TextView*) findViewById(MODE_TEXT_VIEW_ID);
-    componentToggles[0] = (view::TextView*) findViewById(COMPONENT_1_TEXT_VIEW_ID);
-    componentToggles[1] = (view::TextView*) findViewById(COMPONENT_2_TEXT_VIEW_ID);
-    componentToggles[2] = (view::TextView*) findViewById(COMPONENT_3_TEXT_VIEW_ID);
     messageDialogTxt = (TextView*) findViewById(ID_DIALOG_MESSAGE_TXT);
-    rightToolLay = findViewById(ID_RIGHT_TOOL_LAY);
 
+    rightTool.lay = findViewById(ID_RIGHT_TOOL_LAY);
     rightTool.info.widthTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_WIDTH_TXT);
     rightTool.info.heightTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_HEIGHT_TXT);
     rightTool.info.channelsTxt = (TextView*) findViewById(ID_RIGHT_TOOL_INFO_CHANNELS_TXT);
+    rightTool.colorModel.colorModel = (SelectView*) findViewById(ID_RIGHT_TOOL_COLOR_MODEL);
+    rightTool.colorModel.componentToggle[0] = (TextView*) findViewById(ID_RIGHT_TOOL_COLOR_MODEL_COMP1);
+    rightTool.colorModel.componentToggle[1] = (TextView*) findViewById(ID_RIGHT_TOOL_COLOR_MODEL_COMP2);
+    rightTool.colorModel.componentToggle[2] = (TextView*) findViewById(ID_RIGHT_TOOL_COLOR_MODEL_COMP3);
+    rightTool.colorModel.componentToggle[3] = (TextView*) findViewById(ID_RIGHT_TOOL_COLOR_MODEL_COMP4);
     rightTool.gamma.gammaEdt = (EditText*) findViewById(ID_RIGHT_TOOL_GAMMA_EDT);
+    rightTool.dithering.bitsSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_DITHER_BITS);
+    rightTool.dithering.modeSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_DITHER_MODE);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -72,7 +79,6 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
         imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
         imageView->invalidate();
     });
-    setColorModel(colorModelEnum);
 }
 
 void MyApp::update() {
@@ -92,7 +98,6 @@ void MyApp::saveImage() {
         showError(L"Image has not been load yet");
         return;
     }
-
 
     utils::OpenFileInfo openFileInfo = utils::getSaveFileName();
     if (openFileInfo.isCancelled)
@@ -115,6 +120,8 @@ void MyApp::openImage() {
     std::wstring filename;
     if (!utils::getOpenFileName(filename))
         return;
+    if (isEditing)
+        toggleEdit();
     imageFileStorage.open(filename);
 }
 
@@ -150,53 +157,108 @@ void updateEditingImageView() {
     imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
 }
 
-void setModeTexts(const std::wstring& listText, const std::wstring& comp0, const std::wstring& comp1,
-                  const std::wstring& comp2) {
-    modeTxt->setText(listText);
-    componentToggles[0]->setText(comp0);
-    componentToggles[1]->setText(comp1);
-    componentToggles[2]->setText(comp2);
+void setToggleViewActive(int index, bool value) {
+    rightTool.colorModel.componentToggle[index]->getParent()->setBackground(value
+                                                                            ? view::theme.activeComponentBackground
+                                                                            : view::theme.notActiveComponentBackground);
 }
 
-void MyApp::setColorModel(ColorModelEnum colorModelEnum) {
-    this->colorModelEnum = colorModelEnum;
-    info() << "color model changed: " << colorModelEnum;
-
-    switch (colorModelEnum) {
+void updateColorModelUI() {
+    if (!editedRaster)
+        return;
+    auto colorModel = editedRaster->getColorModel();
+    int index = -1;
+    switch (colorModel->getEnum()) {
         case COLOR_MODEL_RGB:
-            setModeTexts(L"RGB", L"R", L"G", L"B");
+            index = 0;
             break;
         case COLOR_MODEL_HSL:
-            setModeTexts(L"HSL", L"H", L"S", L"L");
+            index = 1;
             break;
         case COLOR_MODEL_HSV:
-            setModeTexts(L"HSV", L"H", L"S", L"V");
+            index = 2;
             break;
         case COLOR_MODEL_YCbCr601:
-            setModeTexts(L"YCbCr601", L"Y", L"Cb", L"Cr");
+            index = 3;
             break;
         case COLOR_MODEL_YCbCr709:
-            setModeTexts(L"YCbCr709", L"Y", L"Cb", L"Cr");
+            index = 4;
             break;
         case COLOR_MODEL_YCoCg:
-            setModeTexts(L"YCoCg", L"Y", L"Co", L"Cg");
+            index = 5;
             break;
         case COLOR_MODEL_CMY:
-            setModeTexts(L"CMY", L"C", L"M", L"Y");
+            index = 6;
             break;
+        case COLOR_MODEL_GRAY:
+            index = 7;
+            break;
+        case COLOR_MODEL_RGBA:
+            index = 8;
+            break;
+        default:
+            return;
     }
 
-    if (isEditing) {
-        editedRaster->convertToColorModel(colorModelEnum);
-        updateEditingImageView();
+    static const std::vector<std::vector<String>> componentNames = {
+            {L"R", L"G",  L"B"},
+            {L"H", L"S",  L"L"},
+            {L"H", L"S",  L"V"},
+            {L"Y", L"Cb", L"Cr"},
+            {L"Y", L"Cb", L"Cr"},
+            {L"Y", L"Co", L"Cg"},
+            {L"C", L"M",  L"Y"},
+            {L"Gray"},
+            {L"R", L"G",  L"B", L"A"},
+    };
+
+    rightTool.colorModel.colorModel->setSelectIndex(index);
+    for (int i = 0; i < componentNames[index].size(); i++) {
+        rightTool.colorModel.componentToggle[i]->setText(componentNames[index][i]);
     }
+
+    int componentsCount = colorModel->getComponentsCount();
+    for (int i = 0; i < componentsCount; i++) {
+        rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::VISIBLE);
+        setToggleViewActive(i, editedRaster->getFilter(i));
+    }
+    for (int i = componentsCount; i < 4; i++) {
+        rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
+    }
+}
+
+void MyApp::convertColorModel(ColorModelEnum colorModel) {
+    if (!isEditing) {
+        return;
+    }
+
+    editedRaster->convertToColorModel(colorModel);
+    updateEditingImageView();
+
+    updateColorModelUI();
+}
+
+void MyApp::reinterpretColorModel(ColorModelEnum colorModel) {
+    if (!isEditing) {
+        return;
+    }
+
+    if (editedRaster->getColorModel()->getComponentsCount() != findColorModel(colorModel)->getComponentsCount()) {
+        showError(L"Cannot reinterpret, there is another amount of components");
+        return;
+    }
+
+    editedRaster->reinterpretColorModel(colorModel);
+    updateEditingImageView();
+
+    updateColorModelUI();
 }
 
 void MyApp::convertGamma(float gamma) {
     this->gamma = gamma;
     rightTool.gamma.gammaEdt->setText(std::to_wstring(gamma));
     if (isEditing) {
-        editedRaster->convertToNewGamma(gamma);
+        editedRaster->convertToGamma(gamma);
         updateEditingImageView();
     }
 }
@@ -210,12 +272,6 @@ void MyApp::reinterpretGamma(float gamma) {
     }
 }
 
-void setToggleViewActive(int index, bool value) {
-    componentToggles[index]->getParent()->setBackground(value
-                                                        ? view::theme.activeComponentBackground
-                                                        : view::theme.notActiveComponentBackground);
-}
-
 void MyApp::toggleEdit() {
     if (!isEditing) {
         auto imageFile = imageFileStorage.getCurImageFile();
@@ -227,28 +283,31 @@ void MyApp::toggleEdit() {
             showError(L"Wait image loading");
             return;
         }
-        if (imageFile->raster->getColorModel()->getComponentsCount() != 3) {
-            showError(L"Only 3-component images can be edited");
-            return;
-        }
-        isEditing = true;
+        int componentsCount = imageFile->raster->getColorModel()->getComponentsCount();
 
         editedRaster = new ModernRaster(*imageFile->raster);
-
-        editedRaster->reinterpretColorModel(colorModelEnum);
-//        editedRaster->dither(2, DitheringMethods::ATKINSON_DITHERING);
-
         editedTexture = new gl::Texture(*editedRaster);
 
         imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < componentsCount; i++) {
+            rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::VISIBLE);
             setToggleViewActive(i, editedRaster->getFilter(i));
+        }
+        for (int i = componentsCount; i < 4; i++) {
+            rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
+        }
 
         rightTool.info.widthTxt->setText(std::to_wstring(editedRaster->getWidth()));
         rightTool.info.heightTxt->setText(std::to_wstring(editedRaster->getHeight()));
         rightTool.info.channelsTxt->setText(std::to_wstring(editedRaster->getColorModel()->getComponentsCount()));
         rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
+        rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
+        rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
+
+        updateColorModelUI();
+
+        isEditing = true;
     } else {
         delete editedRaster;
         editedRaster = nullptr;
@@ -258,13 +317,10 @@ void MyApp::toggleEdit() {
         auto imageFile = imageFileStorage.getCurImageFile();
         imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
 
-        for (auto& componentToggle: componentToggles)
-            componentToggle->getParent()->setBackground({});
-
         isEditing = false;
         viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));
     }
-    rightToolLay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
+    rightTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
     info() << "isEditing: " << isEditing;
 }
 
@@ -275,6 +331,20 @@ void MyApp::toggleComponent(int index) {
     editedRaster->setFilter(index, newValue);
     updateEditingImageView();
     setToggleViewActive(index, newValue);
+}
+
+void MyApp::setDitheringBits(int bits) {
+    if (!isEditing)
+        return;
+    editedRaster->setDitheringBits(bits);
+    updateEditingImageView();
+}
+
+void MyApp::setDitheringMethod(DitheringMethodEnum method) {
+    if (!isEditing)
+        return;
+    editedRaster->setDitheringMethod(method);
+    updateEditingImageView();
 }
 
 MyApp* getAppInstance() {

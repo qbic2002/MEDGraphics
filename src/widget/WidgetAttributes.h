@@ -41,6 +41,12 @@ InputType inputType = TEXT;
 #define EDIT_TEXT_VIEW_ATTRS_SET(src)    \
 inputType = src.inputType;
 
+#define SELECT_VIEW_ATTRS             \
+std::vector<String> items;
+
+#define SELECT_VIEW_ATTRS_SET(src)    \
+items = src.items;
+
 #define VIEW_GROUP_ATTRS            \
 std::vector<View*> children;
 

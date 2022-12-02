@@ -85,26 +85,34 @@ public:
 
     const float* getData() const;
 
-    void reinterpretColorModel(const ColorModelEnum colorModelEnum);
+    void convertToColorModel(ColorModelEnum colorModelEnum);
 
-    void reinterpretGamma(float gamma);
-
-    void convertToNewGamma(float gamma);
-
-    void convertToColorModel(const ColorModelEnum colorModelEnum);
-
-    void dither(int bits, DitheringMethods ditheringMethods);
-
-    void drawLine(Point p1, Point p2, float* color);
+    void reinterpretColorModel(ColorModelEnum colorModelEnum);
 
     void setFilter(int index, bool value);
 
     bool getFilter(int index) const;
 
-    float getGamma() const;;
+    void reinterpretGamma(float gamma);
+
+    void convertToGamma(float gamma);
+
+    float getGamma() const;
+
+    void setDitheringMethod(DitheringMethodEnum method);
+
+    DitheringMethodEnum getDitheringMethodEnum() const;
+
+    void setDitheringBits(int ditheringBits);
+
+    int getDitheringBits() const;
+
+    void drawLine(Point p1, Point p2, float* color);
 
 private:
     void fillRgbaData();
+
+    float* dither(float* dataPtr);
 
     int width = 0;
     int height = 0;
@@ -113,6 +121,8 @@ private:
     const ColorModel* colorModel = findColorModel(COLOR_MODEL_RGB);
     bool filter[4] = {true, true, true, true};
     float gamma = 1;
+    DitheringMethodEnum ditheringMethodEnum = NO_DITHERING;
+    int ditheringBits = 8;
 };
 
 #endif //MEDGRAPHICS_MODERN_COLOR_MODEL_H
