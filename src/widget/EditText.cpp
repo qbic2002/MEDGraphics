@@ -96,10 +96,14 @@ namespace view {
     void EditText::setFocused(bool value) {
         if (isFocused == value)
             return;
-        if (value == true && focused != nullptr) {
-            focused->setFocused(false);
+        if (value) {
+            if (focused != nullptr) {
+                focused->setFocused(false);
+            }
+            focused = this;
+        } else {
+            focused = nullptr;
         }
-        focused = this;
         isFocused = value;
         invalidate();
         if (!isFocused)
