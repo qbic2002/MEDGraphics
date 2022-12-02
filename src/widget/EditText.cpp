@@ -4,6 +4,8 @@
 
 #include "EditText.h"
 
+view::EditText* focused = nullptr;
+
 namespace view {
     EditText::EditText(Context* context, const EditTextAttributes& attr)
             : TextView(context, *((const TextViewAttributes*) &attr)) {
@@ -94,6 +96,10 @@ namespace view {
     void EditText::setFocused(bool value) {
         if (isFocused == value)
             return;
+        if (value == true && focused != nullptr) {
+            focused->setFocused(false);
+        }
+        focused = this;
         isFocused = value;
         invalidate();
         if (!isFocused)

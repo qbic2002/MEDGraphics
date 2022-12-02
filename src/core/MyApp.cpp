@@ -284,6 +284,16 @@ void updateColorModelUI() {
     for (int i = componentsCount; i < 4; i++) {
         rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
     }
+
+    for (int i = 0; i < componentsCount; i++) {
+        rightTool.paint.componentText[i]->setVisibility(view::VISIBLE);
+        rightTool.paint.componentEdt[i]->setVisibility(view::VISIBLE);
+        rightTool.paint.componentText[i]->setText(componentNames[index][i]);
+    }
+    for (int i = componentsCount; i < 4; i++) {
+        rightTool.paint.componentText[i]->setVisibility(view::INVISIBLE);
+        rightTool.paint.componentEdt[i]->setVisibility(view::INVISIBLE);
+    }
 }
 
 void MyApp::convertColorModel(ColorModelEnum colorModel) {
