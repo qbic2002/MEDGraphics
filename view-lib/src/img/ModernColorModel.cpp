@@ -203,6 +203,68 @@ int ModernRaster::getDitheringBits() const {
     return ditheringBits;
 }
 
-void ModernRaster::drawLine(Point p1, Point p2, float* color) {
+inline float distance(Point p1, Point p2, Point t) {
+    float result = std::abs((p2.y - p1.y) * t.x - (p2.x - p1.x) * t.y + p2.x * p1.y - p2.y * p1.x) /
+                   std::sqrt(std::pow(p2.y - p1.y, 2) + std::pow(p2.x - p1.x, 2));
 
+    return result;
+}
+
+void ModernRaster::drawLine(Point p1, Point p2, float* color_, float lineWidth, float opacity) {
+    rgbaF color = colorModel->toRgba(color_);
+    color.a = opacity;
+
+    int maxX = std::max(p1.x, p2.x);
+    int minX = std::min(p1.x, p2.x);
+
+    int maxY = std::max(p1.y, p2.y);
+    int minY = std::min(p1.y, p2.y);
+
+    for (int x = minX; x <= maxX; ++x) {
+        for (int y = minY; y <= maxY; ++y) {
+            float dist = distance(p1, p2, {x, y});
+            if (dist < lineWidth / 2) {
+                rgbaF newColor{.a = 1};
+                for (int i = 0; i < 3; ++i) {
+                    newColor.components[i] =
+                            color.components[i] * color.a + (getPixel(x, y).components[i] * (1 - color.a));
+//                    newColor.components[i] = (color.components[i] * topOpacity + oldColor.components[i]) / 2;
+                    if (newColor.components[i] > 1) newColor.components[i] = 1;
+                    if (newColor.components[i] < 0) newColor.components[i] = 0;
+                }
+                setPixel(newColor, x, y);
+            } else {
+                float topOpacity = 1 - (dist - lineWidth / 2);
+                if (topOpacity > 1 || topOpacity < 0) {
+                    continue;
+                }
+
+                topOpacity *= color.a;
+                rgbaF oldColor = getPixel(x, y);
+                rgbaF newColor{.a = 1};
+                for (int i = 0; i < 3; ++i) {
+                    newColor.components[i] =
+                            color.components[i] * topOpacity + (oldColor.components[i] * (1 - topOpacity));
+//                    newColor.components[i] = (color.components[i] * topOpacity + oldColor.components[i]) / 2;
+                    if (newColor.components[i] > 1) newColor.components[i] = 1;
+                    if (newColor.components[i] < 0) newColor.components[i] = 0;
+                }
+
+                setPixel(newColor, x, y);
+            }
+        }
+    }
+}
+
+void ModernRaster::setPixel(rgbaF rgbaf, int x, int y) {
+    rgbaData[y * width + x] = rgbaf.toRgba();
+    for (int i = 0; i < 3; ++i) {
+        rgbaf.components[i] = std::pow(rgbaf.components[i], gamma);
+    }
+    colorModel->fromRgba(rgbaf, data.get() + (y * width + x) * colorModel->getComponentsCount());
+}
+
+rgbaF ModernRaster::getPixel(int x, int y) {
+    return {rgbaData[y * width + x].r / 255.0f, rgbaData[y * width + x].r / 255.0f, rgbaData[y * width + x].r / 255.0f,
+            rgbaData[y * width + x].r / 255.0f};
 }

@@ -305,6 +305,9 @@ void MyApp::toggleEdit() {
         rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
         rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
 
+//        float col[] = {1, 1, 0};
+//        editedRaster->drawLine({10, 35}, {500, 400}, col, 5, 0.7);
+
         updateColorModelUI();
 
         isEditing = true;
