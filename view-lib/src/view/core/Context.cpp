@@ -28,12 +28,12 @@ void Context::loop() {
     while (!windowWrapper->shouldClose()) {
         windowWrapper->waitEvents(0.1);
         update();
-        if (isDrawRequired()) {
+//        if (isDrawRequired()) {
             updateDirtyViews();
             draw();
             windowWrapper->swapBuffers();
             utils::updateTimer();
-        }
+//        }
     }
 }
 

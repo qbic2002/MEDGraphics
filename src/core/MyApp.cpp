@@ -49,6 +49,7 @@ struct {
         view::TextView* componentText[4] = {nullptr, nullptr, nullptr, nullptr};
         view::EditText* componentEdt[4] = {nullptr, nullptr, nullptr, nullptr};
         view::EditText* opacityEdt = nullptr;
+        view::EditText* lineWidthEdt = nullptr;
     } paint;
 } rightTool;
 
@@ -85,6 +86,7 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
         rightTool.paint.componentEdt[i] = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP1_EDT + i);
     }
     rightTool.paint.opacityEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP_OPACITY_EDT);
+    rightTool.paint.lineWidthEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_LINE_WIDTH);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -94,8 +96,47 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     });
 }
 
+void updateEditingImageView() {
+    editedTexture->update(*editedRaster);
+    imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+}
+
 void drawLine(int x1, int y1, int x2, int y2) {
-    info() << x1 << " " << y1;
+    if (!isEditing)
+        return;
+    info() << x1 << " " << y1 << " " << x2 << " " << y2;
+    float color[4] = {0, 0, 0, 0};
+    for (int i = 0; i < editedRaster->getColorModel()->getComponentsCount(); i++) {
+        float value = 1;
+        try {
+            value = std::stof(rightTool.paint.componentEdt[i]->getText());
+        } catch (std::exception& e) {
+        }
+        if (value > 1)
+            value = 1;
+        if (value < 0)
+            value = 0;
+        color[i] = value;
+    }
+    float opacity = 1;
+    try {
+        opacity = std::stof(rightTool.paint.opacityEdt->getText());
+    } catch (std::exception& e) {}
+    if (opacity > 1)
+        opacity = 1;
+    if (opacity < 0)
+        opacity = 0;
+
+    float lineWidth = 1;
+    try {
+        lineWidth = std::stof(rightTool.paint.lineWidthEdt->getText());
+    } catch (std::exception& e) {}
+    if (lineWidth < 0)
+        lineWidth = 0;
+
+    info() << x1 << " " << y1 << " " << x2 << " " << y2;
+    editedRaster->drawLine({x1, y1}, {x2, y2}, color, lineWidth, opacity);
+    updateEditingImageView();
 }
 
 void MyApp::update() {
@@ -167,11 +208,6 @@ bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
     }
 
     return false;
-}
-
-void updateEditingImageView() {
-    editedTexture->update(*editedRaster);
-    imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
 }
 
 void setToggleViewActive(int index, bool value) {

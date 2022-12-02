@@ -203,6 +203,14 @@ int ModernRaster::getDitheringBits() const {
 }
 
 inline float distance(Point p1, Point p2, Point t) {
+    auto lineVector = p2 - p1;
+    float dist = lineVector.dot(t - p1);
+    if (dist < 0)
+        return t.dist(p1);
+    dist = -lineVector.dot(t - p2);
+    if (dist < 0)
+        return t.dist(p2);
+
     float result = std::abs((p2.y - p1.y) * t.x - (p2.x - p1.x) * t.y + p2.x * p1.y - p2.y * p1.x) /
                    std::sqrt(std::pow(p2.y - p1.y, 2) + std::pow(p2.x - p1.x, 2));
 
@@ -214,10 +222,20 @@ void ModernRaster::drawLine(Point p1, Point p2, float* color_, float lineWidth, 
     color.a = opacity;
 
     int maxX = std::max(p1.x, p2.x);
+    maxX += lineWidth;
+    maxX = std::min(maxX, width - 1);
+
     int minX = std::min(p1.x, p2.x);
+    minX -= lineWidth;
+    minX = std::max(minX, 0);
 
     int maxY = std::max(p1.y, p2.y);
+    maxY += lineWidth;
+    maxY = std::min(maxY, height - 1);
+
     int minY = std::min(p1.y, p2.y);
+    minY -= lineWidth;
+    minY = std::max(minY, 0);
 
     for (int x = minX; x <= maxX; ++x) {
         for (int y = minY; y <= maxY; ++y) {

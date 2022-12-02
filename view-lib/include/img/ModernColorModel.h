@@ -59,6 +59,26 @@
 
 struct Point {
     int x, y;
+
+    Point operator+(const Point& other) const {
+        return {x + other.x, y + other.y};
+    }
+
+    Point operator-(const Point& other) const {
+        return {x - other.x, y - other.y};
+    }
+
+    Point operator-() const {
+        return {-x, -y};
+    }
+
+    int dot(const Point& other) const {
+        return x * other.x + y * other.y;
+    }
+
+    float dist(const Point& other) const {
+        return std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2));
+    }
 };
 
 class ModernRaster : public AbstractRaster {

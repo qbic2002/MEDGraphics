@@ -351,6 +351,7 @@ view::LinearLayout* createToolSectionPaint(Context* context) {
                 .width = 200,
                 .padding = Padding(4),
                 .background = ColorBackground{theme.color.primaryBg},
+                .text = L"1",
                 .fontSize = 12,
                 .inputType = view::DECIMAL,
         }));
@@ -366,6 +367,22 @@ view::LinearLayout* createToolSectionPaint(Context* context) {
             .width = 200,
             .padding = Padding(4),
             .background = ColorBackground{theme.color.primaryBg},
+            .text = L"1",
+            .fontSize = 12,
+            .inputType = view::DECIMAL,
+    }));
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Ширина линии: ",
+            .fontSize = 12,
+    }));
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_PAINT_LINE_WIDTH,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .text = L"5",
             .fontSize = 12,
             .inputType = view::DECIMAL,
     }));
