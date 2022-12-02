@@ -14,7 +14,7 @@ bool ContextCallbacks::onDrag(double x, double y, double dx, double dy) {
 
 void ContextCallbacks::onWindowMaximize(int _maximized) {}
 
-bool ContextCallbacks::onMouseButton(ClickEvent& event) {
+bool ContextCallbacks::onMouseButton(MouseEvent& event) {
     return false;
 }
 

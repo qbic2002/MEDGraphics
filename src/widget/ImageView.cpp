@@ -68,6 +68,12 @@ namespace view {
         return true;
     }
 
+    void ImageView::onMouseMove(double x, double y) {
+        View::onMouseMove(pointerX, pointerY);
+        pointerX = (int) ((x - edges.left - translateX) / zoom);
+        pointerY = (int) ((y - edges.top - translateY) / zoom);
+    }
+
     void ImageView::onLayout(float left, float top, float right, float bottom) {
         validateZoom();
     }
@@ -131,6 +137,14 @@ namespace view {
         this->textureHeight = textureHeight;
         imageFitScreen();
         invalidate();
+    }
+
+    int ImageView::getPointerX() const {
+        return pointerX;
+    }
+
+    int ImageView::getPointerY() const {
+        return pointerY;
     }
 
 } // view

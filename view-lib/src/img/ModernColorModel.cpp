@@ -161,7 +161,6 @@ float ModernRaster::getGamma() const {
     return gamma;
 }
 
-
 /// @return tmpData must be deleted
 float* ModernRaster::dither(float* dataPtr) {
     utils::TimeStamp timeStamp;

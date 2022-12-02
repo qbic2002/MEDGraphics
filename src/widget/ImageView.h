@@ -37,6 +37,12 @@ namespace view {
 
         void setTexture(int textureId, int textureWidth, int textureHeight);
 
+        void onMouseMove(double x, double y) override;
+
+        int getPointerX() const;
+
+        int getPointerY() const;
+
     private:
         void setZoomRatio(float ratio);
 
@@ -47,6 +53,7 @@ namespace view {
         float translateX = 0, translateY = 0;
         int textureWidth = 0, textureHeight = 0;
         int textureId;
+        int pointerX = 0, pointerY = 0;
     };
 
 } // view

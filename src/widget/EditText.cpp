@@ -27,10 +27,7 @@ namespace view {
         }
     }
 
-    bool EditText::onClick(const ClickEvent& event) {
-        if (event.action == GLFW_PRESS)
-            return false;
-
+    bool EditText::onClick(const MouseEvent& event) {
         setFocused(true);
         int index = fontRenderer->positionToIndex(text, event.x - innerEdges.left, event.y - innerEdges.top);
         setCursorIndex(index);
@@ -91,7 +88,7 @@ namespace view {
         invalidate();
         setCursorIndex(cursorIndex + 1);
 
-        return false;
+        return true;
     }
 
     void EditText::setFocused(bool value) {

@@ -10,7 +10,7 @@
 #include <utils/Texture.h>
 #include <img/rgba.h>
 #include <view/Style.h>
-#include "ClickEvent.h"
+#include "MouseEvent.h"
 #include "../../../src/widget/WidgetAttributes.h"
 
 namespace view {
@@ -26,6 +26,27 @@ namespace view {
         GONE,
         INVISIBLE
     };
+
+    struct SpaceRequirement {
+        union {
+            struct {
+                float width = 0;
+                float height = 0;
+                float parentPartW = 0;
+                float parentPartH = 0;
+                float parentSparePartW = 0;
+                float parentSparePartH = 0;
+            };
+            struct {
+                float size[2];
+                float parentPart[2];
+                float parentSparePart[2];
+            };
+        };
+    };
+
+    typedef std::function<void(view::View* view, const MouseEvent& event)> OnMouseEventListener;
+    typedef std::function<void(view::View* view)> OnClickListener;
 
     struct ViewAttributes {
         VIEW_ATTRS
@@ -47,12 +68,18 @@ namespace view {
 
         Style& getStyle();
 
+        virtual bool onMouseEvent(const MouseEvent& event);
+
         /// @return whether event was consumed
-        virtual bool onClick(const ClickEvent& event);
+        virtual bool onClick(const MouseEvent& event);
 
         virtual bool onDrag(double x, double y, double dx, double dy);
 
         View& setOnClickListener(const std::function<void()>& _onClickListener);
+
+        void setOnMouseEventListener(const OnMouseEventListener& listener);
+
+        View& setOnClickListener(const OnClickListener& listener);
 
         virtual void onWindowResize(unsigned int width, unsigned int height);
 
@@ -88,24 +115,6 @@ namespace view {
 
         void setState(State _state);
 
-        struct SpaceRequirement {
-            union {
-                struct {
-                    float width = 0;
-                    float height = 0;
-                    float parentPartW = 0;
-                    float parentPartH = 0;
-                    float parentSparePartW = 0;
-                    float parentSparePartH = 0;
-                };
-                struct {
-                    float size[2];
-                    float parentPart[2];
-                    float parentSparePart[2];
-                };
-            };
-        };
-
         SpaceRequirement measure();
 
         virtual float getContentWidth();
@@ -135,7 +144,8 @@ namespace view {
     protected:
         Context* context;
         State state = DEFAULT;
-        std::function<void()> onClickListener = nullptr;
+        OnMouseEventListener onMouseEventListener = nullptr;
+        OnClickListener onClickListener = nullptr;
         std::function<void(View& view, unsigned int width, unsigned int height)> onWindowResizeListener = nullptr;
 
         VIEW_ATTRS

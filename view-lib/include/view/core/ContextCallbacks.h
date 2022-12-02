@@ -5,7 +5,7 @@
 #ifndef MEDGRAPHICS_CONTEXT_CALLBACKS_H
 #define MEDGRAPHICS_CONTEXT_CALLBACKS_H
 
-#include "view/ClickEvent.h"
+#include "view/MouseEvent.h"
 
 class ContextCallbacks {
 public:
@@ -33,7 +33,7 @@ public:
     /// Mouse button event interface
     /// @param event event to process
     /// @return whether event was consumed
-    virtual bool onMouseButton(ClickEvent& event);
+    virtual bool onMouseButton(MouseEvent& event);
 
     /// Pointer window leave event interface
     virtual void onMouseLeave();

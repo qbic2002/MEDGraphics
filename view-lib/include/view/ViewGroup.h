@@ -7,7 +7,7 @@
 
 #include <string>
 #include "Style.h"
-#include "ClickEvent.h"
+#include "MouseEvent.h"
 #include "View.h"
 
 namespace view {
@@ -23,7 +23,7 @@ namespace view {
 
         ~ViewGroup() override;
 
-        bool onClick(const ClickEvent& event) override;
+        bool onClick(const MouseEvent& event) override;
 
         bool onDrag(double x, double y, double dx, double dy) override;
 
@@ -44,6 +44,8 @@ namespace view {
         bool onKey(int key, int scancode, int action, int mods) override;
 
         bool onChar(unsigned int codepoint) override;
+
+        bool onMouseEvent(const MouseEvent& event) override;
 
     protected:
         VIEW_GROUP_ATTRS

@@ -27,7 +27,7 @@ namespace view {
 
         void onDraw() override;
 
-        bool onClick(const ClickEvent& event) override;
+        bool onClick(const MouseEvent& event) override;
 
         bool onKey(int key, int scancode, int action, int mods) override;
 

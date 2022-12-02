@@ -73,21 +73,21 @@ bool RootViewManager::onDrag(double x, double y, double dx, double dy) {
     return false;
 }
 
-bool RootViewManager::onMouseButton(ClickEvent& event) {
+bool RootViewManager::onMouseButton(MouseEvent& event) {
     bool consumed = false;
     for (auto dialog: dialogs) {
         if (!dialog->isShown())
             continue;
 
         if (dialog->getView()->isInside(event.x, event.y)) {
-            if (!consumed && dialog->getView()->onClick(event)) {
+            if (!consumed && dialog->getView()->onMouseEvent(event)) {
                 consumed = true;
             }
         } else {
             dialog->hide();
         }
     }
-    if (!consumed && rootView->onClick(event)) {
+    if (!consumed && rootView->onMouseEvent(event)) {
         consumed = true;
     }
 

@@ -17,17 +17,20 @@ namespace view {
         View::~View();
     }
 
-    bool ViewGroup::onClick(const ClickEvent& event) {
+    bool ViewGroup::onMouseEvent(const MouseEvent& event) {
         for (View* child: children) {
             if (child->getVisibility() != VISIBLE)
                 continue;
             if (child->isInside(event.x, event.y)) {
-                child->setState(event.action == GLFW_PRESS ? PRESSED : HOVERED);
-                if (child->onClick(event)) {
+                if (child->onMouseEvent(event)) {
                     return true;
                 }
             }
         }
+        return View::onMouseEvent(event);
+    }
+
+    bool ViewGroup::onClick(const MouseEvent& event) {
         return View::onClick(event);
     }
 
