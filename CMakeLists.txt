@@ -9,9 +9,10 @@ set(LIBS
         OpenGL32.Lib
         win64/glew32.lib
         win64/glew32s.lib
-        win64/freetype.lib)
+        win64/freetype.lib
+        win64/zlibwapi.dll)
 list(TRANSFORM LIBS PREPEND ${CMAKE_CURRENT_LIST_DIR}/libs/)
-set(BINS glew32.dll freetype.dll)
+set(BINS glew32.dll freetype.dll zlibwapi.dll)
 list(TRANSFORM BINS PREPEND bin/win64/)
 file(
         COPY ${BINS}

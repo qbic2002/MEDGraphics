@@ -37,5 +37,8 @@ add_library(view STATIC
         img/PixelCMY8.cpp
         img/ColorModels.cpp
         img/ModernColorModel.cpp
-        img/DitheringMethods.cpp)
+        img/DitheringMethods.cpp
+        img/PNGImage.cpp
+        img/pngUtils.cpp
+        utils/zlib_utils.cpp)
 target_link_libraries(view ${LIBS})

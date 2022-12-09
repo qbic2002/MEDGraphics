@@ -9,6 +9,7 @@
 #include <img/PixelRGBA8.h>
 #include <img/Raster.h>
 #include "img/pnmUtils.h"
+#include "img/pngUtils.h"
 #include <cmath>
 
 namespace img {
@@ -48,6 +49,20 @@ namespace img {
         return bytes.size() >= 2 && bytes[0] == 'P' && (bytes[1] == '5' || bytes[1] == '6');
     }
 
+    const unsigned char pngSignature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
+
+    bool isPNGSignature(const std::vector<char>& bytes) {
+        if (bytes.size() < 8)
+            return false;
+
+        for (int i = 0; i < 8; ++i) {
+            if ((unsigned char) bytes[i] != pngSignature[i])
+                return false;
+        }
+
+        return true;
+    }
+
     ModernRaster* loadImageData(const std::filesystem::path& file) {
         if (isImage(file)) {
             return loadImageData(utils::readAllBytes(file));
@@ -61,20 +76,24 @@ namespace img {
             if (isPNMSignature(bytes)) {
                 auto pnmImage = pnm::readPNMImageFromMemory(bytes.data(), bytes.size());
                 return new ModernRaster(pnmImage.raster);
-            } else {
-                int width, height, channels;
-                unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,
-                                                            &height,
-                                                            &channels, 0);
-
-                if (data == nullptr)
-                    return nullptr;
-
-                auto* raster = stbDataToRaster(data, width, height, channels);
-                stbi_image_free(data);
-
-                return raster;
             }
+            if (isPNGSignature(bytes)) {
+                auto pngImage = png::readPNGImageFromMemory(bytes.data(), bytes.size());
+                return new ModernRaster(pngImage.getModernRaster());
+            }
+            int width, height, channels;
+            unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,
+                                                        &height,
+                                                        &channels, 0);
+
+            if (data == nullptr)
+                return nullptr;
+
+            auto* raster = stbDataToRaster(data, width, height, channels);
+            stbi_image_free(data);
+
+            return raster;
+
         } catch (std::exception&) {
             return nullptr;
         }

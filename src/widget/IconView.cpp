@@ -13,7 +13,7 @@ namespace view {
     }
 
     void IconView::setImage(const std::filesystem::path& imageFile) {
-        image = assets::texture(imageFile);
+//        image = assets::texture(imageFile);
         invalidate();
     }
 

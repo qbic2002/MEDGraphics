@@ -83,6 +83,8 @@ struct Point {
 
 class ModernRaster : public AbstractRaster {
 public:
+    ModernRaster() = default;
+
     ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel);
 
     ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModelEnum colorModelEnum);
@@ -90,6 +92,8 @@ public:
     ModernRaster(const ModernRaster& other);
 
     ModernRaster(const ModernRaster&& other) noexcept;
+
+    ModernRaster& operator=(const ModernRaster& other) = default;
 
     int getWidth() const override;
 
