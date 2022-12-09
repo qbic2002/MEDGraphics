@@ -22,9 +22,10 @@ struct rgb {
 enum CHUNK_TYPE {
     CHUNK_TYPE_IHDR = 0,
     CHUNK_TYPE_PLTE = 1,
-    CHUNK_TYPE_IDAT = 2,
-    CHUNK_TYPE_IEND = 3,
-    CHUNK_TYPE_UNKNOWN = 4
+    CHUNK_TYPE_GAMMA = 2,
+    CHUNK_TYPE_IDAT = 3,
+    CHUNK_TYPE_IEND = 4,
+    CHUNK_TYPE_UNKNOWN = 5
 };
 
 class PNGChunk {
@@ -81,6 +82,15 @@ public:
     PNGChunkIEND(unsigned int chunkDataSize_, unsigned int crc_);
 
     CHUNK_TYPE getChunkType() override;
+};
+
+class PNGChunkGAMMA : public PNGChunk {
+public:
+    explicit PNGChunkGAMMA(unsigned int chunkDataSize_, unsigned int crc_, unsigned int gamma_);
+
+    CHUNK_TYPE getChunkType() override;
+
+    unsigned int gamma;
 };
 
 class PNGChunkUNKNOWN : public PNGChunk {

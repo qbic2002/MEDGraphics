@@ -41,7 +41,6 @@ std::vector<unsigned char> zlib::inflate(const unsigned char* data, int size) {
             for (int i = 0; i < len; ++i) {
                 result.push_back(buff[i]);
             }
-            inflateEnd(&dStream);
             break;
         }
 

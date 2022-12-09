@@ -22,6 +22,9 @@ CHUNK_TYPE getChunkType(const std::string& chunkTypeString_) {
     if (chunkTypeString == "IEND") {
         return CHUNK_TYPE_IEND;
     }
+    if (chunkTypeString == "GAMA") {
+        return CHUNK_TYPE_GAMMA;
+    }
 
     return CHUNK_TYPE_UNKNOWN;
 
@@ -99,6 +102,14 @@ PNGChunk* readChunk(const char*& data) {
             auto* pngChunkIEND = new PNGChunkIEND(chunkDataSize, crc);
 
             return pngChunkIEND;
+        }
+        case CHUNK_TYPE_GAMMA: {
+            auto gamma = getFromDataWithSkip<unsigned int>(data);
+            auto crc = getFromDataWithSkip<unsigned int>(data);
+
+            auto* pngChunkGamma = new PNGChunkGAMMA(chunkDataSize, crc, gamma);
+
+            return pngChunkGamma;
         }
         case CHUNK_TYPE_UNKNOWN: {
             char* imgData = new char[chunkDataSize];

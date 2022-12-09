@@ -54,6 +54,13 @@ PNGImage::~PNGImage() {
     }
 }
 
+PNGChunkGAMMA::PNGChunkGAMMA(unsigned int chunkDataSize_, unsigned int crc_, unsigned int gamma_) : PNGChunk(
+        chunkDataSize_, crc_), gamma(gamma_) {}
+
+CHUNK_TYPE PNGChunkGAMMA::getChunkType() {
+    return CHUNK_TYPE_GAMMA;
+}
+
 PNGChunkUNKNOWN::PNGChunkUNKNOWN(unsigned int chunkDataSize_, unsigned int crc_, char* data_) : PNGChunk(chunkDataSize_,
                                                                                                          crc_),
                                                                                                 data(data_) {}
@@ -84,6 +91,9 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
     unsigned char interlace = pngChunkIhdr->interlaceMethod;
     if (interlace != 0) {
         throw std::runtime_error("Interlace not supported");
+    }
+    if (pngChunkIhdr->bitDepth != 8) {
+        return;
     }
 
     size_t size = 0;
@@ -136,8 +146,8 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
             for (int w = 0; w < width; ++w) {
                 for (int c = 0; c < componentsCount; ++c) {
                     raster_data[(width * componentsCount) * h + (w * componentsCount) + c] = decompressed[i++] / 255.0;
-                    if (c == 3)
-                        raster_data[(width * componentsCount) * h + (w * componentsCount) + c] = 1;
+//                    if (c == 3)
+//                        raster_data[(width * componentsCount) * h + (w * componentsCount) + c] = 1;
                 }
             }
         }
@@ -145,6 +155,11 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
 
 
     modernRaster = ModernRaster(width, height, raster_data, colorModel);
+    auto* pngChunkGamma = (PNGChunkGAMMA*) findChunkByType(CHUNK_TYPE_GAMMA);
+
+    if (pngChunkGamma) {
+        modernRaster.reinterpretGamma(pngChunkGamma->gamma / 100000.0);
+    }
 
 }
 
