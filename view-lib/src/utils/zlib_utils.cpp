@@ -4,12 +4,11 @@
 
 #include <zlib.h>
 #include <stdexcept>
-#include <iostream>
 #include "utils/zlib_utils.h"
 
-#define CHUNK 256
+#define CHUNK 16384
 
-std::vector<unsigned char> zlib::inflate(const unsigned char* data, int size) {
+std::vector<unsigned char> zlib::inflate(const std::vector<unsigned char>& data) {
     z_stream dStream;
 
     dStream.zalloc = Z_NULL;
@@ -18,7 +17,6 @@ std::vector<unsigned char> zlib::inflate(const unsigned char* data, int size) {
     dStream.avail_in = 0;
     dStream.next_in = Z_NULL;
 
-
     std::vector<unsigned char> result;
 
     int ret = inflateInit(&dStream);
@@ -26,9 +24,9 @@ std::vector<unsigned char> zlib::inflate(const unsigned char* data, int size) {
         throw std::runtime_error("inflate error");
     }
 
-    dStream.avail_in = size;
+    dStream.avail_in = data.size();
+    dStream.next_in = (Bytef*) data.data();
 
-    dStream.next_in = (Bytef*) &data[0];
     while (dStream.avail_in != 0) {
         unsigned char buff[CHUNK];
 //        buff[CHUNK] = '\0';
@@ -49,11 +47,9 @@ std::vector<unsigned char> zlib::inflate(const unsigned char* data, int size) {
             throw std::runtime_error("inflate error");
         }
 
-        for (int i = 0; i < CHUNK; ++i) {
-            result.push_back(buff[i]);
+        for (unsigned char& i: buff) {
+            result.push_back(i);
         }
-
-
     }
 
     inflateEnd(&dStream);

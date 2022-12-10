@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace zlib {
-    std::vector<unsigned char> inflate(const unsigned char* data, int size);
+    std::vector<unsigned char> inflate(const std::vector<unsigned char>& data);
 }
 
 #endif //MEDGRAPHICS_ZLIB_UTILS_H

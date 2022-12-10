@@ -96,7 +96,6 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
         return;
     }
 
-    size_t size = 0;
     std::vector<unsigned char> compressed;
     for (const auto& chunk: pngChunks) {
         if (chunk->getChunkType() == CHUNK_TYPE_IDAT) {
@@ -104,7 +103,6 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
             for (int i = 0; i < pngChunkIdat->chunkDataSize; ++i) {
                 compressed.push_back(pngChunkIdat->data[i]);
             }
-            size += pngChunkIdat->chunkDataSize;
         }
     }
 
@@ -113,18 +111,15 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
             colorModel = COLOR_MODEL_GRAY;
             break;
         case 2:
-            colorModel = COLOR_MODEL_RGB;
-            break;
         case 3:
             colorModel = COLOR_MODEL_RGB;
             break;
         case 6:
             colorModel = COLOR_MODEL_RGBA;
             break;
-
     }
     int componentsCount = findColorModel(colorModel)->getComponentsCount();
-    std::vector<unsigned char> decompressed = zlib::inflate(compressed.data(), size);
+    std::vector<unsigned char> decompressed = zlib::inflate(compressed);
     std::shared_ptr<float[]> raster_data(new float[width * height * componentsCount]);
     if (pngChunkIhdr->colorType == 3) {
         auto* pngChunkPlte = (PNGChunkPLTE*) findChunkByType(CHUNK_TYPE_PLTE);
@@ -140,14 +135,58 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
             }
         }
     } else {
-        int i = 0;
-        for (int h = 0; h < height; ++h) {
-            ++i;
-            for (int w = 0; w < width; ++w) {
+        auto raster_data_ptr = raster_data.get();
+        auto decompressed_ptr = decompressed.data();
+
+        unsigned char prevLine[width * componentsCount];
+        for (auto& v: prevLine)
+            v = 0;
+        unsigned char prevPixel[componentsCount];
+        unsigned char prevUpPixel[componentsCount];
+
+        for (int y = 0; y < height; ++y) {
+            auto filter = *decompressed_ptr++;
+            for (auto& v: prevPixel)
+                v = 0;
+            for (auto& v: prevUpPixel)
+                v = 0;
+            for (int x = 0; x < width; ++x) {
                 for (int c = 0; c < componentsCount; ++c) {
-                    raster_data[(width * componentsCount) * h + (w * componentsCount) + c] = decompressed[i++] / 255.0;
-//                    if (c == 3)
-//                        raster_data[(width * componentsCount) * h + (w * componentsCount) + c] = 1;
+                    unsigned char value = *decompressed_ptr++;
+
+                    switch (filter) {
+                        case 1: // Sub
+                            value += prevPixel[c];
+                            break;
+                        case 2: // Up
+                            value += prevLine[x * componentsCount + c];
+                            break;
+                        case 3: // Average
+                            value += (prevLine[x * componentsCount + c] + prevPixel[c]) / 2;
+                            break;
+                        case 4: // Paeth
+                        {
+                            typedef unsigned char uchar;
+                            int p = (int) prevPixel[c] + prevLine[x * componentsCount + c] - prevUpPixel[c];
+                            int pa = std::abs(p - prevPixel[c]);
+                            int pb = std::abs(p - prevLine[x * componentsCount + c]);
+                            int pc = std::abs(p - prevUpPixel[c]);
+                            if (pa <= pb && pa <= pc)
+                                value += prevPixel[c];
+                            else if (pb <= pc)
+                                value += prevLine[x * componentsCount + c];
+                            else
+                                value += prevUpPixel[c];
+                            break;
+                        }
+                        case 0:
+                        default:
+                            break;
+                    }
+
+                    *raster_data_ptr++ = value / 255.0;
+                    prevUpPixel[c] = prevLine[x * componentsCount + c];
+                    prevLine[x * componentsCount + c] = prevPixel[c] = value;
                 }
             }
         }
@@ -160,7 +199,6 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
     if (pngChunkGamma) {
         modernRaster.reinterpretGamma(pngChunkGamma->gamma / 100000.0);
     }
-
 }
 
 const ModernRaster& PNGImage::getModernRaster() const {

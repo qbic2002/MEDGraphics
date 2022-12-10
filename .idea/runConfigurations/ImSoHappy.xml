@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ImSoHappy" type="CMakeRunConfiguration" factoryName="Application" folderName="MEDGraphics" PROGRAM_PARAMS="&quot;assets\ImSoHappy.jpg&quot;" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MEDGraphics" TARGET_NAME="MEDGraphics" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MEDGraphics" RUN_TARGET_NAME="MEDGraphics">
+    <envs>
+      <env name="CONSOLE_WIDTH" value="200" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

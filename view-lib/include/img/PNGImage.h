@@ -2,8 +2,8 @@
 // Created by golov on 08.12.2022.
 //
 
-#ifndef MEDGRAPHICS_PNGIMAGE_H
-#define MEDGRAPHICS_PNGIMAGE_H
+#ifndef MEDGRAPHICS_PNG_IMAGE_H
+#define MEDGRAPHICS_PNG_IMAGE_H
 
 
 #include "ModernColorModel.h"
@@ -124,4 +124,4 @@ private:
 };
 
 
-#endif //MEDGRAPHICS_PNGIMAGE_H
+#endif //MEDGRAPHICS_PNG_IMAGE_H
