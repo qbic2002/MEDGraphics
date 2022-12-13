@@ -4,8 +4,19 @@
 
 #include "img/PNGImage.h"
 #include "utils/zlib_utils.h"
+#include "img/pngUtils.h"
+
+template<class SrcType>
+void toUCHAR(SrcType src, unsigned char*& dest) {
+//    unsigned char[sizeof(SrcType];
+    for (int i = 0; i < sizeof(SrcType); ++i) {
+        dest[sizeof(SrcType) - 1 - i] = ((unsigned char*) &src)[i];
+    }
+    dest += sizeof(SrcType);
+}
 
 PNGChunk::PNGChunk(unsigned int chunkDataSize_, unsigned int crc_) : chunkDataSize(chunkDataSize_), crc(crc_) {}
+
 
 CHUNK_TYPE PNGChunkIHDR::getChunkType() {
     return CHUNK_TYPE_IHDR;
@@ -18,12 +29,43 @@ PNGChunkIHDR::PNGChunkIHDR(unsigned int chunkDataSize_, unsigned int crc_, unsig
           compressionMethod(compressionMethod),
           filterMethod(filterMethod_), interlaceMethod(interlaceMethod_) {}
 
+std::vector<unsigned char> PNGChunkIHDR::getData() {
+    unsigned char data[chunkDataSize];
+    unsigned char* dataPtr = data;
+
+    toUCHAR(width, dataPtr);
+    toUCHAR(height, dataPtr);
+    toUCHAR(bitDepth, dataPtr);
+    toUCHAR(colorType, dataPtr);
+    toUCHAR(compressionMethod, dataPtr);
+    toUCHAR(filterMethod, dataPtr);
+    toUCHAR(interlaceMethod, dataPtr);
+
+    return std::vector<unsigned char>(data, data + chunkDataSize);
+}
+
+PNGChunkIHDR::PNGChunkIHDR(unsigned int width_, unsigned int height_,
+                           unsigned char bitDepth_, unsigned char colorType_, unsigned char compressionMethod,
+                           unsigned char filterMethod_, unsigned char interlaceMethod_)
+        : PNGChunk(13, 0), width(width_), height(height_), bitDepth(bitDepth_), colorType(colorType_),
+          compressionMethod(compressionMethod),
+          filterMethod(filterMethod_), interlaceMethod(interlaceMethod_) {
+}
+
 PNGChunkPLTE::PNGChunkPLTE(unsigned int chunkDataSize_, unsigned int crc_, const std::vector<rgb>& palette_)
         : PNGChunk(chunkDataSize_, crc_),
           palette(palette_) {}
 
 CHUNK_TYPE PNGChunkPLTE::getChunkType() {
     return CHUNK_TYPE_PLTE;
+}
+
+std::vector<unsigned char> PNGChunkPLTE::getData() {
+    return {(unsigned char*) palette.data(), (unsigned char*) palette.data() + palette.size()};
+}
+
+PNGChunkPLTE::PNGChunkPLTE(const std::vector<rgb>& palette_) : PNGChunk(palette_.size() * 3, 0), palette(palette_) {
+
 }
 
 PNGChunkIDAT::PNGChunkIDAT(unsigned int chunkDataSize_, unsigned int crc_, unsigned char* data_) : PNGChunk(
@@ -38,11 +80,28 @@ PNGChunkIDAT::~PNGChunkIDAT() {
     delete[] data;
 }
 
+std::vector<unsigned char> PNGChunkIDAT::getData() {
+
+    auto dData = zlib::deflate({data, data + chunkDataSize});
+    chunkDataSize = dData.size();
+    return dData;
+
+}
+
+PNGChunkIDAT::PNGChunkIDAT(unsigned int size, unsigned char* data_) : PNGChunk(size, 0), data(data_) {
+}
+
 PNGChunkIEND::PNGChunkIEND(unsigned int chunkDataSize_, unsigned int crc_) : PNGChunk(chunkDataSize_, crc_) {}
 
 CHUNK_TYPE PNGChunkIEND::getChunkType() {
     return CHUNK_TYPE_IEND;
 }
+
+std::vector<unsigned char> PNGChunkIEND::getData() {
+    return std::vector<unsigned char>(0);
+}
+
+PNGChunkIEND::PNGChunkIEND() : PNGChunk(0, 0) {}
 
 PNGImage::PNGImage(const std::vector<PNGChunk*>& pngChunks_) : pngChunks(pngChunks_) {
     setModernRaster();
@@ -55,10 +114,22 @@ PNGImage::~PNGImage() {
 }
 
 PNGChunkGAMMA::PNGChunkGAMMA(unsigned int chunkDataSize_, unsigned int crc_, unsigned int gamma_) : PNGChunk(
-        chunkDataSize_, crc_), gamma(gamma_) {}
+        chunkDataSize_, crc_),
+                                                                                                    gamma(gamma_) {}
+
+PNGChunkGAMMA::PNGChunkGAMMA(unsigned int gamma_) : PNGChunk(4, 0), gamma(gamma_) {
+
+}
 
 CHUNK_TYPE PNGChunkGAMMA::getChunkType() {
     return CHUNK_TYPE_GAMMA;
+}
+
+std::vector<unsigned char> PNGChunkGAMMA::getData() {
+    unsigned char data[chunkDataSize];
+    unsigned char* dataPtr = data;
+    toUCHAR(gamma, dataPtr);
+    return {data, data + chunkDataSize};
 }
 
 PNGChunkUNKNOWN::PNGChunkUNKNOWN(unsigned int chunkDataSize_, unsigned int crc_, char* data_) : PNGChunk(chunkDataSize_,
@@ -71,6 +142,10 @@ CHUNK_TYPE PNGChunkUNKNOWN::getChunkType() {
 
 PNGChunkUNKNOWN::~PNGChunkUNKNOWN() {
     delete[] data;
+}
+
+std::vector<unsigned char> PNGChunkUNKNOWN::getData() {
+    return {data, data + chunkDataSize};
 }
 
 
@@ -203,6 +278,58 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
 
 const ModernRaster& PNGImage::getModernRaster() const {
     return modernRaster;
+}
+
+PNGImage::PNGImage(const ModernRaster& modernRaster_) : modernRaster(modernRaster_) {
+    unsigned int width = modernRaster_.getWidth();
+    unsigned int height = modernRaster_.getHeight();
+    unsigned char colorType;
+    switch (modernRaster_.getColorModel()->getComponentsCount()) {
+        case 1:
+            colorType = 0;
+            break;
+        case 3:
+            colorType = 2;
+            break;
+        case 4:
+            colorType = 6;
+            break;
+        default:
+            throw std::runtime_error("supports only 1, 3, 4 channels images");
+    }
+    unsigned char bidDepth = 8;
+    unsigned char compressionMethod = 0;
+    unsigned char filter = 0;
+    unsigned char interlace = 0;
+    auto* pngChunkIhdr = new PNGChunkIHDR(width, height, bidDepth, colorType, compressionMethod, filter, interlace);
+    pngChunks.push_back(pngChunkIhdr);
+    auto* pngChunkGamma = new PNGChunkGAMMA(modernRaster_.getGamma() * 100000);
+    pngChunks.push_back(pngChunkGamma);
+
+    size_t size =
+            modernRaster_.getWidth() * modernRaster_.getHeight() * modernRaster_.getColorModel()->getComponentsCount() +
+            modernRaster_.getHeight();
+
+    auto* data = new unsigned char[size];
+
+    size_t rasterDataPtr = 0;
+    for (size_t i = 0; i < size; ++i) {
+        if (i % (modernRaster_.getWidth() * modernRaster_.getColorModel()->getComponentsCount() + 1) == 0) {
+            data[i] = 0;
+        } else {
+            data[i] = modernRaster_.getFilter(rasterDataPtr % modernRaster_.getColorModel()->getComponentsCount()) ?
+                      modernRaster_.getData()[rasterDataPtr] * 255 : 0;
+            rasterDataPtr++;
+        }
+    }
+    auto* pngChunkIdat = new PNGChunkIDAT(size, data);
+    pngChunks.push_back(pngChunkIdat);
+    auto* pngChunkIend = new PNGChunkIEND();
+    pngChunks.push_back(pngChunkIend);
+}
+
+const std::vector<PNGChunk*>& PNGImage::getPngChunks() const {
+    return pngChunks;
 }
 
 rgb::rgb() {}

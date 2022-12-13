@@ -78,8 +78,7 @@ namespace img {
                 return new ModernRaster(pnmImage.raster);
             }
             if (isPNGSignature(bytes)) {
-                auto pngImage = png::readPNGImageFromMemory(bytes.data(), bytes.size());
-                return new ModernRaster(pngImage.getModernRaster());
+                return new ModernRaster(png::readPNGImageFromMemory(bytes.data(), bytes.size()));
             }
             int width, height, channels;
             unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,

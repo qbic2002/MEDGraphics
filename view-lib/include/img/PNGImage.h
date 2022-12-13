@@ -30,9 +30,13 @@ enum CHUNK_TYPE {
 
 class PNGChunk {
 public:
-    explicit PNGChunk(unsigned int chunkDataSize_, unsigned int crc_);
+    PNGChunk(unsigned int chunkDataSize_, unsigned int crc_);
+
+    PNGChunk() = default;
 
     virtual CHUNK_TYPE getChunkType() = 0;
+
+    virtual std::vector<unsigned char> getData() = 0;
 
     virtual ~PNGChunk() = default;
 
@@ -46,7 +50,13 @@ public:
                  unsigned char bitDepth_, unsigned char colorType_, unsigned char compressionMethod,
                  unsigned char filterMethod_, unsigned char interlaceMethod_);
 
+    PNGChunkIHDR(unsigned int width_, unsigned int height_,
+                 unsigned char bitDepth_, unsigned char colorType_, unsigned char compressionMethod,
+                 unsigned char filterMethod_, unsigned char interlaceMethod_);
+
     CHUNK_TYPE getChunkType() override;
+
+    std::vector<unsigned char> getData() override;
 
     unsigned int width;
     unsigned int height;
@@ -61,7 +71,11 @@ class PNGChunkPLTE : public PNGChunk {
 public:
     PNGChunkPLTE(unsigned int chunkDataSize_, unsigned int crc_, const std::vector<rgb>& palette_);
 
+    PNGChunkPLTE(const std::vector<rgb>& palette_);
+
     CHUNK_TYPE getChunkType() override;
+
+    std::vector<unsigned char> getData() override;
 
     std::vector<rgb> palette;
 };
@@ -70,7 +84,11 @@ class PNGChunkIDAT : public PNGChunk {
 public:
     PNGChunkIDAT(unsigned int chunkDataSize_, unsigned int crc_, unsigned char* data_);
 
+    PNGChunkIDAT(unsigned int size, unsigned char* data_);
+
     CHUNK_TYPE getChunkType() override;
+
+    std::vector<unsigned char> getData() override;
 
     unsigned char* data;
 
@@ -81,14 +99,22 @@ class PNGChunkIEND : public PNGChunk {
 public:
     PNGChunkIEND(unsigned int chunkDataSize_, unsigned int crc_);
 
+    PNGChunkIEND();
+
+    std::vector<unsigned char> getData() override;
+
     CHUNK_TYPE getChunkType() override;
 };
 
 class PNGChunkGAMMA : public PNGChunk {
 public:
-    explicit PNGChunkGAMMA(unsigned int chunkDataSize_, unsigned int crc_, unsigned int gamma_);
+    PNGChunkGAMMA(unsigned int chunkDataSize_, unsigned int crc_, unsigned int gamma_);
+
+    explicit PNGChunkGAMMA(unsigned int gamma_);
 
     CHUNK_TYPE getChunkType() override;
+
+    std::vector<unsigned char> getData() override;
 
     unsigned int gamma;
 };
@@ -99,6 +125,8 @@ public:
 
     CHUNK_TYPE getChunkType() override;
 
+    std::vector<unsigned char> getData() override;
+
     char* data;
 
     ~PNGChunkUNKNOWN() override;
@@ -108,11 +136,15 @@ class PNGImage {
 public:
     PNGImage(const std::vector<PNGChunk*>& pngChunks_);
 
+    PNGImage(const ModernRaster& modernRaster_);
+
     PNGImage(const PNGImage& pngImage) = default;
 
     ~PNGImage();
 
     PNGChunk* findChunkByType(CHUNK_TYPE chunkType);
+
+    const std::vector<PNGChunk*>& getPngChunks() const;
 
     const ModernRaster& getModernRaster() const;
 

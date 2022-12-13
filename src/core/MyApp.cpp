@@ -9,6 +9,7 @@
 #include "MyLayout.h"
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
+#include "img/pngUtils.h"
 
 MyApp* instance = nullptr;
 
@@ -168,7 +169,7 @@ void MyApp::saveImage() {
         if (isEditing) {
             pnm::writePNMImage(PNMImage(*editedRaster), filename);
         } else {
-            pnm::writePNMImage(PNMImage(*imageFileStorage.getCurImageFile()->raster), filename);
+            png::writePNGImage(*imageFileStorage.getCurImageFile()->raster, filename);
         }
     } catch (std::exception&) {
         showError(L"Error with saving =(");

@@ -9,18 +9,18 @@
 #include "utils/file.h"
 #include "img/pngUtils.h"
 #include "utils/zlib_utils.h"
+#include "utils/random.h"
 #include <zlib.h>
 
 int main([[maybe_unused]] int argc, char** argv) {
-
-
-//    std::vector<char> res = zlib::inflate("123456", 6);
-//    for (const auto& item: res){
-//        std::cout << (int)item;
+//
+//    std::vector<unsigned char> v;
+//    for (int i = 0; i < 10000; ++i){
+//        v.push_back(i);
 //    }
-//    std::cout << "\n";
-//    auto v = utils::readAllBytes(R"(D:\CPP\cg22-project-MEDGraphics\assets\test.png)");
-//    PNGImage p = png::readPNGImageFromMemory(v.data(), v.size());
+//    std::vector<unsigned char> res = zlib::deflate(v);
+//    std::vector<unsigned char> r = zlib::inflate(res);
+//
 //
 //    return 0;
     MyApp app;
