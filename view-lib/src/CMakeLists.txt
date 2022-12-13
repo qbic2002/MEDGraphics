@@ -23,7 +23,6 @@ add_library(view STATIC
         utils/measureFps.cpp
         utils/measureTime.cpp
         utils/random.cpp
-        utils/ImageFormats.cpp
         img/colorModelConverter.cpp
         utils/pixelTypeMethods.cpp
         img/PixelGray8.cpp
@@ -40,5 +39,6 @@ add_library(view STATIC
         img/DitheringMethods.cpp
         img/PNGImage.cpp
         img/pngUtils.cpp
-        utils/zlib_utils.cpp)
+        utils/zlib_utils.cpp
+        utils/SaveFormat.cpp)
 target_link_libraries(view ${LIBS})

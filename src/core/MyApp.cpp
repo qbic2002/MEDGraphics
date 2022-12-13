@@ -10,6 +10,7 @@
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
 #include "img/pngUtils.h"
+#include "utils/SaveFormat.h"
 
 MyApp* instance = nullptr;
 
@@ -162,15 +163,10 @@ void MyApp::saveImage() {
     utils::OpenFileInfo openFileInfo = utils::getSaveFileName();
     if (openFileInfo.isCancelled)
         return;
-
-    std::wstring filename = utils::fixFileName(openFileInfo.filename, openFileInfo.filterIndex);
-
     try {
-        if (isEditing) {
-            pnm::writePNMImage(PNMImage(*editedRaster), filename);
-        } else {
-            png::writePNGImage(*imageFileStorage.getCurImageFile()->raster, filename);
-        }
+        const auto& saveFormat = utils::getSaveFormat(openFileInfo.filterIndex - 1);
+        ModernRaster* rasterToSave = isEditing ? editedRaster : imageFileStorage.getCurImageFile()->raster;
+        saveFormat.saveImage(rasterToSave, openFileInfo.filename);
     } catch (std::exception&) {
         showError(L"Error with saving =(");
     }
