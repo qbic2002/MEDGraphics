@@ -149,23 +149,17 @@ void ModernRaster::fillRgbaData() {
     if (ditheringMethodEnum != NO_DITHERING)
         delete[] dataPtr;
 
-    for (int i = 0; i < length; i++) {
-        for (int c = 0; c < 3; c++)
-            rgbaFData[i].components[c] = applyGamma(unapplyGamma(rgbaFData[i].components[c], gamma), 0);
-        rgbaData[i] = rgbaFData[i].toRgba();
+    if (gamma != 0) {
+        for (int i = 0; i < length; i++) {
+            for (int c = 0; c < 3; c++)
+                rgbaFData[i].components[c] = unapplyGamma(applyGamma(rgbaFData[i].components[c], gamma), 0);
+            rgbaData[i] = rgbaFData[i].toRgba();
+        }
+    } else {
+        for (int i = 0; i < length; i++) {
+            rgbaData[i] = rgbaFData[i].toRgba();
+        }
     }
-
-//    if (gamma != 0) {
-//        for (int i = 0; i < length; i++) {
-//            for (int c = 0; c < 3; c++)
-//                rgbaFData[i].components[c] = applyGamma(unapplyGamma(rgbaFData[i].components[c], gamma), 0);
-//            rgbaData[i] = rgbaFData[i].toRgba();
-//        }
-//    } else {
-//        for (int i = 0; i < length; i++) {
-//            rgbaData[i] = rgbaFData[i].toRgba();
-//        }
-//    }
 
     delete[] rgbaFData;
     timeStamp.report("fillRgbaData");
@@ -312,9 +306,6 @@ void ModernRaster::drawLine(Point p1, Point p2, float* color_, float lineWidth, 
 }
 
 void ModernRaster::setPixel(rgbaF rgbaf, int x, int y) {
-//    for (int i = 0; i < 3; ++i){
-//        rgbaf.components[i] = std::pow(rgbaf.components[i], gamma);
-//    }
     int index = (y * width + x);
     colorModel->fromRgba(rgbaf, data.get() + index * colorModel->getComponentsCount());
 
@@ -323,7 +314,7 @@ void ModernRaster::setPixel(rgbaF rgbaf, int x, int y) {
         components[c] = (filter[c] ? data.get()[index * colorModel->getComponentsCount() + c] : 0);
     rgbaf = colorModel->toRgba(components);
     for (int i = 0; i < 3; ++i) {
-        rgbaf.components[i] = applyGamma(rgbaf.components[i], gamma);
+        rgbaf.components[i] = unapplyGamma(applyGamma(rgbaf.components[i], gamma), 0);
     }
     rgbaData[index] = rgbaf.toRgba();
 }
