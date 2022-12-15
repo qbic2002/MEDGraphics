@@ -10,6 +10,10 @@ add_executable(test_file test_file.cpp ../view-lib/include/utils/encoding.h ../v
 add_executable(test_texture test_texture.cpp ../include/stb_image.h)
 target_link_libraries(test_texture ${LIBS})
 
+add_executable(test_compute_shader test_compute_shader.cpp)
+target_link_libraries(test_compute_shader view)
+add_dependencies(test_compute_shader copy_assets)
+
 add_executable(process_assets
         process_assets.cpp ../include/stb_image.h ../include/stb_image_write.h
         ../view-lib/src/utils/file.cpp ../view-lib/include/utils/file.h)

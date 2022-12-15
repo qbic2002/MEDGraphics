@@ -15,7 +15,9 @@ add_executable(MEDGraphics
         widget/DropDownView.cpp widget/DropDownView.h
         widget/IconView.cpp widget/IconView.h
         core/MyLayout.cpp core/MyLayout.h
-        widget/EditText.cpp widget/EditText.h widget/SelectView.cpp widget/SelectView.h)
+        widget/EditText.cpp widget/EditText.h
+        widget/SelectView.cpp widget/SelectView.h
+        core/RasterComputing.cpp core/RasterComputing.h)
 target_link_libraries(MEDGraphics view)
 add_dependencies(MEDGraphics copy_assets)
 

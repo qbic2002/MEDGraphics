@@ -4,12 +4,10 @@
 
 #include "MyApp.h"
 #include "utils/explorer_utils.h"
-#include "img/pnmUtils.h"
 #include "../widget/ImageView.h"
 #include "MyLayout.h"
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
-#include "img/pngUtils.h"
 #include "utils/SaveFormat.h"
 
 MyApp* instance = nullptr;
@@ -224,7 +222,7 @@ void updateColorModelUI() {
     if (!editedRaster)
         return;
     auto colorModel = editedRaster->getColorModel();
-    int index = -1;
+    int index;
     switch (colorModel->getEnum()) {
         case COLOR_MODEL_RGB:
             index = 0;
@@ -346,6 +344,7 @@ void editRaster(ModernRaster* modernRaster) {
     editedTexture = new gl::Texture(*editedRaster);
 
     imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+    imageView->setShouldRenderGrid(true);
 
     for (int i = 0; i < componentsCount; i++) {
         rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::VISIBLE);
@@ -397,21 +396,19 @@ void MyApp::toggleEdit() {
         }
         editRaster(imageFileStorage.getCurImageFile()->raster);
     } else {
-        delete
-                editedRaster;
+        delete editedRaster;
         editedRaster = nullptr;
-        delete
-                editedTexture;
+        delete editedTexture;
         editedTexture = nullptr;
 
         auto imageFile = imageFileStorage.getCurImageFile();
         imageView->setTexture(imageFile->textureId,
                               imageFile->raster->getWidth(),
                               imageFile->raster->getHeight());
+        imageView->setShouldRenderGrid(false);
 
         isEditing = false;
-        viewerRootView->
-                setBackground(view::ColorBackground(rgba{0, 0, 0, 255})
+        viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255})
         );
     }
     rightTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);

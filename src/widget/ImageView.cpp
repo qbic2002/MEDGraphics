@@ -5,12 +5,15 @@
 #include "ImageView.h"
 #include <GL/glew.h>
 #include <cmath>
+#include <utils/gl_utils.h>
 
 namespace view {
 
-    void glVertexUV(float x, float y, float u, float v) {
-        glTexCoord2f(u, v);
-        glVertex2f(x, y);
+    int zoomToGridSize(float zoom) {
+        float zoomBase2 = std::pow(2, (int) std::log2(zoom));
+        if (zoomBase2 >= 16)
+            return 1;
+        return std::round(16 / zoomBase2);
     }
 
     ImageView::ImageView(Context* context, const ViewAttributes& attr) : View(context, attr) {}
@@ -26,14 +29,14 @@ namespace view {
             glTranslatef(translateX, translateY, 0);
             glScalef(zoom, zoom, 1);
 
-            glBegin(GL_QUADS);
+            if (shouldRenderGrid) {
+                gridShader.useProgram();
+                glUniform1i(uniformSizeLoc, zoomToGridSize(zoom));
+                glPositionQuad(0, 0, textureWidth, textureHeight);
+                glUseProgram(0);
+            }
 
-            glVertexUV(0, 0, 0, 0);
-            glVertexUV(0, textureHeight, 0, 1);
-            glVertexUV(textureWidth, textureHeight, 1, 1);
-            glVertexUV(textureWidth, 0, 1, 0);
-
-            glEnd();
+            glTextureQuad(0, 0, textureWidth, textureHeight);
         }
         glPopMatrix();
     }
@@ -145,6 +148,13 @@ namespace view {
 
     int ImageView::getPointerY() const {
         return pointerY;
+    }
+
+    void ImageView::setShouldRenderGrid(bool value) {
+        if (shouldRenderGrid == value)
+            return;
+        shouldRenderGrid = value;
+        invalidate();
     }
 
 } // view

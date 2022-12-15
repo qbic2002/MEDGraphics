@@ -44,8 +44,11 @@ void ImageFileStorage::update() {
         if (imageFile.raster != nullptr && imageFile.textureId == 0) {
             info() << "load texture " << imageFile.getPath().filename().string();
             auto* raster = imageFile.raster;
-            imageFile.textureId = gl::loadTexture(raster->getRgbaData(), raster->getWidth(), raster->getHeight(),
-                                                  GL_RGBA, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+            const unsigned char* data = raster->getRgbaData();
+            int width = raster->getWidth();
+            int height = raster->getHeight();
+            imageFile.textureId = gl::loadTexture(data, GL_RGBA, GL_UNSIGNED_BYTE, width, height, GL_RGBA, GL_CLAMP,
+                                                  GL_LINEAR, GL_NEAREST);
         }
     }
 

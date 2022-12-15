@@ -10,7 +10,9 @@ namespace gl {
     Texture::Texture(const ModernRaster& raster) {
         width = raster.getWidth();
         height = raster.getHeight();
-        textureId = loadTexture(raster.getRgbaData(), width, height, GL_RGBA, GL_CLAMP, GL_LINEAR, GL_NEAREST);
+        const unsigned char* data = raster.getRgbaData();
+        textureId = loadTexture(data, GL_RGBA, GL_UNSIGNED_BYTE, width, height, GL_RGBA, GL_CLAMP, GL_LINEAR,
+                                GL_NEAREST);
     }
 
     Texture::Texture(Texture&& other) noexcept: textureId(other.textureId) {

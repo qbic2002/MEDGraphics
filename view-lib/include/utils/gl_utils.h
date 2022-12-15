@@ -13,8 +13,9 @@ namespace gl {
 
     GLint getMaxTextureSize();
 
-    GLuint loadTexture(const unsigned char* data, int width, int height, GLint format, GLint wrap, GLint minFilter,
-                       GLint magFilter);
+    GLuint loadTexture(const void* data, GLuint dataFormat, GLenum type, int width, int height,
+                       GLint internalFormat, GLint wrap, GLint minFilter, GLint magFilter);
+
 }
 
 void glColor(const rgba& rgba);

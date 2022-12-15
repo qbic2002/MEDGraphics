@@ -31,8 +31,8 @@ namespace gl {
 
         ft::doneFace(face);
 
-        textureId = gl::loadTexture(textureData, textureWidth, textureHeight, GL_ALPHA, GL_CLAMP, GL_LINEAR,
-                                    GL_NEAREST);
+        textureId = loadTexture(textureData, GL_ALPHA, GL_UNSIGNED_BYTE, textureWidth, textureHeight, GL_ALPHA,
+                                GL_CLAMP, GL_LINEAR, GL_NEAREST);
         delete[] textureData;
     }
 

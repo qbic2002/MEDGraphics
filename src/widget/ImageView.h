@@ -5,9 +5,9 @@
 #ifndef MEDGRAPHICS_IMAGEVIEW_H
 #define MEDGRAPHICS_IMAGEVIEW_H
 
-#include "utils/ShaderProgram.h"
 #include "view/View.h"
 #include "../core/MyApp.h"
+#include "utils/ShaderProgram.h"
 
 namespace view {
 
@@ -43,6 +43,8 @@ namespace view {
 
         int getPointerY() const;
 
+        void setShouldRenderGrid(bool value);
+
     private:
         void setZoomRatio(float ratio);
 
@@ -54,6 +56,10 @@ namespace view {
         int textureWidth = 0, textureHeight = 0;
         int textureId;
         int pointerX = 0, pointerY = 0;
+        bool shouldRenderGrid = false;
+
+        ShaderProgram gridShader = ShaderProgram("grid");
+        GLuint uniformSizeLoc = gridShader.getUniformLocation("size");
     };
 
 } // view
