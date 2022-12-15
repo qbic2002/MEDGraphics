@@ -241,10 +241,9 @@ rgbaF ColorModelYCbCr601::toRgba(const float* data) const {
     float cb = data[1] * 255;
     float cr = data[2] * 255;
 
-    float r = 255 / 219.0 * (y - 16) + 255 / 224.0 * 1.402 * (cr - 128);
-    float g = 255 / 219.0 * (y - 16) - 255 / 224.0 * 1.772 * 0.114 / 0.587 * (cb - 128) -
-              255 / 224.0 * 1.402 * 0.299 / 0.587 * (cr - 128);
-    float b = 255 / 219.0 * (y - 16) + 255 / 224.0 * 1.772 * (cb - 128);
+    float r = ((y) + 1.402 * (cr - 128));
+    float g = ((y) - 0.344136 * (cb - 128) - 0.714136 * (cr - 128));
+    float b = (y) + 1.772 * (cb - 128);
 
     if (r < 0) r = 0;
     if (r > 255) r = 255;
@@ -258,9 +257,13 @@ rgbaF ColorModelYCbCr601::toRgba(const float* data) const {
 }
 
 void ColorModelYCbCr601::fromRgba(rgbaF color, float* dest) const {
-    float y = ((65.481 * color.r) + (128.553 * color.g) + (24.966 * color.b));
-    float cb = (128 - (37.797 * color.r) - (74.203 * color.g) + (112.0 * color.b));
-    float cr = (128 + (112.0 * color.r) - (93.786 * color.g) - (18.214 * color.b));
+    color.r *= 255;
+    color.g *= 255;
+    color.b *= 255;
+
+    float y = (0 + (0.299 * color.r) + (0.587 * color.g) + (0.114 * color.b));
+    float cb = (128 - (0.168736 * color.r) - (0.331264 * color.g) + (0.5 * color.b));
+    float cr = (128 + (0.5 * color.r) - (0.418688 * color.g) - (0.081312 * color.b));
 
     dest[0] = y / 255;
     dest[1] = cb / 255;
@@ -280,9 +283,9 @@ rgbaF ColorModelYCbCr709::toRgba(const float* data) const {
     float cb = data[1] * 255;
     float cr = data[2] * 255;
 
-    float r = ((y) + 1.402 * (cr - 128));
-    float g = ((y) - 0.344136 * (cb - 128) - 0.714136 * (cr - 128));
-    float b = (y) + 1.772 * (cb - 128);
+    float r = ((y) + 1.5748 * cr);
+    float g = ((y) - 0.1873 * cb - 0.4681 * cr);
+    float b = (y) + 1.8556 * cb;
 
     if (r < 0) r = 0;
     if (r > 255) r = 255;
@@ -299,9 +302,9 @@ void ColorModelYCbCr709::fromRgba(rgbaF color, float* dest) const {
     color.g *= 255;
     color.b *= 255;
 
-    float y = (0 + (0.299 * color.r) + (0.587 * color.g) + (0.114 * color.b));
-    float cb = (128 - (0.168736 * color.r) - (0.331264 * color.g) + (0.5 * color.b));
-    float cr = (128 + (0.5 * color.r) - (0.418688 * color.g) - (0.081312 * color.b));
+    float y = (0 + (0.2126 * color.r) + (0.7152 * color.g) + (0.0722 * color.b));
+    float cb = (0 - (0.1146 * color.r) - (0.3854 * color.g) + (0.5 * color.b));
+    float cr = (0 + (0.5 * color.r) - (0.4542 * color.g) - (0.0458 * color.b));
 
     dest[0] = y / 255;
     dest[1] = cb / 255;
