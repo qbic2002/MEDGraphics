@@ -454,6 +454,12 @@ void MyApp::openGrad(int width, int height) {
     editRaster(&gradientRaster);
 }
 
+void MyApp::applyScale(const img::ScaleImageInfo&) {
+    if (!isEditing)
+        return;
+
+}
+
 MyApp* getAppInstance() {
     return instance;
 }

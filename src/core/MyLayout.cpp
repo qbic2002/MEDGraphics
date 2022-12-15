@@ -451,7 +451,7 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .fontSize = 12,
     }));
 
-    valuesLay->addChild(new EditText(context, {
+    auto* scaleWidthEdt = new EditText(context, {
             .id = ID_RIGHT_TOOL_SCALE_WIDTH,
             .width = 200,
             .padding = Padding(4),
@@ -459,7 +459,8 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .text = L"",
             .fontSize = 12,
             .inputType = view::INTEGER,
-    }));
+    });
+    valuesLay->addChild(scaleWidthEdt);
 
     keysLay->addChild(new TextView(context, {
             .padding = Padding(4),
@@ -467,7 +468,7 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .fontSize = 12,
     }));
 
-    valuesLay->addChild(new EditText(context, {
+    auto* scaleHeightEdt = new EditText(context, {
             .id = ID_RIGHT_TOOL_SCALE_HEIGHT,
             .width = 200,
             .padding = Padding(4),
@@ -475,7 +476,8 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .text = L"",
             .fontSize = 12,
             .inputType = view::INTEGER,
-    }));
+    });
+    valuesLay->addChild(scaleHeightEdt);
 
     keysLay->addChild(new TextView(context, {
             .padding = Padding(4),

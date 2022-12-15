@@ -14,6 +14,7 @@ namespace img {
         int height = 0;
         float centerShiftX = 0;
         float centerShiftY = 0;
+        int mode = 0;
     };
 
     struct ScaleMode {
@@ -29,6 +30,8 @@ namespace img {
 //    extern const ScaleMode bcSplines;
         extern const std::vector<const ScaleMode*> modes;
     }
+
+    void histogram(const float* src, int stride, int length, int* dst, int dstLength, int& topValuesCount);
 }
 
 #endif //MEDGRAPHICS_IMAGE_PROCESSING_H

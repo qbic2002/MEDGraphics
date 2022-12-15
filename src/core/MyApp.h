@@ -10,6 +10,7 @@
 #include <vector>
 #include <utils/String.h>
 #include "R.h"
+#include "img/ImageProcessing.h"
 
 class MyApp : public Context {
 public:
@@ -51,6 +52,8 @@ public:
     void setDitheringBits(int bits);
 
     void setDitheringMethod(DitheringMethodEnum method);
+
+    void applyScale(const img::ScaleImageInfo& scaleImageInfo);
 
 protected:
     ImageFileStorage imageFileStorage;
