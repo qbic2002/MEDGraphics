@@ -267,13 +267,13 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
         }
     }
 
-
-    modernRaster = ModernRaster(width, height, raster_data, colorModel);
+    float gamma = 0;
     auto* pngChunkGamma = (PNGChunkGAMMA*) findChunkByType(CHUNK_TYPE_GAMMA);
-
     if (pngChunkGamma) {
-        modernRaster.reinterpretGamma(pngChunkGamma->gamma / 100000.0 * 2.2);
+        gamma = pngChunkGamma->gamma / 100000.0;
     }
+
+    modernRaster = ModernRaster(width, height, raster_data, colorModel, gamma);
 }
 
 const ModernRaster& PNGImage::getModernRaster() const {
@@ -303,7 +303,7 @@ PNGImage::PNGImage(const ModernRaster& modernRaster_) : modernRaster(modernRaste
     unsigned char interlace = 0;
     auto* pngChunkIhdr = new PNGChunkIHDR(width, height, bidDepth, colorType, compressionMethod, filter, interlace);
     pngChunks.push_back(pngChunkIhdr);
-    auto* pngChunkGamma = new PNGChunkGAMMA(modernRaster_.getGamma() * 100000 / 2.2);
+    auto* pngChunkGamma = new PNGChunkGAMMA(modernRaster_.getGamma() * 100000);
     pngChunks.push_back(pngChunkGamma);
 
     size_t size =

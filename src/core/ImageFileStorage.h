@@ -11,7 +11,7 @@
 #include <condition_variable>
 #include <set>
 
-#define IMG_LOAD_R 2
+#define IMG_LOAD_R 0
 #define IMG_LOAD_D (IMG_LOAD_R + IMG_LOAD_R + 1)
 
 class ImageFileStorage {
@@ -56,6 +56,7 @@ private:
     std::condition_variable notifier;
 
     int prevImageAnnouncedIndex = -1;
+    int prevImageAnnouncedTextureId = -1;
     std::vector<std::function<void()>> onImageChangedListeners;
     int prevImageTitleAnnouncedIndex = -1;
     std::vector<std::function<void()>> onImageTitleChangedListeners;

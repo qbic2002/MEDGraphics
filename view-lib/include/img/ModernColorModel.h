@@ -85,9 +85,11 @@ class ModernRaster : public AbstractRaster {
 public:
     ModernRaster() = default;
 
-    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel);
+    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel,
+                 float gamma = 0);
 
-    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModelEnum colorModelEnum);
+    ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModelEnum colorModelEnum,
+                 float gamma = 0);
 
     ModernRaster(const ModernRaster& other);
 
@@ -148,7 +150,7 @@ private:
     std::shared_ptr<rgba[]> rgbaData;
     const ColorModel* colorModel = findColorModel(COLOR_MODEL_RGB);
     bool filter[4] = {true, true, true, true};
-    float gamma = 1;
+    float gamma = 0;
     DitheringMethodEnum ditheringMethodEnum = NO_DITHERING;
     int ditheringBits = 8;
 };

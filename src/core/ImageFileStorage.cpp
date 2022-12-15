@@ -24,6 +24,7 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
             curIndex = -1;
             prevNotifiedIndex = -1;
             prevImageAnnouncedIndex = -1;
+            prevImageAnnouncedTextureId = -1;
             prevImageTitleAnnouncedIndex = -1;
         } else {
             curPath = fs::canonical(file);
@@ -67,13 +68,31 @@ void ImageFileStorage::update() {
         prevImageTitleAnnouncedIndex = curIndex;
     }
 
-    if (curIndex != prevImageAnnouncedIndex &&
-        (curDirImageFiles.empty() || curDirImageFiles[curIndex].textureId != 0)) {
+    if (curDirImageFiles.empty() && prevImageAnnouncedIndex != curIndex) {
         for (auto& listener: onImageChangedListeners) {
             listener();
         }
         prevImageAnnouncedIndex = curIndex;
+        prevImageAnnouncedTextureId = -1;
+    } else if (curDirImageFiles[curIndex].textureId != 0) {
+        if (curIndex != prevImageAnnouncedIndex
+            || curDirImageFiles[curIndex].textureId != prevImageAnnouncedTextureId) {
+            for (auto& listener: onImageChangedListeners) {
+                listener();
+            }
+            prevImageAnnouncedIndex = curIndex;
+            prevImageAnnouncedTextureId = curDirImageFiles[curIndex].textureId;
+        }
     }
+//
+//    if ((curIndex != prevImageAnnouncedIndex || prevImageAnnouncedTextureId) &&
+//        (curDirImageFiles.empty() || curDirImageFiles[curIndex].textureId != 0)) {
+//        for (auto& listener: onImageChangedListeners) {
+//            listener();
+//        }
+//        prevImageAnnouncedIndex = curIndex;
+//        prevImageAnnouncedTextureId = curDirImageFiles.empty() ? -1 : curDirImageFiles[curIndex].textureId;
+//    }
 }
 
 void ImageFileStorage::next() {

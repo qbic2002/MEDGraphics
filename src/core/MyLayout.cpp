@@ -12,6 +12,7 @@
 #include "../widget/WindowBar.h"
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
+#include "img/ImageProcessing.h"
 
 using namespace view;
 
@@ -420,6 +421,119 @@ view::LinearLayout* createToolSectionPaint(Context* context) {
     return lay;
 }
 
+view::LinearLayout* createToolSectionScale(Context* context) {
+    auto lay = createToolSectionLay(context, L"Масштабирование");
+
+    auto propertiesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_PARENT,
+            .height = WRAP_CONTENT,
+            .orientation = HORIZONTAL,
+    });
+    lay->addChild(propertiesLay);
+
+    auto keysLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(keysLay);
+
+    auto valuesLay = new LinearLayout(context, LinearLayoutAttributes{
+            .width = FILL_SPARE,
+            .height = WRAP_CONTENT,
+            .gravity = LEFT,
+    });
+    propertiesLay->addChild(valuesLay);
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Ширина",
+            .fontSize = 12,
+    }));
+
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_SCALE_WIDTH,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .text = L"",
+            .fontSize = 12,
+            .inputType = view::INTEGER,
+    }));
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Высота",
+            .fontSize = 12,
+    }));
+
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_SCALE_HEIGHT,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .text = L"",
+            .fontSize = 12,
+            .inputType = view::INTEGER,
+    }));
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Смещение X центра",
+            .fontSize = 12,
+    }));
+
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_SCALE_CENTER_X,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .text = L"0",
+            .fontSize = 12,
+            .inputType = view::INTEGER,
+    }));
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Смещение Y центра",
+            .fontSize = 12,
+    }));
+
+    valuesLay->addChild(new EditText(context, {
+            .id = ID_RIGHT_TOOL_SCALE_CENTER_Y,
+            .width = 200,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .text = L"0",
+            .fontSize = 12,
+            .inputType = view::INTEGER,
+    }));
+
+    keysLay->addChild(new TextView(context, {
+            .padding = Padding(4),
+            .text = L"Алгоритм",
+            .fontSize = 12,
+    }));
+
+    std::vector<String> modeItems;
+    for (auto& mode: img::scale::modes)
+        modeItems.push_back(mode->name);
+    auto selectMode = new SelectView(context, {
+            .id = ID_RIGHT_TOOL_SCALE_MODE,
+            .padding = Padding(4),
+            .background = ColorBackground{theme.color.primaryBg},
+            .fontSize = 12,
+            .items = modeItems
+    }, theme.dropDownViewAttr);
+    selectMode->setOnSelectChangeListener([](int index) {
+        info() << index;
+//        getAppInstance()->setDitheringMethod((DitheringMethodEnum) (index - 1));
+    });
+    valuesLay->addChild(selectMode);
+
+    return lay;
+}
+
 view::View* createRootView(Context* context) {
     using namespace view;
 
@@ -463,6 +577,7 @@ view::View* createRootView(Context* context) {
     rightToolLay->addChild(createToolSectionGamma(context));
     rightToolLay->addChild(createToolSectionDithering(context));
     rightToolLay->addChild(createToolSectionPaint(context));
+    rightToolLay->addChild(createToolSectionScale(context));
 
     return rootView;
 }

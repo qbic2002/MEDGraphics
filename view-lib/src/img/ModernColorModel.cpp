@@ -5,19 +5,22 @@
 
 #include "img/ModernColorModel.h"
 #include "utils/measureTime.h"
+#include "utils/logging.h"
 
-ModernRaster::ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel)
-        : width(width), height(height), data(data), colorModel(colorModel) {
+ModernRaster::ModernRaster(int width, int height, const std::shared_ptr<float[]>& data, const ColorModel* colorModel,
+                           float gamma)
+        : width(width), height(height), data(data), colorModel(colorModel), gamma(gamma) {
     rgbaData = std::shared_ptr<rgba[]>(new rgba[width * height]);
     fillRgbaData();
 }
 
 ModernRaster::ModernRaster(int width, int height, const std::shared_ptr<float[]>& data,
-                           const ColorModelEnum colorModelEnum)
-        : ModernRaster(width, height, data, findColorModel(colorModelEnum)) {}
+                           const ColorModelEnum colorModelEnum, float gamma)
+        : ModernRaster(width, height, data, findColorModel(colorModelEnum), gamma) {}
 
 ModernRaster::ModernRaster(const ModernRaster& other) : width(other.width), height(other.height),
-                                                        colorModel(other.colorModel) {
+                                                        colorModel(other.colorModel), gamma(other.gamma) {
+    info() << "cloned";
     int length = width * height * other.colorModel->getComponentsCount();
     data = std::shared_ptr<float[]>(new float[length]);
     for (int i = 0; i < length; i++) {
@@ -30,6 +33,7 @@ ModernRaster::ModernRaster(const ModernRaster& other) : width(other.width), heig
 ModernRaster::ModernRaster(const ModernRaster&& other) noexcept: ModernRaster(other.width, other.height, other.data,
                                                                               other.colorModel) {
     rgbaData = other.rgbaData;
+    throw std::runtime_error("not implemented");
 }
 
 int ModernRaster::getWidth() const {
@@ -103,6 +107,28 @@ bool ModernRaster::getFilter(int index) const {
     return filter[index];
 }
 
+/**
+ * From linear gamma to selected @param gamma
+ */
+float applyGamma(float colorValue, float gamma) {
+    if (gamma != 0)
+        return std::pow(colorValue, gamma);
+    if (colorValue <= 0.04045)
+        return colorValue / 12.92;
+    return std::pow((colorValue + 0.055) / 1.055, 2.4);
+}
+
+/**
+ * From selected @param gamma to linear gamma
+ */
+float unapplyGamma(float colorValue, float gamma) {
+    if (gamma != 0)
+        return std::pow(colorValue, 1 / gamma);
+    if (colorValue <= 0.0031308)
+        return colorValue * 12.92;
+    return 1.055 * std::pow(colorValue, 1 / 2.4) - 0.055;
+}
+
 void ModernRaster::fillRgbaData() {
     utils::TimeStamp timeStamp;
 
@@ -125,9 +151,21 @@ void ModernRaster::fillRgbaData() {
 
     for (int i = 0; i < length; i++) {
         for (int c = 0; c < 3; c++)
-            rgbaFData[i].components[c] = std::pow(rgbaFData[i].components[c], 1 / gamma);
+            rgbaFData[i].components[c] = applyGamma(unapplyGamma(rgbaFData[i].components[c], gamma), 0);
         rgbaData[i] = rgbaFData[i].toRgba();
     }
+
+//    if (gamma != 0) {
+//        for (int i = 0; i < length; i++) {
+//            for (int c = 0; c < 3; c++)
+//                rgbaFData[i].components[c] = applyGamma(unapplyGamma(rgbaFData[i].components[c], gamma), 0);
+//            rgbaData[i] = rgbaFData[i].toRgba();
+//        }
+//    } else {
+//        for (int i = 0; i < length; i++) {
+//            rgbaData[i] = rgbaFData[i].toRgba();
+//        }
+//    }
 
     delete[] rgbaFData;
     timeStamp.report("fillRgbaData");
@@ -145,9 +183,9 @@ void ModernRaster::convertToGamma(float gamma_) {
     for (int i = 0; i < length; i++) {
         auto rgbaf = colorModel->toRgba(dataPtr);
 
-        rgbaf.r = std::pow(rgbaf.r, gamma_ / gamma);
-        rgbaf.g = std::pow(rgbaf.g, gamma_ / gamma);
-        rgbaf.b = std::pow(rgbaf.b, gamma_ / gamma);
+        rgbaf.r = unapplyGamma(applyGamma(rgbaf.r, gamma), gamma_);
+        rgbaf.b = unapplyGamma(applyGamma(rgbaf.b, gamma), gamma_);
+        rgbaf.g = unapplyGamma(applyGamma(rgbaf.g, gamma), gamma_);
 
         colorModel->fromRgba(rgbaf, dataPtr);
         dataPtr += componentsCount;
@@ -285,7 +323,7 @@ void ModernRaster::setPixel(rgbaF rgbaf, int x, int y) {
         components[c] = (filter[c] ? data.get()[index * colorModel->getComponentsCount() + c] : 0);
     rgbaf = colorModel->toRgba(components);
     for (int i = 0; i < 3; ++i) {
-        rgbaf.components[i] = std::pow(rgbaf.components[i], 1 / gamma);
+        rgbaf.components[i] = applyGamma(rgbaf.components[i], gamma);
     }
     rgbaData[index] = rgbaf.toRgba();
 }
