@@ -9,6 +9,7 @@
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
 #include "utils/SaveFormat.h"
+#include "../widget/HistogramView.h"
 
 MyApp* instance = nullptr;
 
@@ -26,6 +27,10 @@ gl::Texture* editedTexture;
 
 int xBegin = 0;
 int yBegin = 0;
+
+struct {
+    view::View* lay = nullptr;
+} leftTool;
 
 struct {
     view::View* lay = nullptr;
@@ -87,6 +92,8 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     }
     rightTool.paint.opacityEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP_OPACITY_EDT);
     rightTool.paint.lineWidthEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_LINE_WIDTH);
+
+    leftTool.lay = findViewById(ID_LEFT_TOOL_LAY);
 
     imageFileStorage.open(args[1]);
     imageFileStorage.addImageChangedListener([&]() {
@@ -188,18 +195,33 @@ bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
     if (RootViewManager::onKey(key, scancode, action, mods))
         return true;
 
-    if (isEditing)
-        return false;
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
-        switch (key) {
-            case GLFW_KEY_LEFT:
-                imageFileStorage.prev();
-                return true;
-            case GLFW_KEY_RIGHT:
-                imageFileStorage.next();
-                return true;
-            default:
-                break;
+        if (isEditing) {
+            switch (key) {
+                case GLFW_KEY_UP: {
+                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+                    histogramView->changeLineWidth(1);
+                    return true;
+                }
+                case GLFW_KEY_DOWN: {
+                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+                    histogramView->changeLineWidth(-1);
+                    return true;
+                }
+                default:
+                    break;
+            }
+        } else {
+            switch (key) {
+                case GLFW_KEY_LEFT:
+                    imageFileStorage.prev();
+                    return true;
+                case GLFW_KEY_RIGHT:
+                    imageFileStorage.next();
+                    return true;
+                default:
+                    break;
+            }
         }
     }
 
@@ -408,10 +430,10 @@ void MyApp::toggleEdit() {
         imageView->setShouldRenderGrid(false);
 
         isEditing = false;
-        viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255})
-        );
+        viewerRootView->setBackground(view::ColorBackground(rgba{0, 0, 0, 255}));
     }
     rightTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
+    leftTool.lay->setVisibility(isEditing ? view::VISIBLE : view::INVISIBLE);
     info() << "isEditing: " << isEditing;
 }
 

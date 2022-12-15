@@ -24,7 +24,7 @@ namespace view {
         glBindTexture(GL_TEXTURE_2D, textureId);
         glPushMatrix();
         {
-            glTranslatef(edges.left, edges.top, 0);
+            glTranslatef(innerEdges.left, innerEdges.top, 0);
 
             glTranslatef(translateX, translateY, 0);
             glScalef(zoom, zoom, 1);

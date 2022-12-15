@@ -87,6 +87,8 @@ namespace view {
             }
             for (auto* child: children) {
                 auto req = child->measure();
+                if (child->getVisibility() == INVISIBLE)
+                    continue;
 
                 float childEdges[2];
                 for (int i = 0; i < 2; i++)

@@ -13,6 +13,7 @@
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
 #include "img/ImageProcessing.h"
+#include "../widget/HistogramView.h"
 
 using namespace view;
 
@@ -536,6 +537,20 @@ view::LinearLayout* createToolSectionScale(Context* context) {
     return lay;
 }
 
+view::LinearLayout* createToolSectionHistograms(Context* context) {
+    auto lay = createToolSectionLay(context, L"Гистограммы");
+
+    auto* histogram = new HistogramView(context, {
+            .id = ID_LEFT_TOOL_HISTOGRAM_TEST,
+            .width = FILL_PARENT,
+            .height = 200,
+            .background = ColorBackground{theme.color.primaryBg},
+    });
+    lay->addChild(histogram);
+
+    return lay;
+}
+
 view::View* createRootView(Context* context) {
     using namespace view;
 
@@ -557,9 +572,20 @@ view::View* createRootView(Context* context) {
     });
     rootView->addChild(mainLay);
 
+    auto leftToolLay = new LinearLayout(context, {
+            .id = ID_LEFT_TOOL_LAY,
+            .width = FILL_SPARE,
+            .height = FILL_PARENT,
+            .background = ColorBackground(theme.color.secondaryBg),
+            .visibility = INVISIBLE,
+            .gravity = TOP
+    });
+    mainLay->addChild(leftToolLay);
+    leftToolLay->addChild(createToolSectionHistograms(context));
+
     auto imageView = new ImageView(context, {
             .id = IMAGE_VIEW_ID,
-            .width = FILL_SPARE * 4,
+            .width = FILL_SPARE * 6,
             .height = FILL_PARENT,
             .style = Style{true}});
     mainLay->addChild(imageView);
