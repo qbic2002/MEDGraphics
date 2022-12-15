@@ -55,6 +55,8 @@ public:
 
     void applyScale(const img::ScaleImageInfo& scaleImageInfo);
 
+    void printHistogram();
+
 protected:
     ImageFileStorage imageFileStorage;
 //    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;

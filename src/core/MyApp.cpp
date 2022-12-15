@@ -208,6 +208,10 @@ bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
                     histogramView->changeLineWidth(-1);
                     return true;
                 }
+                case GLFW_KEY_RIGHT_ALT: {
+                    printHistogram();
+                    return true;
+                }
                 default:
                     break;
             }
@@ -480,6 +484,41 @@ void MyApp::applyScale(const img::ScaleImageInfo&) {
     if (!isEditing)
         return;
 
+}
+
+void MyApp::printHistogram() {
+    if (!isEditing)
+        return;
+    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+    auto rgbaData = editedRaster->getRgbaData();
+    auto* rgbaDataf = new float[editedRaster->getWidth() * editedRaster->getHeight() * 4];
+    for (int i = 0; i < editedRaster->getWidth() * editedRaster->getHeight() * 4; ++i) {
+        rgbaDataf[i] = rgbaData[i] / 255.0;
+    }
+
+    int maxValueR = 0;
+    int maxValueG = 0;
+    int maxValueB = 0;
+
+    int* histR = new int[256];
+    int* histG = new int[256];
+    int* histB = new int[256];
+
+    img::histogram(rgbaDataf, 4, editedRaster->getWidth() * editedRaster->getHeight(), histR, 256, maxValueR);
+    img::histogram(rgbaDataf + 1, 4, editedRaster->getWidth() * editedRaster->getHeight(), histG, 256, maxValueG);
+    img::histogram(rgbaDataf + 2, 4, editedRaster->getWidth() * editedRaster->getHeight(), histB, 256, maxValueB);
+
+    histogramView->setValuesR(histR, 256);
+    histogramView->setValuesG(histG, 256);
+    histogramView->setValuesB(histB, 256);
+
+    histogramView->setMaxValue(max(maxValueR, maxValueG, maxValueB));
+
+    delete[] rgbaDataf;
+    delete[] histR;
+    delete[] histG;
+    delete[] histB;
+    histogramView->invalidate();
 }
 
 MyApp* getAppInstance() {
