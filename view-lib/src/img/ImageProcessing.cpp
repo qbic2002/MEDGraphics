@@ -67,7 +67,62 @@ namespace img::scale {
                 for (int i = 0; i < stride; i++) {
                     float r1 = value1[i] * wx + value2[i] * (1 - wx);
                     float r2 = value3[i] * wx + value4[i] * (1 - wx);
-                    *dst++ = r1 * wy + r2 * (1 - wy);
+                    *dst++ = std::clamp(r1 * wy + r2 * (1 - wy), 0.0f, 1.0f);
+                }
+            }
+        }
+    }
+
+    float calcLanczos(float x, float a) {
+        if (x == 0)
+            return 1;
+        if (x < -a || a <= x)
+            return 0;
+        float piXTimes = M_PI * x;
+        return a * std::sin(piXTimes) * std::sin(piXTimes / a) / (piXTimes * piXTimes);
+    }
+
+    void scaleLanczos3(const float* src, int srcWidth, int srcHeight,
+                       float* dst, int dstWidth, int dstHeight,
+                       int stride, float centerShiftX, float centerShiftY) {
+        const float a = 3;
+        for (int y = 0; y < dstHeight; y++) {
+            for (int x = 0; x < dstWidth; x++) {
+                float mappedX = (x + 0.5f) * srcWidth / dstWidth - centerShiftX - 0.5;
+                float mappedY = (y + 0.5f) * srcHeight / dstHeight - centerShiftY - 0.5;
+
+                int intLeft = std::floor(mappedX - a);
+                int intRight = std::ceil(mappedX + a);
+                int intTop = std::floor(mappedY - a);
+                int intBottom = std::ceil(mappedY + a);
+
+                float xWeights[intRight - intLeft + 1];
+                for (int i = intLeft; i <= intRight; i++) {
+                    xWeights[i - intLeft] = calcLanczos(mappedX - i, a);
+                }
+                float yWeights[intBottom - intTop + 1];
+                for (int i = intTop; i <= intBottom; i++) {
+                    yWeights[i - intTop] = calcLanczos(mappedY - i, a);
+                }
+
+                float weight = 0;
+                float acc[stride];
+                for (int i = 0; i < stride; i++) {
+                    acc[i] = 0;
+                }
+                for (int y = intTop; y <= intBottom; y++) {
+                    for (int x = intLeft; x <= intRight; x++) {
+                        float curW = xWeights[x - intLeft] * yWeights[y - intTop];
+                        const float* pixel = getPixel(src, x, y, srcWidth, srcHeight, stride);
+                        for (int i = 0; i < stride; i++) {
+                            acc[i] += pixel[i] * curW;
+                        }
+                        weight += curW;
+                    }
+                }
+
+                for (int i = 0; i < stride; i++) {
+                    *dst++ = std::clamp(acc[i] / weight, 0.0f, 1.0f);
                 }
             }
         }
@@ -75,10 +130,10 @@ namespace img::scale {
 
     const ScaleMode nearest{L"Ближайший", scaleNearest};
     const ScaleMode bilinear{L"Билинейный", scaleBilinear};
-//    const ScaleMode lanczos3;
+    const ScaleMode lanczos3{L"Фильтр Ланцоша", scaleLanczos3};
 //    const ScaleMode bcSplines;
 
-    const std::vector<const ScaleMode*> modes = {&nearest, &bilinear};
+    const std::vector<const ScaleMode*> modes = {&nearest, &bilinear, &lanczos3};
 }
 
 void img::histogram(const float* src, int stride, int length, int* dst, int dstLength, int& topValuesCount) {

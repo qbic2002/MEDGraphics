@@ -11,6 +11,7 @@
 #include "utils/SaveFormat.h"
 #include "../widget/HistogramView.h"
 #include "../math/math_utils.h"
+#include "utils/measureTime.h"
 
 MyApp* instance = nullptr;
 
@@ -502,8 +503,9 @@ void MyApp::applyScale() {
     float centerShiftX = parseFloatOrDefault(rightTool.scale.centerShiftXEdt->getText(), 0);
     float centerShiftY = parseFloatOrDefault(rightTool.scale.centerShiftYEdt->getText(), 0);
     int index = rightTool.scale.modeSelect->getSelectIndex();
-
+    utils::TimeStamp scaleTs;
     editedRaster->scale(index, {width, height, centerShiftX, centerShiftY});
+    scaleTs.report("image scale");
     updateEditingImageView();
 }
 
