@@ -231,6 +231,10 @@ bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
                     printHistograms();
                     return true;
                 }
+                case GLFW_KEY_LEFT_ALT: {
+                    applyRescaleColor();
+                    return true;
+                }
                 default:
                     break;
             }
@@ -633,6 +637,18 @@ void MyApp::resetAllHistograms() {
         auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_MAIN + i);
         histogramView->reset();
     }
+}
+
+void MyApp::applyRescaleColor() {
+    if (!isEditing)
+        return;
+    float leftEdge = parseFloatOrDefault(rightTool.paint.componentEdt[0]->getText(), 0);
+    float rightEdge = parseFloatOrDefault(rightTool.paint.componentEdt[1]->getText(), 1);
+
+    utils::TimeStamp scaleTs;
+    editedRaster->rescale(leftEdge, rightEdge);
+    scaleTs.report("image rescale");
+    updateEditingImageView();
 }
 
 MyApp* getAppInstance() {

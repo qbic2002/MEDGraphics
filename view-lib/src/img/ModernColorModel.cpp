@@ -336,3 +336,11 @@ void ModernRaster::scale(int index, const img::ScaleImageInfo& scaleDto) {
     rgbaData.reset(new rgba[width * height]);
     fillRgbaData();
 }
+
+void ModernRaster::rescale(float leftEdge, float rightEdge) {
+    int count = colorModel->getComponentsCount();
+    for (int i = 0; i < count; i++) {
+        img::rescale(data.get() + i, count, width * height, data.get() + i, leftEdge, rightEdge);
+    }
+    fillRgbaData();
+}

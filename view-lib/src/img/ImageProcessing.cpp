@@ -208,3 +208,40 @@ void img::histogram(const float* src, int stride, int length, int* dst, int dstL
         src += stride;
     }
 }
+
+void img::rescale(const float* src, int stride, int length, float* dst, float leftEdge, float rightEdge) {
+    int* valueCounts = new int[256];
+    histogram(src, stride, length, valueCounts, 256);
+
+    float currentBack = 0;
+    int index = 0;
+    while (index < 256) {
+        currentBack += (float) valueCounts[index] / length;
+        if (currentBack >= leftEdge)
+            break;
+        index++;
+    }
+    if (index >= 256)
+        index = 255;
+    leftEdge = (float) index / 255;
+
+    currentBack = 1;
+    index = 255;
+    while (index >= 0) {
+        currentBack -= (float) valueCounts[index] / length;
+        if (currentBack <= rightEdge)
+            break;
+        index--;
+    }
+    if (index < 0)
+        index = 0;
+    rightEdge = (float) index / (255);
+
+    for (int i = 0; i < length; i++) {
+        float value = *src;
+        value = std::clamp((value - leftEdge) / (rightEdge - leftEdge), 0.0f, 1.0f);
+        *dst = value;
+        src += stride;
+        dst += stride;
+    }
+}

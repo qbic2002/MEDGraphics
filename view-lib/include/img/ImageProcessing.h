@@ -40,6 +40,8 @@ namespace img {
     }
 
     void histogram(const float* src, int stride, int length, int* dst, int dstLength);
+
+    void rescale(const float* src, int stride, int length, float* dst, float leftEdge, float rightEdge);
 }
 
 #endif //MEDGRAPHICS_IMAGE_PROCESSING_H

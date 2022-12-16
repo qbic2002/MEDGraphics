@@ -67,6 +67,8 @@ public:
 
     void updateEditingImageView();
 
+    void applyRescaleColor();
+
 protected:
     ImageFileStorage imageFileStorage;
 //    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;

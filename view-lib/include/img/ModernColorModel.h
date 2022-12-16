@@ -142,6 +142,8 @@ public:
 
     void scale(int index, const img::ScaleImageInfo& scaleDto);
 
+    void rescale(float leftEdge, float rightEdge);
+
 private:
     void fillRgbaData();
 
