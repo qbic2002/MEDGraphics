@@ -55,6 +55,12 @@ public:
 
     void applyScale();
 
+    void resetAllHistograms();
+
+    void printRBGHistogram();
+
+    void printHistograms();
+
 protected:
     ImageFileStorage imageFileStorage;
 //    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;

@@ -11,14 +11,28 @@ namespace view {
 
     class HistogramView : public View {
     public:
+        struct ValuesColorPair {
+            std::vector<int> values;
+            float color[4] = {1, 1, 1, 1};
+        };
+
         HistogramView(Context* context, const ViewAttributes& attr);
 
         void onDraw() override;
 
-        void changeLineWidth(int diff);
+        void addValues(const HistogramView::ValuesColorPair& valuesColorPair);
+
+        void reset();
+
+        ~HistogramView() override;
 
     private:
+        int getMaxComponent();
+
+        float* buildTriangleVertexArray(float barWidth, float scaleY, int canvasHeight, const std::vector<int>& src);
+
         int lineWidth = 1;
+        std::vector<ValuesColorPair> valuesColorVector;
     };
 
 } // view

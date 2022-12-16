@@ -273,7 +273,11 @@ void PNGImage::setModernRaster(ColorModelEnum colorModel) {
         gamma = pngChunkGamma->gamma / 100000.0;
     }
 
-    modernRaster = ModernRaster(width, height, raster_data, colorModel, 1 / gamma);
+    if (gamma == 0) {
+        modernRaster = ModernRaster(width, height, raster_data, colorModel, 0);
+    } else {
+        modernRaster = ModernRaster(width, height, raster_data, colorModel, 1 / gamma);
+    }
 }
 
 const ModernRaster& PNGImage::getModernRaster() const {

@@ -136,20 +136,15 @@ namespace img::scale {
     const std::vector<const ScaleMode*> modes = {&nearest, &bilinear, &lanczos3};
 }
 
-void img::histogram(const float* src, int stride, int length, int* dst, int dstLength, int& topValuesCount) {
+void img::histogram(const float* src, int stride, int length, int* dst, int dstLength) {
     for (int i = 0; i < dstLength; i++) {
         dst[i] = 0;
     }
     for (int i = 0; i < length; i++) {
-        int index = (int) *src * dstLength;
+        int index = (int) (*src * dstLength);
         if (index == dstLength)
             index = dstLength - 1;
-        dst[i] += index;
+        ++dst[index];
         src += stride;
-    }
-    topValuesCount = 0;
-    for (int i = 0; i < dstLength; i++) {
-        if (dst[i] > topValuesCount)
-            topValuesCount = dst[i];
     }
 }

@@ -548,13 +548,91 @@ view::LinearLayout* createToolSectionScale(Context* context) {
 view::LinearLayout* createToolSectionHistograms(Context* context) {
     auto lay = createToolSectionLay(context, L"Гистограммы");
 
+    auto* textView = new TextView(context, {
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .background = ColorBackground{theme.color.secondaryBg},
+            .text = L"RGB гистограмма",
+            .font = "assets/fonts/segoe-ui/Segoe UI.ttf",
+            .fontSize = 18
+    });
+    lay->addChild(textView);
     auto* histogram = new HistogramView(context, {
-            .id = ID_LEFT_TOOL_HISTOGRAM_TEST,
+            .id = ID_LEFT_TOOL_HISTOGRAM_MAIN,
             .width = FILL_PARENT,
-            .height = 200,
+            .height = 150,
             .background = ColorBackground{theme.color.primaryBg},
     });
     lay->addChild(histogram);
+    auto* textView1 = new TextView(context, {
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .background = ColorBackground{theme.color.secondaryBg},
+            .text = L"Первая компонента",
+            .font = "assets/fonts/segoe-ui/Segoe UI.ttf",
+            .fontSize = 18
+    });
+    lay->addChild(textView1);
+    auto* histogram1 = new HistogramView(context, {
+            .id = ID_LEFT_TOOL_HISTOGRAM_1,
+            .width = FILL_PARENT,
+            .height = 150,
+            .background = ColorBackground{theme.color.primaryBg},
+    });
+    lay->addChild(histogram1);
+    auto* textView2 = new TextView(context, {
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .background = ColorBackground{theme.color.secondaryBg},
+            .text = L"Вторая компонента",
+            .font = "assets/fonts/segoe-ui/Segoe UI.ttf",
+            .fontSize = 18
+    });
+    lay->addChild(textView2);
+    auto* histogram2 = new HistogramView(context, {
+            .id = ID_LEFT_TOOL_HISTOGRAM_2,
+            .width = FILL_PARENT,
+            .height = 150,
+            .background = ColorBackground{theme.color.primaryBg},
+    });
+    lay->addChild(histogram2);
+    auto* textView3 = new TextView(context, {
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .background = ColorBackground{theme.color.secondaryBg},
+            .text = L"Третья компонента",
+            .font = "assets/fonts/segoe-ui/Segoe UI.ttf",
+            .fontSize = 18
+    });
+    lay->addChild(textView3);
+    auto* histogram3 = new HistogramView(context, {
+            .id = ID_LEFT_TOOL_HISTOGRAM_3,
+            .width = FILL_PARENT,
+            .height = 150,
+            .background = ColorBackground{theme.color.primaryBg},
+    });
+    lay->addChild(histogram3);
+    auto* textView4 = new TextView(context, {
+            .width = WRAP_CONTENT,
+            .height = WRAP_CONTENT,
+            .padding = Padding(8),
+            .background = ColorBackground{theme.color.secondaryBg},
+            .text = L"Четвертая компонента",
+            .font = "assets/fonts/segoe-ui/Segoe UI.ttf",
+            .fontSize = 18
+    });
+    lay->addChild(textView4);
+    auto* histogram4 = new HistogramView(context, {
+            .id = ID_LEFT_TOOL_HISTOGRAM_4,
+            .width = FILL_PARENT,
+            .height = 150,
+            .background = ColorBackground{theme.color.primaryBg},
+    });
+    lay->addChild(histogram4);
 
     return lay;
 }
@@ -582,7 +660,7 @@ view::View* createRootView(Context* context) {
 
     auto leftToolLay = new LinearLayout(context, {
             .id = ID_LEFT_TOOL_LAY,
-            .width = FILL_SPARE,
+            .width = 295,
             .height = FILL_PARENT,
             .background = ColorBackground(theme.color.secondaryBg),
             .visibility = INVISIBLE,
