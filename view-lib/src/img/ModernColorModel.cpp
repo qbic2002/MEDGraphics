@@ -329,7 +329,7 @@ void ModernRaster::scale(int index, const img::ScaleImageInfo& scaleDto) {
     img::scale::modes[index]->scale(data.get(), width, height,
                                     newData, scaleDto.width, scaleDto.height,
                                     getColorModel()->getComponentsCount(),
-                                    scaleDto.centerShiftX, scaleDto.centerShiftY);
+                                    scaleDto.centerShiftX, scaleDto.centerShiftY, scaleDto.params);
     data.reset(newData);
     width = scaleDto.width;
     height = scaleDto.height;

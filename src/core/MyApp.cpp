@@ -63,6 +63,7 @@ struct {
         view::EditText* heightEdt = nullptr;
         view::EditText* centerShiftXEdt = nullptr;
         view::EditText* centerShiftYEdt = nullptr;
+        view::EditText* paramEdt[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
         view::SelectView* modeSelect = nullptr;
     } scale;
 } rightTool;
@@ -105,6 +106,9 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     rightTool.scale.heightEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_HEIGHT);
     rightTool.scale.centerShiftXEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_CENTER_X);
     rightTool.scale.centerShiftYEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_CENTER_Y);
+    for (int i = 0; i < 5; i++) {
+        rightTool.scale.paramEdt[i] = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_PARAM_1_EDT + i);
+    }
     rightTool.scale.modeSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_SCALE_MODE);
 
     leftTool.lay = findViewById(ID_LEFT_TOOL_LAY);
@@ -509,7 +513,12 @@ void MyApp::applyScale() {
     float centerShiftY = parseFloatOrDefault(rightTool.scale.centerShiftYEdt->getText(), 0);
     int index = rightTool.scale.modeSelect->getSelectIndex();
     utils::TimeStamp scaleTs;
-    editedRaster->scale(index, {width, height, centerShiftX, centerShiftY});
+    const auto& mode = img::scale::modes[index];
+    float params[mode->params.size()];
+    for (int i = 0; i < mode->params.size(); i++) {
+        params[i] = parseFloatOrDefault(rightTool.scale.paramEdt[i]->getText(), mode->params[i].defaultValue);
+    }
+    editedRaster->scale(index, {width, height, centerShiftX, centerShiftY, params});
     scaleTs.report("image scale");
     updateEditingImageView();
 }

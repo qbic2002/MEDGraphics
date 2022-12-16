@@ -25,7 +25,7 @@ namespace img::scale {
 
     void scaleNearest(const float* src, int srcWidth, int srcHeight,
                       float* dst, int dstWidth, int dstHeight,
-                      int stride, float centerShiftX, float centerShiftY) {
+                      int stride, float centerShiftX, float centerShiftY, [[maybe_unused]] float* params) {
         for (int y = 0; y < dstHeight; y++) {
             for (int x = 0; x < dstWidth; x++) {
                 float mappedX = (x + 0.5f) * srcWidth / dstWidth - centerShiftX - 0.5;
@@ -42,7 +42,7 @@ namespace img::scale {
 
     void scaleBilinear(const float* src, int srcWidth, int srcHeight,
                        float* dst, int dstWidth, int dstHeight,
-                       int stride, float centerShiftX, float centerShiftY) {
+                       int stride, float centerShiftX, float centerShiftY, [[maybe_unused]] float* params) {
         for (int y = 0; y < dstHeight; y++) {
             for (int x = 0; x < dstWidth; x++) {
                 float mappedX = (x + 0.5f) * srcWidth / dstWidth - centerShiftX - 0.5;
@@ -84,7 +84,7 @@ namespace img::scale {
 
     void scaleLanczos3(const float* src, int srcWidth, int srcHeight,
                        float* dst, int dstWidth, int dstHeight,
-                       int stride, float centerShiftX, float centerShiftY) {
+                       int stride, float centerShiftX, float centerShiftY, [[maybe_unused]] float* params) {
         const float a = 3;
         for (int y = 0; y < dstHeight; y++) {
             for (int x = 0; x < dstWidth; x++) {
@@ -128,12 +128,72 @@ namespace img::scale {
         }
     }
 
-    const ScaleMode nearest{L"Ближайший", scaleNearest};
-    const ScaleMode bilinear{L"Билинейный", scaleBilinear};
-    const ScaleMode lanczos3{L"Фильтр Ланцоша", scaleLanczos3};
-//    const ScaleMode bcSplines;
+    float calcBcSpline(float x, float b, float c) {
+        x = std::abs(x);
+        if (x < 1) {
+            return ((12 - 9 * b - 6 * c) * x * x * x + (-18 + 12 * b + 6 * c) * x * x + (6 - 2 * b)) / 6;
+        } else if (x < 2) {
+            return ((-b - 6 * c) * x * x * x + (6 * b + 30 * c) * x * x
+                    + (-12 * b - 48 * c) * x + (8 * b + 24 * c));
+        } else {
+            return 0;
+        }
+    }
 
-    const std::vector<const ScaleMode*> modes = {&nearest, &bilinear, &lanczos3};
+    void scaleBcSplines(const float* src, int srcWidth, int srcHeight,
+                        float* dst, int dstWidth, int dstHeight,
+                        int stride, float centerShiftX, float centerShiftY,
+                        float* params) { // NOLINT(readability-non-const-parameter)
+        const float b = params[0];
+        const float c = params[1];
+        for (int y = 0; y < dstHeight; y++) {
+            for (int x = 0; x < dstWidth; x++) {
+                float mappedX = (x + 0.5f) * srcWidth / dstWidth - centerShiftX - 0.5;
+                float mappedY = (y + 0.5f) * srcHeight / dstHeight - centerShiftY - 0.5;
+
+                int intLeft = std::floor(mappedX - 2);
+                int intRight = std::ceil(mappedX + 2);
+                int intTop = std::floor(mappedY - 2);
+                int intBottom = std::ceil(mappedY + 2);
+
+                float xWeights[intRight - intLeft + 1];
+                for (int i = intLeft; i <= intRight; i++) {
+                    xWeights[i - intLeft] = calcBcSpline(mappedX - i, b, c);
+                }
+                float yWeights[intBottom - intTop + 1];
+                for (int i = intTop; i <= intBottom; i++) {
+                    yWeights[i - intTop] = calcBcSpline(mappedY - i, b, c);
+                }
+
+                float weight = 0;
+                float acc[stride];
+                for (int i = 0; i < stride; i++) {
+                    acc[i] = 0;
+                }
+                for (int y = intTop; y <= intBottom; y++) {
+                    for (int x = intLeft; x <= intRight; x++) {
+                        float curW = xWeights[x - intLeft] * yWeights[y - intTop];
+                        const float* pixel = getPixel(src, x, y, srcWidth, srcHeight, stride);
+                        for (int i = 0; i < stride; i++) {
+                            acc[i] += pixel[i] * curW;
+                        }
+                        weight += curW;
+                    }
+                }
+
+                for (int i = 0; i < stride; i++) {
+                    *dst++ = std::clamp(acc[i] / weight, 0.0f, 1.0f);
+                }
+            }
+        }
+    }
+
+    const ScaleMode nearest{L"Ближайший", {}, scaleNearest};
+    const ScaleMode bilinear{L"Билинейный", {}, scaleBilinear};
+    const ScaleMode lanczos3{L"Фильтр Ланцоша", {}, scaleLanczos3};
+    const ScaleMode bcSplines{L"BC-Сплайны", {{L"b", 0}, {L"c", 0.5}}, scaleBcSplines};
+
+    const std::vector<const ScaleMode*> modes = {&nearest, &bilinear, &lanczos3, &bcSplines};
 }
 
 void img::histogram(const float* src, int stride, int length, int* dst, int dstLength) {

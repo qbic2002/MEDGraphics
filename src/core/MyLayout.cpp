@@ -513,6 +513,28 @@ view::LinearLayout* createToolSectionScale(Context* context) {
     });
     valuesLay->addChild(scaleCenterShiftYEdt);
 
+    for (int i = 0; i < 5; i++) {
+        keysLay->addChild(new TextView(context, {
+                .id = ID_RIGHT_TOOL_SCALE_PARAM_1_TXT + i,
+                .padding = Padding(4),
+                .visibility = INVISIBLE,
+                .text = L"Параметр " + std::to_wstring(i + 1),
+                .fontSize = 12,
+        }));
+
+        auto* scaleCenterShiftYEdt = new EditText(context, {
+                .id = ID_RIGHT_TOOL_SCALE_PARAM_1_EDT + i,
+                .width = 200,
+                .padding = Padding(4),
+                .background = ColorBackground{theme.color.primaryBg},
+                .visibility = INVISIBLE,
+                .text = L"0",
+                .fontSize = 12,
+                .inputType = view::DECIMAL,
+        });
+        valuesLay->addChild(scaleCenterShiftYEdt);
+    }
+
     keysLay->addChild(new TextView(context, {
             .padding = Padding(4),
             .text = L"Алгоритм",
@@ -529,6 +551,23 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .fontSize = 12,
             .items = modeItems
     }, theme.dropDownViewAttr);
+    scaleMode->setOnSelectChangeListener([context](int index) {
+        const auto& mode = img::scale::modes[index];
+        for (int i = 0; i < mode->params.size(); i++) {
+            auto* txt = (TextView*) context->findViewById(ID_RIGHT_TOOL_SCALE_PARAM_1_TXT + i);
+            txt->setVisibility(VISIBLE);
+            txt->setText(mode->params[i].name);
+            auto* edt = (EditText*) context->findViewById(ID_RIGHT_TOOL_SCALE_PARAM_1_EDT + i);
+            edt->setVisibility(VISIBLE);
+            edt->setText(std::to_wstring(mode->params[i].defaultValue));
+        }
+        for (int i = mode->params.size(); i < 5; i++) {
+            auto* txt = (TextView*) context->findViewById(ID_RIGHT_TOOL_SCALE_PARAM_1_TXT + i);
+            txt->setVisibility(INVISIBLE);
+            auto* edt = (EditText*) context->findViewById(ID_RIGHT_TOOL_SCALE_PARAM_1_EDT + i);
+            edt->setVisibility(INVISIBLE);
+        }
+    });
     valuesLay->addChild(scaleMode);
 
     auto* applyScaleBtn = new TextView(context, {
