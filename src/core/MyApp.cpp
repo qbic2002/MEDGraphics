@@ -121,12 +121,13 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     });
 }
 
-void updateEditingImageView() {
+void MyApp::updateEditingImageView() {
     editedTexture->update(*editedRaster);
     imageView->setTexture(editedTexture->getTextureId(), editedTexture->getWidth(), editedTexture->getHeight());
+    printHistograms();
 }
 
-void drawLine(int x1, int y1, int x2, int y2) {
+void MyApp::drawLine(int x1, int y1, int x2, int y2) {
     if (!isEditing)
         return;
     if (x1 == x2 && y1 == y2)
@@ -381,7 +382,7 @@ void MyApp::reinterpretGamma(float gamma) {
     }
 }
 
-void editRaster(ModernRaster* modernRaster) {
+void MyApp::editRaster(ModernRaster* modernRaster) {
     int componentsCount = modernRaster->getColorModel()->getComponentsCount();
 
     editedRaster = new ModernRaster(*modernRaster);
@@ -398,7 +399,7 @@ void editRaster(ModernRaster* modernRaster) {
         rightTool.colorModel.componentToggle[i]->getParent()->setVisibility(view::INVISIBLE);
     }
 
-    imageView->setOnMouseEventListener([](view::View* view, const MouseEvent& e) {
+    imageView->setOnMouseEventListener([&](view::View* view, const MouseEvent& e) {
         if (!isEditing)
             return false;
         if (e.button != 1)
