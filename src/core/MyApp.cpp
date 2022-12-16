@@ -537,6 +537,11 @@ void MyApp::printRBGHistogram() {
         rgbaDataf[i] = rgbaData[i] / 255.0;
     }
 
+    bool filter[4];
+    for (int i = 0; i < 4; ++i) {
+        filter[i] = editedRaster->getFilter(i);
+    }
+
 
     int* histR = new int[256];
     int* histG = new int[256];
@@ -547,15 +552,34 @@ void MyApp::printRBGHistogram() {
     img::histogram(rgbaDataf + 2, 4, editedRaster->getWidth() * editedRaster->getHeight(), histB, 256);
 
 
-    histogramView->addValues(
-            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histR, histR + 256), .color = {1, 0, 0,
-                                                                                                           0.33}});
-    histogramView->addValues(
-            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histG, histG + 256), .color = {0, 1, 0,
-                                                                                                           0.33}});
-    histogramView->addValues(
-            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histB, histB + 256), .color = {0, 0, 1,
-                                                                                                           0.33}});
+    if (editedRaster->getColorModel()->getEnum() == COLOR_MODEL_RGBA ||
+        editedRaster->getColorModel()->getEnum() == COLOR_MODEL_RGB) {
+        if (filter[0])
+            histogramView->addValues(
+                    view::HistogramView::ValuesColorPair{.values = std::vector<int>(histR, histR + 256), .color = {1, 0,
+                                                                                                                   0,
+                                                                                                                   0.33}});
+        if (filter[1])
+            histogramView->addValues(
+                    view::HistogramView::ValuesColorPair{.values = std::vector<int>(histG, histG + 256), .color = {0, 1,
+                                                                                                                   0,
+                                                                                                                   0.33}});
+        if (filter[2])
+            histogramView->addValues(
+                    view::HistogramView::ValuesColorPair{.values = std::vector<int>(histB, histB + 256), .color = {0, 0,
+                                                                                                                   1,
+                                                                                                                   0.33}});
+    } else {
+        histogramView->addValues(
+                view::HistogramView::ValuesColorPair{.values = std::vector<int>(histR, histR + 256), .color = {1, 0, 0,
+                                                                                                               0.33}});
+        histogramView->addValues(
+                view::HistogramView::ValuesColorPair{.values = std::vector<int>(histG, histG + 256), .color = {0, 1, 0,
+                                                                                                               0.33}});
+        histogramView->addValues(
+                view::HistogramView::ValuesColorPair{.values = std::vector<int>(histB, histB + 256), .color = {0, 0, 1,
+                                                                                                               0.33}});
+    }
 
 
     delete[] rgbaDataf;
