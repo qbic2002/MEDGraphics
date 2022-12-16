@@ -198,18 +198,18 @@ bool MyApp::onKey(int key, [[maybe_unused]] int scancode, int action, [[maybe_un
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
         if (isEditing) {
             switch (key) {
-                case GLFW_KEY_UP: {
-                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
-                    histogramView->changeLineWidth(1);
-                    return true;
-                }
-                case GLFW_KEY_DOWN: {
-                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
-                    histogramView->changeLineWidth(-1);
-                    return true;
-                }
+//                case GLFW_KEY_UP: {
+//                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+//                    histogramView->changeLineWidth(1);
+//                    return true;
+//                }
+//                case GLFW_KEY_DOWN: {
+//                    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+//                    histogramView->changeLineWidth(-1);
+//                    return true;
+//                }
                 case GLFW_KEY_RIGHT_ALT: {
-                    printHistogram();
+                    printHistograms();
                     return true;
                 }
                 default:
@@ -486,39 +486,91 @@ void MyApp::applyScale(const img::ScaleImageInfo&) {
 
 }
 
-void MyApp::printHistogram() {
+void MyApp::printRBGHistogram() {
     if (!isEditing)
         return;
-    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_TEST);
+
+    auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_MAIN);
+    histogramView->reset();
+
     auto rgbaData = editedRaster->getRgbaData();
     auto* rgbaDataf = new float[editedRaster->getWidth() * editedRaster->getHeight() * 4];
     for (int i = 0; i < editedRaster->getWidth() * editedRaster->getHeight() * 4; ++i) {
         rgbaDataf[i] = rgbaData[i] / 255.0;
     }
 
-    int maxValueR = 0;
-    int maxValueG = 0;
-    int maxValueB = 0;
 
     int* histR = new int[256];
     int* histG = new int[256];
     int* histB = new int[256];
 
-    img::histogram(rgbaDataf, 4, editedRaster->getWidth() * editedRaster->getHeight(), histR, 256, maxValueR);
-    img::histogram(rgbaDataf + 1, 4, editedRaster->getWidth() * editedRaster->getHeight(), histG, 256, maxValueG);
-    img::histogram(rgbaDataf + 2, 4, editedRaster->getWidth() * editedRaster->getHeight(), histB, 256, maxValueB);
+    img::histogram(rgbaDataf, 4, editedRaster->getWidth() * editedRaster->getHeight(), histR, 256);
+    img::histogram(rgbaDataf + 1, 4, editedRaster->getWidth() * editedRaster->getHeight(), histG, 256);
+    img::histogram(rgbaDataf + 2, 4, editedRaster->getWidth() * editedRaster->getHeight(), histB, 256);
 
-    histogramView->setValuesR(histR, 256);
-    histogramView->setValuesG(histG, 256);
-    histogramView->setValuesB(histB, 256);
 
-    histogramView->setMaxValue(max(maxValueR, maxValueG, maxValueB));
+    histogramView->addValues(
+            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histR, histR + 256), .color = {1, 0, 0,
+                                                                                                           0.33}});
+    histogramView->addValues(
+            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histG, histG + 256), .color = {0, 1, 0,
+                                                                                                           0.33}});
+    histogramView->addValues(
+            view::HistogramView::ValuesColorPair{.values = std::vector<int>(histB, histB + 256), .color = {0, 0, 1,
+                                                                                                           0.33}});
+
 
     delete[] rgbaDataf;
     delete[] histR;
     delete[] histG;
     delete[] histB;
     histogramView->invalidate();
+}
+
+void MyApp::printHistograms() {
+    if (!isEditing) {
+        return;
+    }
+
+    resetAllHistograms();
+    printRBGHistogram();
+
+    bool filter[4];
+    for (int i = 0; i < 4; ++i) {
+        filter[i] = editedRaster->getFilter(i);
+    }
+
+    for (int i = 0; i < editedRaster->getColorModel()->getComponentsCount(); ++i) {
+        auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_MAIN + 1 + i);
+//        if (histogramView == nullptr){
+//            continue;
+//        }
+        if (!filter[i]) {
+            histogramView->reset();
+            continue;
+        }
+
+        histogramView->reset();
+
+        auto data = editedRaster->getData();
+
+        int* hist = new int[256];
+
+        img::histogram(data + i, editedRaster->getColorModel()->getComponentsCount(),
+                       editedRaster->getWidth() * editedRaster->getHeight(), hist, 256);
+
+        histogramView->addValues(view::HistogramView::ValuesColorPair{.values = std::vector<int>(hist, hist + 256)});
+        delete[] hist;
+        histogramView->invalidate();
+    }
+
+}
+
+void MyApp::resetAllHistograms() {
+    for (int i = 0; i < 5; ++i) {
+        auto* histogramView = (view::HistogramView*) findViewById(ID_LEFT_TOOL_HISTOGRAM_MAIN + i);
+        histogramView->reset();
+    }
 }
 
 MyApp* getAppInstance() {

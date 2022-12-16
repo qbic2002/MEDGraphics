@@ -31,7 +31,7 @@ namespace img {
         extern const std::vector<const ScaleMode*> modes;
     }
 
-    void histogram(const float* src, int stride, int length, int* dst, int dstLength, int& topValuesCount);
+    void histogram(const float* src, int stride, int length, int* dst, int dstLength);
 }
 
 #endif //MEDGRAPHICS_IMAGE_PROCESSING_H

@@ -55,7 +55,11 @@ public:
 
     void applyScale(const img::ScaleImageInfo& scaleImageInfo);
 
-    void printHistogram();
+    void resetAllHistograms();
+
+    void printRBGHistogram();
+
+    void printHistograms();
 
 protected:
     ImageFileStorage imageFileStorage;

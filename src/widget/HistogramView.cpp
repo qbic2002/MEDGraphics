@@ -8,7 +8,7 @@ namespace view {
     HistogramView::HistogramView(Context* context, const ViewAttributes& attr) : View(context, attr) {}
 
     void HistogramView::onDraw() {
-        if (valueArrayLength == 0) {
+        if (valuesColorVector.empty()) {
             return;
         }
         glPushMatrix();
@@ -18,73 +18,45 @@ namespace view {
 
             int height = innerEdges.height();
             int width = innerEdges.width();
-            float scaleY = (float) height / maxValue;
-            int barWidth = (float) width / valueArrayLength;
 
 
-            float* triangleVertexArrayR = buildTriangleVertexArray(barWidth, scaleY, height, valuesR);
-            float* triangleVertexArrayG = buildTriangleVertexArray(barWidth, scaleY, height, valuesG);
-            float* triangleVertexArrayB = buildTriangleVertexArray(barWidth, scaleY, height, valuesB);
+            float scaleY = (float) height / getMaxComponent();
+            int barWidth = (float) width / valuesColorVector[0].values.size();
+
 
             glLineWidth(lineWidth);
-            glColor4f(1, 0, 0, 1.0 / 3);
-            glBegin(GL_QUADS);
-            for (int i = 0; i < ((valueArrayLength * 4)); ++i) {
+            for (const auto& valuesColorPair: valuesColorVector) {
+                float* triangleVertexArray = buildTriangleVertexArray(barWidth, scaleY, height, valuesColorPair.values);
 
-                glVertex2f(triangleVertexArrayR[2 * i], triangleVertexArrayR[2 * i + 1]);
+                glColor4f(valuesColorPair.color[0], valuesColorPair.color[1], valuesColorPair.color[2],
+                          valuesColorPair.color[3]);
+                glBegin(GL_QUADS);
+                for (int i = 0; i < valuesColorPair.values.size() * 4; ++i) {
+                    glVertex2f(triangleVertexArray[2 * i], triangleVertexArray[2 * i + 1]);
+                }
+
+//                glColor4f(1, 1, 1, 1);
+                glEnd();
+
+                delete[] triangleVertexArray;
             }
-            glColor4f(1, 1, 1, 1);
-            glEnd();
 
-            glLineWidth(lineWidth);
-            glColor4f(0, 1, 0, 1.0 / 3);
-            glBegin(GL_QUADS);
-            for (int i = 0; i < ((valueArrayLength * 4)); ++i) {
-
-                glVertex2f(triangleVertexArrayG[2 * i], triangleVertexArrayG[2 * i + 1]);
-            }
-            glColor4f(1, 1, 1, 1);
-            glEnd();
-
-            glLineWidth(lineWidth);
-            glColor4f(0, 0, 1, 1.0 / 3);
-            glBegin(GL_QUADS);
-            for (int i = 0; i < ((valueArrayLength * 4)); ++i) {
-
-                glVertex2f(triangleVertexArrayB[2 * i], triangleVertexArrayB[2 * i + 1]);
-            }
-            glColor4f(1, 1, 1, 1);
-            glEnd();
-
-            delete[] triangleVertexArrayR;
-            delete[] triangleVertexArrayG;
-            delete[] triangleVertexArrayB;
         }
         glPopMatrix();
     }
 
-    void HistogramView::changeLineWidth(int diff) {
-//        lineWidth += diff;
-//        if (lineWidth < 1)
-//            lineWidth = 1;
-//        if (lineWidth > 10)
-//            lineWidth = 10;
-//        invalidate();
-    }
-
     HistogramView::~HistogramView() {
-        delete[] valuesR;
-        delete[] valuesG;
-        delete[] valuesB;
+
     }
 
     /// do not forget to delete result pointer
-    float* HistogramView::buildTriangleVertexArray(int barWidth, float scaleY, int canvasHeight, int* src) {
-        auto* triangleVertexArray = new float[(valueArrayLength * 4) * 2];
+    float*
+    HistogramView::buildTriangleVertexArray(int barWidth, float scaleY, int canvasHeight, const std::vector<int>& src) {
+        auto* triangleVertexArray = new float[(src.size() * 4) * 2];
 
 
         int triangleVertexArrayIndex = 0;
-        for (int i = 0; i < valueArrayLength; ++i) {
+        for (int i = 0; i < src.size(); ++i) {
             triangleVertexArray[triangleVertexArrayIndex++] = i * barWidth;
             triangleVertexArray[triangleVertexArrayIndex++] = canvasHeight;
             triangleVertexArray[triangleVertexArrayIndex++] = i * barWidth;
@@ -99,31 +71,24 @@ namespace view {
     }
 
 
-    void HistogramView::setMaxValue(int maxValue) {
-        HistogramView::maxValue = maxValue;
+    void HistogramView::addValues(const HistogramView::ValuesColorPair& valuesColorPair) {
+        this->valuesColorVector.push_back(valuesColorPair);
     }
 
-    void HistogramView::setValuesR(int* values, int valueArrayLength) {
-        this->valueArrayLength = valueArrayLength;
+    int HistogramView::getMaxComponent() {
+        int maxComponent = 0;
+        for (const auto& item: valuesColorVector) {
+            for (const auto& value: item.values) {
+                if (value > maxComponent) {
+                    maxComponent = value;
+                }
+            }
+        }
 
-        delete[] this->valuesR;
-        this->valuesR = new int[valueArrayLength];
-        memcpy(this->valuesR, values, valueArrayLength * sizeof(int));
+        return maxComponent;
     }
 
-    void HistogramView::setValuesG(int* values, int valueArrayLength) {
-        this->valueArrayLength = valueArrayLength;
-
-        delete[] this->valuesG;
-        this->valuesG = new int[valueArrayLength];
-        memcpy(this->valuesG, values, valueArrayLength * sizeof(int));
-    }
-
-    void HistogramView::setValuesB(int* values, int valueArrayLength) {
-        this->valueArrayLength = valueArrayLength;
-
-        delete[] this->valuesB;
-        this->valuesB = new int[valueArrayLength];
-        memcpy(this->valuesB, values, valueArrayLength * sizeof(int));
+    void HistogramView::reset() {
+        valuesColorVector.erase(valuesColorVector.begin(), valuesColorVector.end());
     }
 } // view

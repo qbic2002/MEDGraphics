@@ -14,7 +14,7 @@ namespace img::scale {
     const std::vector<const ScaleMode*> modes = {&nearest};
 }
 
-void img::histogram(const float* src, int stride, int length, int* dst, int dstLength, int& topValuesCount) {
+void img::histogram(const float* src, int stride, int length, int* dst, int dstLength) {
     for (int i = 0; i < dstLength; i++) {
         dst[i] = 0;
     }
@@ -24,11 +24,5 @@ void img::histogram(const float* src, int stride, int length, int* dst, int dstL
             index = dstLength - 1;
         ++dst[index];
         src += stride;
-    }
-    dst[0] = 0;
-    topValuesCount = 0;
-    for (int i = 0; i < dstLength; i++) {
-        if (dst[i] > topValuesCount)
-            topValuesCount = dst[i];
     }
 }
