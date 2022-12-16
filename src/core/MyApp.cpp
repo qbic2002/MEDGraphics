@@ -10,6 +10,7 @@
 #include "../widget/SelectView.h"
 #include "utils/SaveFormat.h"
 #include "../widget/HistogramView.h"
+#include "../math/math_utils.h"
 
 MyApp* instance = nullptr;
 
@@ -56,6 +57,13 @@ struct {
         view::EditText* opacityEdt = nullptr;
         view::EditText* lineWidthEdt = nullptr;
     } paint;
+    struct {
+        view::EditText* widthEdt = nullptr;
+        view::EditText* heightEdt = nullptr;
+        view::EditText* centerShiftXEdt = nullptr;
+        view::EditText* centerShiftYEdt = nullptr;
+        view::SelectView* modeSelect = nullptr;
+    } scale;
 } rightTool;
 
 void MyApp::onCreated(const std::vector<std::wstring>& args) {
@@ -92,6 +100,11 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     }
     rightTool.paint.opacityEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_COMP_OPACITY_EDT);
     rightTool.paint.lineWidthEdt = (EditText*) findViewById(ID_RIGHT_TOOL_PAINT_LINE_WIDTH);
+    rightTool.scale.widthEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_WIDTH);
+    rightTool.scale.heightEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_HEIGHT);
+    rightTool.scale.centerShiftXEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_CENTER_X);
+    rightTool.scale.centerShiftYEdt = (EditText*) findViewById(ID_RIGHT_TOOL_SCALE_CENTER_Y);
+    rightTool.scale.modeSelect = (SelectView*) findViewById(ID_RIGHT_TOOL_SCALE_MODE);
 
     leftTool.lay = findViewById(ID_LEFT_TOOL_LAY);
 
@@ -396,8 +409,12 @@ void editRaster(ModernRaster* modernRaster) {
     rightTool.gamma.gammaEdt->setText(std::to_wstring(editedRaster->getGamma()));
     rightTool.dithering.bitsSelect->setSelectIndex(editedRaster->getDitheringBits() - 1);
     rightTool.dithering.modeSelect->setSelectIndex(editedRaster->getDitheringMethodEnum() + 1);
-
     updateColorModelUI();
+    rightTool.scale.widthEdt->setText(std::to_wstring(editedRaster->getWidth()));
+    rightTool.scale.heightEdt->setText(std::to_wstring(editedRaster->getHeight()));
+    rightTool.scale.centerShiftXEdt->setText(L"0");
+    rightTool.scale.centerShiftYEdt->setText(L"0");
+    rightTool.scale.modeSelect->setSelectIndex(0);
 
     isEditing = true;
 
@@ -476,10 +493,18 @@ void MyApp::openGrad(int width, int height) {
     editRaster(&gradientRaster);
 }
 
-void MyApp::applyScale(const img::ScaleImageInfo&) {
+void MyApp::applyScale() {
     if (!isEditing)
         return;
 
+    int width = parseIntOrDefault(rightTool.scale.widthEdt->getText(), 1);
+    int height = parseIntOrDefault(rightTool.scale.heightEdt->getText(), 1);
+    float centerShiftX = parseFloatOrDefault(rightTool.scale.centerShiftXEdt->getText(), 0);
+    float centerShiftY = parseFloatOrDefault(rightTool.scale.centerShiftYEdt->getText(), 0);
+    int index = rightTool.scale.modeSelect->getSelectIndex();
+
+    editedRaster->scale(index, {width, height, centerShiftX, centerShiftY});
+    updateEditingImageView();
 }
 
 MyApp* getAppInstance() {

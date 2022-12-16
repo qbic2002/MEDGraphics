@@ -15,6 +15,7 @@
 #include "rgba.h"
 #include "ColorModels.h"
 #include "DitheringMethods.h"
+#include "ImageProcessing.h"
 
 //class Pixel1f {
 //public:
@@ -138,6 +139,8 @@ public:
     void setPixel(rgbaF rgbaf, int x, int y);
 
     rgbaF getPixel(int x, int y);
+
+    void scale(int index, const img::ScaleImageInfo& scaleDto);
 
 private:
     void fillRgbaData();

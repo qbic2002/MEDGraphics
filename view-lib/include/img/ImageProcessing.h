@@ -14,20 +14,21 @@ namespace img {
         int height = 0;
         float centerShiftX = 0;
         float centerShiftY = 0;
-        int mode = 0;
     };
 
     struct ScaleMode {
         std::wstring name;
 
-        void (* scale)(const ScaleImageInfo&);
+        void (* scale)(const float* src, int srcWidth, int srcHeight,
+                       float* dst, int dstWidth, int dstHeight,
+                       int stride, float centerShiftX, float centerShiftY);
     };
 
     namespace scale {
         extern const ScaleMode nearest;
-//    extern const ScaleMode bilinear;
-//    extern const ScaleMode lanczos3;
-//    extern const ScaleMode bcSplines;
+        extern const ScaleMode bilinear;
+        extern const ScaleMode lanczos3;
+//        extern const ScaleMode bcSplines;
         extern const std::vector<const ScaleMode*> modes;
     }
 
