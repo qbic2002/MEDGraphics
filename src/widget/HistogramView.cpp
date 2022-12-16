@@ -21,7 +21,7 @@ namespace view {
 
 
             float scaleY = (float) height / getMaxComponent();
-            int barWidth = (float) width / valuesColorVector[0].values.size();
+            float barWidth = (float) width / valuesColorVector[0].values.size();
 
 
             glLineWidth(lineWidth);
@@ -51,7 +51,8 @@ namespace view {
 
     /// do not forget to delete result pointer
     float*
-    HistogramView::buildTriangleVertexArray(int barWidth, float scaleY, int canvasHeight, const std::vector<int>& src) {
+    HistogramView::buildTriangleVertexArray(float barWidth, float scaleY, int canvasHeight,
+                                            const std::vector<int>& src) {
         auto* triangleVertexArray = new float[(src.size() * 4) * 2];
 
 

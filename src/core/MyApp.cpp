@@ -421,6 +421,7 @@ void MyApp::toggleEdit() {
             return;
         }
         editRaster(imageFileStorage.getCurImageFile()->raster);
+        printHistograms();
     } else {
         delete editedRaster;
         editedRaster = nullptr;

@@ -29,7 +29,7 @@ namespace view {
     private:
         int getMaxComponent();
 
-        float* buildTriangleVertexArray(int barWidth, float scaleY, int canvasHeight, const std::vector<int>& src);
+        float* buildTriangleVertexArray(float barWidth, float scaleY, int canvasHeight, const std::vector<int>& src);
 
         int lineWidth = 1;
         std::vector<ValuesColorPair> valuesColorVector;
