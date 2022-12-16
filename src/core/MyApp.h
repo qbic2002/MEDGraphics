@@ -61,6 +61,12 @@ public:
 
     void printHistograms();
 
+    void drawLine(int x1, int y1, int x2, int y2);
+
+    void editRaster(ModernRaster* modernRaster);
+
+    void updateEditingImageView();
+
 protected:
     ImageFileStorage imageFileStorage;
 //    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
