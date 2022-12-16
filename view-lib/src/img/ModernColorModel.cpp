@@ -323,3 +323,16 @@ rgbaF ModernRaster::getPixel(int x, int y) {
     rgbaF rgbaf = colorModel->toRgba(data.get() + (y * width + x) * colorModel->getComponentsCount());
     return rgbaf;
 }
+
+void ModernRaster::scale(int index, const img::ScaleImageInfo& scaleDto) {
+    auto* newData = new float[scaleDto.width * scaleDto.height * getColorModel()->getComponentsCount()];
+    img::scale::modes[index]->scale(data.get(), width, height,
+                                    newData, scaleDto.width, scaleDto.height,
+                                    getColorModel()->getComponentsCount(),
+                                    scaleDto.centerShiftX, scaleDto.centerShiftY);
+    data.reset(newData);
+    width = scaleDto.width;
+    height = scaleDto.height;
+    rgbaData.reset(new rgba[width * height]);
+    fillRgbaData();
+}

@@ -53,7 +53,7 @@ public:
 
     void setDitheringMethod(DitheringMethodEnum method);
 
-    void applyScale(const img::ScaleImageInfo& scaleImageInfo);
+    void applyScale();
 
     void resetAllHistograms();
 

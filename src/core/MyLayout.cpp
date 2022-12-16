@@ -12,7 +12,6 @@
 #include "../widget/WindowBar.h"
 #include "../widget/EditText.h"
 #include "../widget/SelectView.h"
-#include "img/ImageProcessing.h"
 #include "../widget/HistogramView.h"
 
 using namespace view;
@@ -486,15 +485,16 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .fontSize = 12,
     }));
 
-    valuesLay->addChild(new EditText(context, {
+    auto* scaleCenterShiftXEdt = new EditText(context, {
             .id = ID_RIGHT_TOOL_SCALE_CENTER_X,
             .width = 200,
             .padding = Padding(4),
             .background = ColorBackground{theme.color.primaryBg},
             .text = L"0",
             .fontSize = 12,
-            .inputType = view::INTEGER,
-    }));
+            .inputType = view::DECIMAL,
+    });
+    valuesLay->addChild(scaleCenterShiftXEdt);
 
     keysLay->addChild(new TextView(context, {
             .padding = Padding(4),
@@ -502,15 +502,16 @@ view::LinearLayout* createToolSectionScale(Context* context) {
             .fontSize = 12,
     }));
 
-    valuesLay->addChild(new EditText(context, {
+    auto* scaleCenterShiftYEdt = new EditText(context, {
             .id = ID_RIGHT_TOOL_SCALE_CENTER_Y,
             .width = 200,
             .padding = Padding(4),
             .background = ColorBackground{theme.color.primaryBg},
             .text = L"0",
             .fontSize = 12,
-            .inputType = view::INTEGER,
-    }));
+            .inputType = view::DECIMAL,
+    });
+    valuesLay->addChild(scaleCenterShiftYEdt);
 
     keysLay->addChild(new TextView(context, {
             .padding = Padding(4),
@@ -521,18 +522,25 @@ view::LinearLayout* createToolSectionScale(Context* context) {
     std::vector<String> modeItems;
     for (auto& mode: img::scale::modes)
         modeItems.push_back(mode->name);
-    auto selectMode = new SelectView(context, {
+    auto* scaleMode = new SelectView(context, {
             .id = ID_RIGHT_TOOL_SCALE_MODE,
             .padding = Padding(4),
             .background = ColorBackground{theme.color.primaryBg},
             .fontSize = 12,
             .items = modeItems
     }, theme.dropDownViewAttr);
-    selectMode->setOnSelectChangeListener([](int index) {
-        info() << index;
-//        getAppInstance()->setDitheringMethod((DitheringMethodEnum) (index - 1));
+    valuesLay->addChild(scaleMode);
+
+    auto* applyScaleBtn = new TextView(context, {
+            .width = FILL_PARENT,
+            .padding = Padding(4),
+            .background = theme.hoverBackground,
+            .text = L"Применить",
     });
-    valuesLay->addChild(selectMode);
+    applyScaleBtn->setOnClickListener([](View* view) {
+        getAppInstance()->applyScale();
+    });
+    lay->addChild(applyScaleBtn);
 
     return lay;
 }
