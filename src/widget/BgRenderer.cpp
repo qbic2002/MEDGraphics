@@ -83,7 +83,7 @@ namespace view {
             auto& imageStorage = ((MyApp*) context)->getImageFileStorage();
             int i = 0;
             for (auto& imageFile: imageStorage.nearImageFiles()) {
-                if (imageFile.textureId == 0) {
+                if (imageFile.texture == nullptr) {
                     i++;
                     continue;
                 }
@@ -92,7 +92,7 @@ namespace view {
                 int renderBeginEdge = rectsCount * (trueIndex) / IMG_LOAD_D;
                 int renderEndEdge = rectsCount * (trueIndex + 1) / IMG_LOAD_D;
 
-                glBindTexture(GL_TEXTURE_2D, imageFile.textureId);
+                glBindTexture(GL_TEXTURE_2D, imageFile.texture->getTextureId());
                 glDrawArrays(GL_QUADS, renderBeginEdge * 4, (renderEndEdge - renderBeginEdge) * 4);
                 i++;
             }

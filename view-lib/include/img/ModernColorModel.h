@@ -144,6 +144,8 @@ public:
 
     void rescale(float leftEdge, float rightEdge);
 
+    static ModernRaster* fromBytesArray(const unsigned char* data, int width, int height, int channels);
+
 private:
     void fillRgbaData();
 

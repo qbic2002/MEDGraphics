@@ -3,10 +3,6 @@
 //
 
 #include "ImageFileStorage.h"
-#include <utils/logging.h>
-#include <utils/gl_utils.h>
-#include <img/imageLoader.h>
-#include <utils/measureTime.h>
 #include "CyclicImageFileSpan.h"
 
 ImageFileStorage::ImageFileStorage() {
@@ -23,9 +19,8 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
             curDirImageFiles.clear();
             curIndex = -1;
             prevNotifiedIndex = -1;
-            prevImageAnnouncedIndex = -1;
-            prevImageAnnouncedTextureId = -1;
-            prevImageTitleAnnouncedIndex = -1;
+            observableTexture.set(nullptr);
+            observablePath.set("");
         } else {
             curPath = fs::canonical(file);
             setCurDir(fs::is_directory(curPath) ? curPath : curPath.parent_path());
@@ -41,58 +36,17 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
 }
 
 void ImageFileStorage::update() {
-    for (auto& imageFile: nearImageFiles()) {
-        if (imageFile.raster != nullptr && imageFile.textureId == 0) {
-            info() << "load texture " << imageFile.getPath().filename().string();
-            auto* raster = imageFile.raster;
-            const unsigned char* data = raster->getRgbaData();
-            int width = raster->getWidth();
-            int height = raster->getHeight();
-            imageFile.textureId = gl::loadTexture(data, GL_RGBA, GL_UNSIGNED_BYTE, width, height, GL_RGBA, GL_CLAMP,
-                                                  GL_LINEAR, GL_NEAREST);
-        }
+    for (auto& imageFile: curDirImageFiles) {
+        imageFile.verifyTextureLoaded();
     }
-
-    for (auto& imageFile: notNearImageFiles()) {
-        if (imageFile.raster != nullptr) {
-            info() << "unload texture " << imageFile.getPath().filename().string();
-            imageFile.deleteRaster();
-            imageFile.deleteTexture();
-        }
+    auto* curImageFile = getCurImageFile();
+    if (curImageFile == nullptr) {
+        observableTexture.set(nullptr);
+        observablePath.set("");
+    } else {
+        observableTexture.set(curImageFile->texture);
+        observablePath.set(curImageFile->getPath());
     }
-
-    if (curIndex != prevImageTitleAnnouncedIndex) {
-        for (auto& listener: onImageTitleChangedListeners) {
-            listener();
-        }
-        prevImageTitleAnnouncedIndex = curIndex;
-    }
-
-    if (curDirImageFiles.empty() && prevImageAnnouncedIndex != curIndex) {
-        for (auto& listener: onImageChangedListeners) {
-            listener();
-        }
-        prevImageAnnouncedIndex = curIndex;
-        prevImageAnnouncedTextureId = -1;
-    } else if (curDirImageFiles[curIndex].textureId != 0) {
-        if (curIndex != prevImageAnnouncedIndex
-            || curDirImageFiles[curIndex].textureId != prevImageAnnouncedTextureId) {
-            for (auto& listener: onImageChangedListeners) {
-                listener();
-            }
-            prevImageAnnouncedIndex = curIndex;
-            prevImageAnnouncedTextureId = curDirImageFiles[curIndex].textureId;
-        }
-    }
-//
-//    if ((curIndex != prevImageAnnouncedIndex || prevImageAnnouncedTextureId) &&
-//        (curDirImageFiles.empty() || curDirImageFiles[curIndex].textureId != 0)) {
-//        for (auto& listener: onImageChangedListeners) {
-//            listener();
-//        }
-//        prevImageAnnouncedIndex = curIndex;
-//        prevImageAnnouncedTextureId = curDirImageFiles.empty() ? -1 : curDirImageFiles[curIndex].textureId;
-//    }
 }
 
 void ImageFileStorage::next() {
@@ -112,6 +66,13 @@ void ImageFileStorage::chooseIndex(int index) {
         index = 0;
     curIndex = index;
 
+    for (auto& imageFile: notNearImageFiles()) {
+        imageFile.shouldBeLoaded = false;
+    }
+    for (auto& imageFile: nearImageFiles()) {
+        imageFile.shouldBeLoaded = true;
+    }
+
     notifier.notify_one();
 }
 
@@ -121,12 +82,12 @@ ImageFile* ImageFileStorage::getCurImageFile() {
     return &curDirImageFiles[curIndex];
 }
 
-void ImageFileStorage::addImageChangedListener(const std::function<void()>& listener) {
-    onImageChangedListeners.push_back(listener);
+ReadOnlyObservableValue<gl::Texture*>& ImageFileStorage::getObservableTexture() {
+    return observableTexture;
 }
 
-void ImageFileStorage::addImageTitleChangedListener(const std::function<void()>& listener) {
-    onImageTitleChangedListeners.push_back(listener);
+ReadOnlyObservableValue<std::filesystem::path>& ImageFileStorage::getObservablePath() {
+    return observablePath;
 }
 
 void ImageFileStorage::setCurDir(const fs::path& dir) {
@@ -145,19 +106,15 @@ void ImageFileStorage::setCurDir(const fs::path& dir) {
     info() << "setCurDir " << dir << " finished";
 }
 
-void ImageFileStorage::runService() {
+[[noreturn]] void ImageFileStorage::runService() {
     while (true) {
         std::unique_lock lock(mutex);
         if (prevNotifiedIndex == curIndex)
             notifier.wait(lock);
         prevNotifiedIndex = curIndex;
 
-        for (auto& imageFile: nearImageFiles()) {
-            if (imageFile.raster == nullptr) {
-                utils::TimeStamp loadImageTs;
-                imageFile.raster = img::loadImageData(imageFile.getPath());
-                loadImageTs.report("load image data " + imageFile.getPath().filename().string());
-            }
+        for (auto& imageFile: curDirImageFiles) {
+            imageFile.verifyRasterLoaded();
         }
 
         lock.unlock();

@@ -2,119 +2,92 @@
 // Created by danil on 18.09.2022.
 //
 
-
 #include <img/imageLoader.h>
 #include <utils/file.h>
 #include <stb_image.h>
-#include <img/PixelRGBA8.h>
 #include <img/Raster.h>
 #include "img/pnmUtils.h"
 #include "img/pngUtils.h"
+#include "img/format/jpeg_utils.h"
 #include <cmath>
 
 namespace img {
+
     typedef std::basic_string<unsigned char> ustring;
 
-    std::vector<ustring> supportedSignatures({ // NOLINT(cert-err58-cpp)
-                                                     {0xFF, 0xD8, 0xFF},
-                                                     {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A},
-                                                     (const unsigned char*) "BM",
-                                                     (const unsigned char*) "P5",
-                                                     (const unsigned char*) "P6"
-                                             });
+    struct ImageFormat {
+        std::wstring name;
+        ustring signature;
 
-    ModernRaster* stbDataToRaster(const unsigned char* data, int width, int height, int channels) {
-        ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
-        switch (channels) {
-            case 3:
-                colorModelEnum = COLOR_MODEL_RGB;
-                break;
-            case 4:
-                colorModelEnum = COLOR_MODEL_RGBA;
-                break;
-            default:
-                throw std::runtime_error("unexpected channels count: " + std::to_string(channels));
-                break;
+        bool equalsSignature(const unsigned char* bytes) const {
+            for (int i = 0; i < signature.length(); i++) {
+                if (signature[i] != bytes[i])
+                    return false;
+            }
+            return true;
         }
 
-        int values = width * height * channels;
-        auto pixels = std::shared_ptr<float[]>(new float[values]);
-        for (int i = 0; i < values; i++)
-            pixels[i] = data[i] / 255.0f;
+        ModernRaster* (* read)(const char* data, int length);
+    };
 
-        return new ModernRaster(width, height, pixels, colorModelEnum);
+    ModernRaster* readPng(const char* data, int length) {
+        return new ModernRaster(png::readPNGImageFromMemory(data, length));
     }
 
-    bool isPNMSignature(const std::vector<char>& bytes) {
-        return bytes.size() >= 2 && bytes[0] == 'P' && (bytes[1] == '5' || bytes[1] == '6');
+    ModernRaster* readPnm(const char* data, int length) {
+        auto pnmImage = pnm::readPNMImageFromMemory(data, length);
+        return new ModernRaster(pnmImage.raster);
     }
 
-    const unsigned char pngSignature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
+    ModernRaster* readStb(const char* data, int length) {
+        int width, height, channels;
+        unsigned char* pixels = stbi_load_from_memory((unsigned char*) data, length, &width, &height, &channels, 0);
+        if (data == nullptr)
+            throw std::runtime_error("stb_image return null");
 
-    bool isPNGSignature(const std::vector<char>& bytes) {
-        if (bytes.size() < 8)
-            return false;
-
-        for (int i = 0; i < 8; ++i) {
-            if ((unsigned char) bytes[i] != pngSignature[i])
-                return false;
-        }
-
-        return true;
+        auto* raster = ModernRaster::fromBytesArray(pixels, width, height, channels);
+        stbi_image_free(pixels);
+        return raster;
     }
+
+    const std::vector<ImageFormat> imageFormats = {
+            ImageFormat{L"PGM", (const unsigned char*) "P5", readPnm},
+            ImageFormat{L"PPM", (const unsigned char*) "P6", readPnm},
+            ImageFormat{L"PNG", {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}, readPng},
+            ImageFormat{L"JPEG", {0xFF, 0xD8}, img::readJpegImage},
+//            ImageFormat{L"JPEG", {0xFF, 0xD8}, readStb},
+            ImageFormat{L"BMP", (const unsigned char*) "BM", readStb},
+    };
 
     ModernRaster* loadImageData(const std::filesystem::path& file) {
-        if (isImage(file)) {
-            return loadImageData(utils::readAllBytes(file));
-        }
-
-        return nullptr;
-    }
-
-    ModernRaster* loadImageData(const std::vector<char>& bytes) {
         try {
-            if (isPNMSignature(bytes)) {
-                auto pnmImage = pnm::readPNMImageFromMemory(bytes.data(), bytes.size());
-                return new ModernRaster(pnmImage.raster);
-            }
-            if (isPNGSignature(bytes)) {
-                return new ModernRaster(png::readPNGImageFromMemory(bytes.data(), bytes.size()));
-            }
-            int width, height, channels;
-            unsigned char* data = stbi_load_from_memory((unsigned char*) bytes.data(), bytes.size(), &width,
-                                                        &height,
-                                                        &channels, 0);
-
-            if (data == nullptr)
+            auto signature = std::unique_ptr<unsigned char>(utils::readNBytes(file, 8));
+            if (signature == nullptr)
                 return nullptr;
-
-            auto* raster = stbDataToRaster(data, width, height, channels);
-            stbi_image_free(data);
-
-            return raster;
-
-        } catch (std::exception&) {
+            for (auto& format: imageFormats) {
+                if (format.equalsSignature(signature.get())) {
+                    std::vector<char> bytes = utils::readAllBytes(file);
+                    return format.read(bytes.data(), bytes.size());
+                }
+            }
+            return nullptr;
+        } catch (const std::exception& e) {
             return nullptr;
         }
     }
 
     bool isImage(const std::filesystem::path& file) noexcept {
-        unsigned char* signatureBytes;
         try {
-            signatureBytes = utils::readNBytes(file, 8);
-        } catch (std::exception& e) {
+            auto signature = std::unique_ptr<unsigned char>(utils::readNBytes(file, 8));
+            if (signature == nullptr)
+                return false;
+            for (auto& format: imageFormats) {
+                if (format.equalsSignature(signature.get()))
+                    return true;
+            }
+            return false;
+        } catch (const std::exception& e) {
             return false;
         }
-        if (signatureBytes == nullptr) return false;
-
-        ustring signature(signatureBytes);
-
-        delete signatureBytes;
-
-        if (std::any_of(supportedSignatures.begin(), supportedSignatures.end(), [signature](ustring& supported) {
-            return signature.starts_with(supported);
-        }))
-            return true;
-        return false;
     }
 }

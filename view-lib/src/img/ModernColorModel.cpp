@@ -344,3 +344,24 @@ void ModernRaster::rescale(float leftEdge, float rightEdge) {
     }
     fillRgbaData();
 }
+
+ModernRaster* ModernRaster::fromBytesArray(const unsigned char* data, int width, int height, int channels) {
+    ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
+    switch (channels) {
+        case 3:
+            colorModelEnum = COLOR_MODEL_RGB;
+            break;
+        case 4:
+            colorModelEnum = COLOR_MODEL_RGBA;
+            break;
+        default:
+            throw std::runtime_error("unexpected channels count: " + std::to_string(channels));
+    }
+
+    int values = width * height * channels;
+    auto pixels = std::shared_ptr<float[]>(new float[values]);
+    for (int i = 0; i < values; i++)
+        pixels[i] = data[i] / 255.0f;
+
+    return new ModernRaster(width, height, pixels, colorModelEnum);
+}

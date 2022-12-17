@@ -12,6 +12,8 @@
 namespace gl {
     class Texture {
     public:
+        Texture();
+
         explicit Texture(const ModernRaster& raster);
 
         Texture(const Texture& other) = delete;

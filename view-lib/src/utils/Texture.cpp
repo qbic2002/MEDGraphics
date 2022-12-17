@@ -7,6 +7,11 @@
 #include <utils/gl_utils.h>
 
 namespace gl {
+    Texture::Texture() {
+        textureId = loadTexture(nullptr, GL_RGBA, GL_UNSIGNED_BYTE, width, height, GL_RGBA, GL_CLAMP, GL_LINEAR,
+                                GL_NEAREST);
+    }
+
     Texture::Texture(const ModernRaster& raster) {
         width = raster.getWidth();
         height = raster.getHeight();

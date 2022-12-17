@@ -9,6 +9,11 @@
 #include <GL/glew.h>
 #include <img/AbstractRaster.h>
 #include "img/ModernColorModel.h"
+#include "utils/measureTime.h"
+#include "utils/logging.h"
+#include "img/imageLoader.h"
+#include "utils/gl_utils.h"
+#include "utils/Texture.h"
 
 namespace fs = std::filesystem;
 
@@ -22,23 +27,33 @@ public:
 
     ~ImageFile();
 
+    /**
+     * @return bool is operation successful
+     */
+    bool loadRaster();
+
+    void loadTexture();
+
     void deleteRaster();
 
-    void deleteCompRaster();
-
     void deleteTexture();
-
-    void deleteCompTextureId();
 
     const fs::path& getPath() const;
 
     ModernRaster* raster = nullptr;
-    ModernRaster* compRaster = nullptr;
-    GLuint textureId = 0;
-    GLuint compTextureId = 0;
+    gl::Texture* texture = nullptr;
+
+    bool shouldBeLoaded = false;
+
+    void verifyRasterLoaded();
+
+    void verifyTextureLoaded();
 
 private:
     fs::path path;
+    bool isRasterLoaded = false;
+    bool isTextureLoaded = false;
+    bool isLoadFailed = false;
 };
 
 #endif //MEDGRAPHICS_IMAGE_FILE_H

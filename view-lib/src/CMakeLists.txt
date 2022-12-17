@@ -40,5 +40,7 @@ add_library(view STATIC
         img/PNGImage.cpp
         img/pngUtils.cpp
         utils/zlib_utils.cpp
-        utils/SaveFormat.cpp ../include/img/ImageProcessing.h img/ImageProcessing.cpp)
+        utils/SaveFormat.cpp
+        img/ImageProcessing.cpp
+        img/format/jpeg_utils.cpp)
 target_link_libraries(view ${LIBS})

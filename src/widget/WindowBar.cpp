@@ -42,14 +42,14 @@ namespace view {
         });
         addChild(titleView);
 
-        getAppInstance()->getImageFileStorage().addImageTitleChangedListener([titleView]() {
-            auto* imageFile = getAppInstance()->getImageFileStorage().getCurImageFile();
-            if (imageFile == nullptr) {
-                titleView->setText(L"MEDGraphics");
-            } else {
-                titleView->setText(imageFile->getPath().filename().wstring());
-            }
-        });
+        getAppInstance()->getImageFileStorage().getObservablePath().addObserver(
+                [titleView](const std::filesystem::path& path) {
+                    if (path.empty()) {
+                        titleView->setText(L"MEDGraphics");
+                    } else {
+                        titleView->setText(path.filename().wstring());
+                    }
+                });
 
         /// Edit
         view = new THEME_WINDOW_BAR_CONTROL("assets/icons/ic_edit.png");

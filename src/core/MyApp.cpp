@@ -11,7 +11,6 @@
 #include "utils/SaveFormat.h"
 #include "../widget/HistogramView.h"
 #include "../math/math_utils.h"
-#include "utils/measureTime.h"
 
 MyApp* instance = nullptr;
 
@@ -114,9 +113,12 @@ void MyApp::onCreated(const std::vector<std::wstring>& args) {
     leftTool.lay = findViewById(ID_LEFT_TOOL_LAY);
 
     imageFileStorage.open(args[1]);
-    imageFileStorage.addImageChangedListener([&]() {
-        auto* imageFile = imageFileStorage.getCurImageFile();
-        imageView->setTexture(imageFile->textureId, imageFile->raster->getWidth(), imageFile->raster->getHeight());
+    imageFileStorage.getObservableTexture().addObserver([&](gl::Texture* texture) {
+        if (texture == nullptr) {
+            imageView->setTexture(0, 0, 0);
+        } else {
+            imageView->setTexture(texture->getTextureId(), texture->getWidth(), texture->getHeight());
+        }
         imageView->invalidate();
     });
 }
@@ -456,9 +458,13 @@ void MyApp::toggleEdit() {
         editedTexture = nullptr;
 
         auto imageFile = imageFileStorage.getCurImageFile();
-        imageView->setTexture(imageFile->textureId,
-                              imageFile->raster->getWidth(),
-                              imageFile->raster->getHeight());
+        if (imageFile == nullptr || imageFile->texture == nullptr) {
+            imageView->setTexture(0, 0, 0);
+        } else {
+            imageView->setTexture(imageFile->texture->getTextureId(),
+                                  imageFile->texture->getWidth(),
+                                  imageFile->texture->getHeight());
+        }
         imageView->setShouldRenderGrid(false);
 
         isEditing = false;

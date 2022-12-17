@@ -17,7 +17,7 @@ add_executable(MEDGraphics
         core/MyLayout.cpp core/MyLayout.h
         widget/EditText.cpp widget/EditText.h
         widget/SelectView.cpp widget/SelectView.h
-        core/RasterComputing.cpp core/RasterComputing.h widget/HistogramView.cpp widget/HistogramView.h math/math_utils.cpp math/math_utils.h)
+        core/RasterComputing.cpp core/RasterComputing.h widget/HistogramView.cpp widget/HistogramView.h math/math_utils.cpp math/math_utils.h core/ObservableValue.cpp core/ObservableValue.h)
 target_link_libraries(MEDGraphics view)
 add_dependencies(MEDGraphics copy_assets)
 
@@ -36,5 +36,5 @@ add_executable(Experiment
         widget/WindowBar.cpp widget/WindowBar.h
         widget/TextView.cpp widget/TextView.h
         widget/DropDownView.cpp widget/DropDownView.h
-        widget/WidgetAttributes.h widget/EditText.cpp widget/EditText.h widget/SelectView.cpp widget/SelectView.h widget/HistogramView.cpp widget/HistogramView.h math/math_utils.cpp math/math_utils.h)
+        widget/WidgetAttributes.h widget/EditText.cpp widget/EditText.h widget/SelectView.cpp widget/SelectView.h widget/HistogramView.cpp widget/HistogramView.h math/math_utils.cpp math/math_utils.h core/ObservableValue.cpp core/ObservableValue.h)
 target_link_libraries(Experiment view)

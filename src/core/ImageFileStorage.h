@@ -7,6 +7,7 @@
 
 #include "ImageFile.h"
 #include "CyclicImageFileSpan.h"
+#include "ObservableValue.h"
 #include <thread>
 #include <condition_variable>
 #include <set>
@@ -30,9 +31,9 @@ public:
 
     ImageFile* getCurImageFile();
 
-    void addImageChangedListener(const std::function<void()>& listener);
+    ReadOnlyObservableValue<gl::Texture*>& getObservableTexture();
 
-    void addImageTitleChangedListener(const std::function<void()>& listener);
+    ReadOnlyObservableValue<std::filesystem::path>& getObservablePath();
 
     int getCurImageIndex() const;
 
@@ -43,7 +44,7 @@ public:
 private:
     void setCurDir(const fs::path& dir);
 
-    void runService();
+    [[noreturn]] void runService();
 
     fs::path curPath;
     fs::path curDir;
@@ -55,11 +56,8 @@ private:
     std::mutex mutex;
     std::condition_variable notifier;
 
-    int prevImageAnnouncedIndex = -1;
-    int prevImageAnnouncedTextureId = -1;
-    std::vector<std::function<void()>> onImageChangedListeners;
-    int prevImageTitleAnnouncedIndex = -1;
-    std::vector<std::function<void()>> onImageTitleChangedListeners;
+    ObservableValue<gl::Texture*> observableTexture;
+    ObservableValue<std::filesystem::path> observablePath;
 };
 
 #endif //MEDGRAPHICS_IMAGE_FILE_STORAGE_H
