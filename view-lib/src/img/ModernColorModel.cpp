@@ -149,10 +149,10 @@ void ModernRaster::fillRgbaData() {
     if (ditheringMethodEnum != NO_DITHERING)
         delete[] dataPtr;
 
-    if (gamma != 0) {
+    if (std::abs(gamma - 2.2) > 0.03) {
         for (int i = 0; i < length; i++) {
             for (int c = 0; c < 3; c++)
-                rgbaFData[i].components[c] = unapplyGamma(applyGamma(rgbaFData[i].components[c], gamma), 0);
+                rgbaFData[i].components[c] = unapplyGamma(applyGamma(rgbaFData[i].components[c], gamma), 2.2);
             rgbaData[i] = rgbaFData[i].toRgba();
         }
     } else {
