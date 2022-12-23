@@ -30,6 +30,7 @@ void ImageFileStorage::open(const std::filesystem::path& file) {
                     break;
                 }
             }
+            chooseIndex(curIndex);
         }
     }
     notifier.notify_one();
@@ -109,9 +110,11 @@ void ImageFileStorage::setCurDir(const fs::path& dir) {
 [[noreturn]] void ImageFileStorage::runService() {
     while (true) {
         std::unique_lock lock(mutex);
-        if (prevNotifiedIndex == curIndex)
-            notifier.wait(lock);
-        prevNotifiedIndex = curIndex;
+        notifier.wait(lock);
+        info() << "runService()";
+//        if (prevNotifiedIndex == curIndex)
+//            notifier.wait(lock);
+//        prevNotifiedIndex = curIndex;
 
         for (auto& imageFile: curDirImageFiles) {
             imageFile.verifyRasterLoaded();

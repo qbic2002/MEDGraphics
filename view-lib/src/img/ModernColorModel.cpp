@@ -348,6 +348,9 @@ void ModernRaster::rescale(float leftEdge, float rightEdge) {
 ModernRaster* ModernRaster::fromBytesArray(const unsigned char* data, int width, int height, int channels) {
     ColorModelEnum colorModelEnum = COLOR_MODEL_RGB;
     switch (channels) {
+        case 1:
+            colorModelEnum = COLOR_MODEL_GRAY;
+            break;
         case 3:
             colorModelEnum = COLOR_MODEL_RGB;
             break;

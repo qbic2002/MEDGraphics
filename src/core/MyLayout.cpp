@@ -717,7 +717,7 @@ view::View* createRootView(Context* context) {
 
     auto rightToolLay = new LinearLayout(context, {
             .id = ID_RIGHT_TOOL_LAY,
-            .width = FILL_SPARE,
+            .width = 295,
             .height = FILL_PARENT,
             .background = ColorBackground(theme.color.secondaryBg),
             .visibility = INVISIBLE,
