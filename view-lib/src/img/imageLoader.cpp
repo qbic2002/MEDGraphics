@@ -49,18 +49,15 @@ namespace img {
         auto* raster = ModernRaster::fromBytesArray(pixels, width, height, channels);
         stbi_image_free(pixels);
 
-        auto* r = readJpegImage(data, length);
-        delete raster;
-
-        return r;
+        return raster;
     }
 
     const std::vector<ImageFormat> imageFormats = {
             ImageFormat{L"PGM", (const unsigned char*) "P5", readPnm},
             ImageFormat{L"PPM", (const unsigned char*) "P6", readPnm},
             ImageFormat{L"PNG", {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}, readPng},
-//            ImageFormat{L"JPEG", {0xFF, 0xD8}, img::readJpegImage},
-            ImageFormat{L"JPEG", {0xFF, 0xD8}, readStb},
+            ImageFormat{L"JPEG", {0xFF, 0xD8}, img::readJpegImage},
+//            ImageFormat{L"JPEG", {0xFF, 0xD8}, readStb},
             ImageFormat{L"BMP", (const unsigned char*) "BM", readStb},
     };
 

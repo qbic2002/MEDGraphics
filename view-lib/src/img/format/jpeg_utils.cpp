@@ -4,7 +4,7 @@
 
 #include "img/format/jpeg_utils.h"
 #include "utils/logging.h"
-#include "../../../../src/core/R.h"
+#include "stb_image.h"
 #include <iostream>
 #include <iomanip>
 #include <bitset>
@@ -511,18 +511,19 @@ namespace img {
             }
         }
 
-        static void idct(const float* svu, float* syx) {
+        static void idct(const short* svu, float* syx) {
             static const long double oneBySqrt2 = 1 / std::sqrt((long double) 2);
             for (int y = 0; y < 8; y++) {
                 for (int x = 0; x < 8; x++) {
-                    long double value = 0;
+                    float value = 0;
                     for (int v = 0; v < 8; v++) {
                         for (int u = 0; u < 8; u++) {
-                            value += svu[v * 8 + u]
-                                     * std::cos((long double) (((2 * x + 1) * u * M_PI) / 16))
-                                     * std::cos((long double) (((2 * y + 1) * v * M_PI) / 16))
-                                     * (v == 0 ? oneBySqrt2 : 1)
-                                     * (u == 0 ? oneBySqrt2 : 1);
+                            value += svu[v * 8 + u] * ((
+                                    std::cos((2 * x + 1) * u * M_PI / 16)
+                                    * std::cos((2 * y + 1) * v * M_PI / 16)
+                                    * (v == 0 ? oneBySqrt2 : 1)
+                                    * (u == 0 ? oneBySqrt2 : 1)
+                            ));
                         }
                     }
                     syx[y * 8 + x] = value / 4;
@@ -636,40 +637,23 @@ namespace img {
             }
         }
 
-        int module(int value, int divider) {
-            return ((value % divider) + divider) % divider;
-        }
-
         void readMCU(short& predDc, float* samples, const Component& component, JpegBitReader& bitReader) {
-//            info() << "readMCU";
             short zz[64]{};
             zz[0] = predDc = predDc + readQValue(huffTables[0][component.dcTable], bitReader);
 
             decodeACCoefficients(zz, huffTables[1][component.acTable], bitReader);
 
-//            printMCUArray(zz);
-
-            float R[64];
+            short R[64];
             for (int i = 0; i < 64; i++) {
-                R[i] = (float) zz[i] * quantizationTable[component.quantTable][i];
+                R[i] = zz[i] * quantizationTable[component.quantTable][i];
             }
-//            printMCUArray(R);
-            float RUnZZ[64];
+            short RUnZZ[64];
             unZigZagData(R, RUnZZ);
 
-//            printMCUArray(RUnZZ);
-
             idct(RUnZZ, samples);
-
-            printMCUArray(samples);
-
             for (int i = 0; i < 64; i++) {
-//                samples[i] = std::clamp(samples[i] + 128, 0.0f, 255.0f) / 255.0f;
-                samples[i] = module((samples[i] + 128), 256) / 255.0f;
+                samples[i] = std::clamp(samples[i] + 128, 0.f, 255.f) / 255.0f;
             }
-
-//            printMCUArray(samples);
-//            info() << "readMCU finished";
         }
 
         Component& getComponentById(uchar id) {
@@ -681,8 +665,6 @@ namespace img {
         }
 
         void placeMCU(const float* samples, int mcuX, int mcuY, int component, int xScale, int yScale) {
-//            HANDLE_SIGSEGV
-//            info() << "PlaceMCU " << mcuX << ", " << mcuY << " " << component << ", scale: " << xScale << "x" << yScale;
             for (int j = 0; j < 8; j++) {
                 for (int i = 0; i < 8; i++) {
                     float value = samples[j * 8 + i];
@@ -697,69 +679,43 @@ namespace img {
                     }
                 }
             }
-//            info() << "PlaceMCU " << mcuX << ", " << mcuY << " " << component << ", scale: " << xScale << "x" << yScale << " finished";
+        }
+
+        static int divideCeil(int value, int divider) {
+            return (value + divider - 1) / divider;
         }
 
         void scan(uchar ss, uchar se, uchar ah, uchar al) {
             JpegBitReader bitReader(stream);
 
             short predDc[ns];
-            for (int i = 0; i < ns; i++) {
-                short pred = 0;
-                float samples[64];
-                auto& component = getComponentById(cs[i]);
+            for (int i = 0; i < ns; i++)
+                predDc[i] = 0;
+            float samples[64];
 
-                int horPixelScale = maxHorSamplingFactor / component.horSamplingFactor;
-                int vertPixelScale = maxVertSamplingFactor / component.vertSamplingFactor;
-                int horMCUCount = x / horPixelScale / 8;
-                int vertMCUCount = y / vertPixelScale / 8;
-                if (horMCUCount * horPixelScale * 8 < x)
-                    horMCUCount += 1;
-                if (vertMCUCount * vertPixelScale * 8 < y)
-                    vertMCUCount += 1;
-                for (int yMCU = 0; yMCU < vertMCUCount; yMCU++) {
-                    for (int xMCU = 0; xMCU < horMCUCount; xMCU++) {
-                        readMCU(pred, samples, component, bitReader);
-                        placeMCU(samples, xMCU, yMCU, component.id - 1, horPixelScale, vertPixelScale);
+            int mcuWidth = divideCeil(x, maxHorSamplingFactor * 8);
+            int mcuHeight = divideCeil(y, maxVertSamplingFactor * 8);
+
+            for (int mcuY = 0; mcuY < mcuHeight; mcuY++) {
+                for (int mcuX = 0; mcuX < mcuWidth; mcuX++) {
+                    for (int i = 0; i < ns; i++) {
+                        auto& component = getComponentById(cs[i]);
+                        int horPixelScale = maxHorSamplingFactor / component.horSamplingFactor;
+                        int vertPixelScale = maxVertSamplingFactor / component.vertSamplingFactor;
+                        for (int mcuCompY = 0; mcuCompY < component.vertSamplingFactor; mcuCompY++) {
+                            for (int mcuCompX = 0; mcuCompX < component.horSamplingFactor; mcuCompX++) {
+                                readMCU(predDc[i], samples, component, bitReader);
+                                placeMCU(samples,
+                                         mcuX * component.vertSamplingFactor + mcuCompX,
+                                         mcuY * component.horSamplingFactor + mcuCompY,
+                                         component.id - 1,
+                                         horPixelScale,
+                                         vertPixelScale);
+                            }
+                        }
                     }
                 }
             }
-
-
-//            for (int c = 0; c < ns; c++) {
-//                short zz[64]{};
-////                uchar t = huffTables[0][td[c]]->decode(bitReader);
-////                uchar diff = receive(t, bitReader);
-////                diff = extend(diff, t);
-//                auto diff = readQValue(huffTables[0][td[c]], bitReader);
-//
-//                decodeACCoefficients(zz, huffTables[1][ta[c]], bitReader);
-//
-////                uchar sq[64];
-////                unZigZagData(zz, sq);
-//
-//                float R[64];
-//                for (int i = 0; i < 64; i++) {
-//                    R[i] = (float) zz[i] * quantizationTable[components[c].quantTable][i];
-//                }
-//                float RUnZZ[64];
-//                unZigZagData(R, RUnZZ);
-//
-//                float samples[64];
-//                idct(RUnZZ, samples);
-//
-//                for (float& sample: samples)
-//                    sample = (uchar) (sample + 128);
-//
-//                {
-//                    auto& os = info() << "Component " << c << " samples:";
-//                    for (int j = 0; j < 64; j++) { // NOLINT(modernize-loop-convert)
-//                        os << (int) samples[j] << '\t';
-//                        if (j % 8 == 7)
-//                            os << '\n';
-//                    }
-//                }
-//            }
         }
 
         std::istream& stream;
