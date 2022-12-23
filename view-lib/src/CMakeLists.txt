@@ -43,5 +43,4 @@ add_library(view STATIC
         utils/SaveFormat.cpp
         img/ImageProcessing.cpp
         img/format/jpeg_utils.cpp)
-target_compile_options(view PUBLIC -O0)
 target_link_libraries(view ${LIBS})
