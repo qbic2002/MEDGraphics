@@ -28,6 +28,7 @@ add_executable(Experiment
         core/ImageFileStorage.cpp
         core/CyclicImageFileSpan.cpp
         core/MyApp.cpp core/MyApp.h
+        core/MyLayout.cpp core/MyLayout.h
         math/vec3.cpp math/vec3.h
         core/R.h
         widget/BgRenderer.cpp widget/BgRenderer.h
