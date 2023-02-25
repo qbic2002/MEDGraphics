@@ -12,7 +12,7 @@ namespace utils {
         SetConsoleOutputCP(CP_UTF8);
     }
 
-    std::vector<std::wstring> readArgs(int argc, char** argv) {
+    std::vector<std::wstring> readArgs() {
         int count;
         /**
          * GetCommandLineW - return value is managed by system
@@ -20,11 +20,16 @@ namespace utils {
          * */
         auto** argsChars = CommandLineToArgvW(GetCommandLineW(), &count);
         std::vector<std::wstring> args;
+        args.reserve(count);
         for (int i = 0; i < count; i++) {
             args.emplace_back(argsChars[i]);
         }
         LocalFree(argsChars);
         return args;
+    }
+
+    std::vector<std::wstring> readArgs(int argc, char** argv) {
+        return readArgs();
     }
 }
 

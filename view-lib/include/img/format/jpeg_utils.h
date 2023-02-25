@@ -8,6 +8,8 @@
 #include "img/ModernColorModel.h"
 
 namespace img {
+    ModernRaster* readJpegImage(std::istream& is);
+
     ModernRaster* readJpegImage(const char* data, int length);
 }
 

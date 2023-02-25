@@ -12,7 +12,8 @@ namespace utils {
     std::ofstream
     openFileOStream(const std::filesystem::path& file, const std::ios_base::openmode& mode = std::ios::binary);
 
-    std::ifstream openFileIStream(const std::filesystem::path& file, const std::ios_base::openmode& mode);
+    std::ifstream openFileIStream(const std::filesystem::path& file,
+                                  const std::ios_base::openmode& mode = std::ios::binary);
 
     std::string readAllText(const std::filesystem::path& file);
 

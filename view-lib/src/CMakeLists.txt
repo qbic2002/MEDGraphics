@@ -12,7 +12,9 @@ add_library(view STATIC
         view/ViewGroup.cpp
         view/Style.cpp
         view/widget/LinearLayout.cpp
-        utils/encoding.cpp utils/logging.cpp utils/OsLock.cpp
+        utils/encoding.cpp
+        utils/logging.cpp
+        utils/OsLock.cpp
         utils/FontRenderer.cpp
         utils/ShaderProgram.cpp
         utils/Texture.cpp

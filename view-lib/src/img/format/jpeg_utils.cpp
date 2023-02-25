@@ -86,6 +86,10 @@ namespace img {
         };
 
     private:
+        inline void ignore(int count) {
+            stream.ignore(count);
+        }
+
         template<typename TValue>
         TValue read() {
             char c[sizeof(TValue)];
@@ -165,9 +169,7 @@ namespace img {
                 case 0xEF:
                 case 0xFE:  // Comment
                     auto length = readLength();
-                    for (int i = 2; i < length; i++) {
-                        readByte();
-                    }
+                    ignore(length - 2);
                     return true;
             }
 
@@ -187,11 +189,11 @@ namespace img {
             auto yThumbnail = readByte();
             for (int i = identifier.size() + 1 + 11; i < length; i++)
                 readByte();
-            info() << "APPO - " << "length: " << length << ", identifier: " << identifier
-                   << ", version: " << (int) versionMajor << "." << (int) versionMinor
-                   << ", density: " << xDensity << "x" << yDensity
-                   << (densityUnits == 0 ? " no units" : densityUnits == 1 ? " pixels per inch" : " pixels per cm")
-                   << ", thumbnail size: " << (int) xThumbnail << "x" << (int) yThumbnail;
+//            info() << "APPO - " << "length: " << length << ", identifier: " << identifier
+//                   << ", version: " << (int) versionMajor << "." << (int) versionMinor
+//                   << ", density: " << xDensity << "x" << yDensity
+//                   << (densityUnits == 0 ? " no units" : densityUnits == 1 ? " pixels per inch" : " pixels per cm")
+//                   << ", thumbnail size: " << (int) xThumbnail << "x" << (int) yThumbnail;
         }
 
         const char normToZigZag[64] = {0, 1, 5, 6, 14, 15, 27, 28,
@@ -220,14 +222,14 @@ namespace img {
             } else {
                 throw std::runtime_error("Unexpected DQT pq value: " + std::to_string(pq));
             }
-            {
-                auto& os = info() << "DQT - " << "length: " << length << ", pq: " << (int) pq << ", tq: " << (int) tq;
-                for (int i = 0; i < 64; i++) {
-                    os << quantizationTable[tq][normToZigZag[i]] << '\t';
-                    if (i % 8 == 7)
-                        os << '\n';
-                }
-            }
+//            {
+//                auto& os = info() << "DQT - " << "length: " << length << ", pq: " << (int) pq << ", tq: " << (int) tq;
+//                for (int i = 0; i < 64; i++) {
+//                    os << quantizationTable[tq][normToZigZag[i]] << '\t';
+//                    if (i % 8 == 7)
+//                        os << '\n';
+//                }
+//            }
         }
 
         void readChunkBaselineDCT() {
@@ -240,25 +242,28 @@ namespace img {
             data = new float[x * y * nf];
             maxHorSamplingFactor = maxVertSamplingFactor = 0;
             components.resize(nf);
-            {
-                auto& os = info() << "BaselineDCT - " << "length: " << length << ", sample precision: " << (int) p
-                                  << ", number of lines: " << (int) y << ", number of samples per lines: " << (int) x
-                                  << ", number of image components in frame: " << (int) nf;
-                os << std::hex;
-                for (int i = 0; i < nf; i++) {
-                    components[i].id = readByte();
-                    readByteHalves(components[i].horSamplingFactor, components[i].vertSamplingFactor);
-                    if (maxHorSamplingFactor < components[i].horSamplingFactor) {
-                        maxHorSamplingFactor = components[i].horSamplingFactor;
-                    }
-                    if (maxVertSamplingFactor < components[i].vertSamplingFactor) {
-                        maxVertSamplingFactor = components[i].vertSamplingFactor;
-                    }
-                    components[i].quantTable = readByte();
-                    os << components[i] << '\n';
+            for (int i = 0; i < nf; i++) {
+                components[i].id = readByte();
+                readByteHalves(components[i].horSamplingFactor, components[i].vertSamplingFactor);
+                if (maxHorSamplingFactor < components[i].horSamplingFactor) {
+                    maxHorSamplingFactor = components[i].horSamplingFactor;
                 }
-                os << std::dec;
+                if (maxVertSamplingFactor < components[i].vertSamplingFactor) {
+                    maxVertSamplingFactor = components[i].vertSamplingFactor;
+                }
+                components[i].quantTable = readByte();
             }
+
+//            {
+//                auto& os = info() << "BaselineDCT - " << "length: " << length << ", sample precision: " << (int) p
+//                                  << ", number of lines: " << (int) y << ", number of samples per lines: " << (int) x
+//                                  << ", number of image components in frame: " << (int) nf;
+//                os << std::hex;
+//                for (int i = 0; i < nf; i++) {
+//                    os << components[i] << '\n';
+//                }
+//                os << std::dec;
+//            }
         }
 
         static void generateSizeTable(const uchar* bits, uchar* huffSize, uchar& lastK) {
@@ -436,19 +441,19 @@ namespace img {
             delete huffTables[tc][th];
             huffTables[tc][th] = new HuffTable(lengths, huffVal);
 
-            {
-                auto& os = info() << "Huffman Table Spec - " << "length: " << length << ", table class: " << (int) tc
-                                  << ", table id.: " << (int) th;
-                int valueIndex = 0;
-                for (int i = 0; i < 16; i++) {
-                    os << "codes of length " << i + 1 << " - " << (int) lengths[i] << ": [";
-                    os << std::hex;
-                    for (int j = 0; j < lengths[i]; j++) {
-                        os << (int) huffTables[tc][th]->huffVal[valueIndex++] << '\t';
-                    }
-                    os << std::dec << ']' << '\n';
-                }
-            }
+//            {
+//                auto& os = info() << "Huffman Table Spec - " << "length: " << length << ", table class: " << (int) tc
+//                                  << ", table id.: " << (int) th;
+//                int valueIndex = 0;
+//                for (int i = 0; i < 16; i++) {
+//                    os << "codes of length " << i + 1 << " - " << (int) lengths[i] << ": [";
+//                    os << std::hex;
+//                    for (int j = 0; j < lengths[i]; j++) {
+//                        os << (int) huffTables[tc][th]->huffVal[valueIndex++] << '\t';
+//                    }
+//                    os << std::dec << ']' << '\n';
+//                }
+//            }
         }
 
         uchar ns = 0;                   // Number of components in scan
@@ -471,25 +476,50 @@ namespace img {
             auto se = readByte();   // End of spectral selection
             uchar ah, al;   // Successive approx. bit pos. high, Successive approx. bit pos. low or point transform
             readByteHalves(ah, al);
-            {
-                auto& os = info() << "Start Of Scan - " << "length: " << length
-                                  << ", number of components: " << (int) ns
-                                  << ", Start of spectral or predictor selection: " << (int) ss
-                                  << ", End of spectral selection: " << (int) se
-                                  << ", Successive approx. bit pos. high: " << (int) ah
-                                  << ", Successive approx. bit pos. low or point transform: " << (int) al;
-                for (int i = 0; i < ns; i++) {
-                    for (auto& component: components) {
-                        if (component.id == cs[i]) {
-                            os << "component id.: " << (int) cs[i] << ", dc selector: " << (int) component.dcTable
-                               << ", ac selector: " << (int) component.acTable << '\n';
-                            break;
-                        }
-                    }
-                }
-            }
+//            {
+//                auto& os = info() << "Start Of Scan - " << "length: " << length
+//                                  << ", number of components: " << (int) ns
+//                                  << ", Start of spectral or predictor selection: " << (int) ss
+//                                  << ", End of spectral selection: " << (int) se
+//                                  << ", Successive approx. bit pos. high: " << (int) ah
+//                                  << ", Successive approx. bit pos. low or point transform: " << (int) al;
+//                for (int i = 0; i < ns; i++) {
+//                    for (auto& component: components) {
+//                        if (component.id == cs[i]) {
+//                            os << "component id.: " << (int) cs[i] << ", dc selector: " << (int) component.dcTable
+//                               << ", ac selector: " << (int) component.acTable << '\n';
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
             scan(ss, se, ah, al);
         }
+
+        // cosTable[(a << 3) | b] = cos((2 * a + 1) * b * PI / 16)
+        constexpr static const double cosTable[64] = {1, 0.98078528040323, 0.923879532511287, 0.831469612302545,
+                                                      0.707106781186548, 0.555570233019602,
+                                                      0.38268343236509, 0.195090322016128, 1, 0.831469612302545,
+                                                      0.38268343236509, -0.195090322016128,
+                                                      -0.707106781186547, -0.98078528040323, -0.923879532511287,
+                                                      -0.555570233019602, 1, 0.555570233019602,
+                                                      -0.38268343236509, -0.98078528040323, -0.707106781186548,
+                                                      0.195090322016128, 0.923879532511287,
+                                                      0.831469612302545, 1, 0.195090322016128, -0.923879532511287,
+                                                      -0.555570233019602, 0.707106781186547,
+                                                      0.831469612302545, -0.38268343236509, -0.980785280403231, 1,
+                                                      -0.195090322016128, -0.923879532511287,
+                                                      0.555570233019602, 0.707106781186548, -0.831469612302545,
+                                                      -0.382683432365091, 0.98078528040323, 1,
+                                                      -0.555570233019602, -0.38268343236509, 0.98078528040323,
+                                                      -0.707106781186547, -0.195090322016128,
+                                                      0.923879532511287, -0.831469612302545, 1, -0.831469612302545,
+                                                      0.38268343236509, 0.195090322016129,
+                                                      -0.707106781186547, 0.980785280403231, -0.923879532511286,
+                                                      0.555570233019602, 1, -0.98078528040323,
+                                                      0.923879532511287, -0.831469612302545, 0.707106781186547,
+                                                      -0.555570233019602, 0.38268343236509,
+                                                      -0.195090322016129};
 
         static void fdct(const float* syx, float* svu) {
             for (int v = 0; v < 7; v++) {
@@ -497,8 +527,7 @@ namespace img {
                     float value = 0;
                     for (int y = 0; y < 7; y++) {
                         for (int x = 0; x < 7; x++) {
-                            value += syx[y * 8 + x] * std::cos(((2 * x + 1) * u * M_PI) / 16) *
-                                     std::cos(((2 * y + 1) * v * M_PI) / 16);
+                            value += syx[y * 8 + x] * cosTable[(x << 3) | u] * cosTable[(y << 3) | v];
                         }
                     }
                     value *= 0.25;
@@ -519,8 +548,8 @@ namespace img {
                     for (int v = 0; v < 8; v++) {
                         for (int u = 0; u < 8; u++) {
                             value += svu[v * 8 + u] * ((
-                                    std::cos((2 * x + 1) * u * M_PI / 16)
-                                    * std::cos((2 * y + 1) * v * M_PI / 16)
+                                    cosTable[(x << 3) | u]
+                                    * cosTable[(y << 3) | v]
                                     * (v == 0 ? oneBySqrt2 : 1)
                                     * (u == 0 ? oneBySqrt2 : 1)
                             ));

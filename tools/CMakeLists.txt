@@ -21,3 +21,6 @@ add_dependencies(test_compute_shader copy_assets)
 add_executable(process_assets
         process_assets.cpp ../include/stb_image.h ../include/stb_image_write.h
         ../view-lib/src/utils/file.cpp ../view-lib/include/utils/file.h test_static_objects/static_object.h)
+
+add_executable(bench_jpeg bench/bench_jpeg.cpp)
+target_link_libraries(bench_jpeg view)

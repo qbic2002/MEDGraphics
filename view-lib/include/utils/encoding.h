@@ -12,6 +12,8 @@
 namespace utils {
     void configureUtf8();
 
+    std::vector<std::wstring> readArgs();
+
     std::vector<std::wstring> readArgs(int argc, char** argv);
 }
 
